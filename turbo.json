@@ -5,13 +5,13 @@
         "build": {
             "dependsOn": ["^build"],
             "inputs": ["$TURBO_DEFAULT$", ".env*"],
-            "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
+            "outputs": [".output/**", "!.output/nitro.json"]
         },
         "lint": {
             "dependsOn": ["^lint"]
         },
-        "check-types": {
-            "dependsOn": ["^check-types"]
+        "typecheck": {
+            "dependsOn": ["^typecheck"]
         },
         "dev": {
             "cache": false,

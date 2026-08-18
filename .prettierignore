@@ -1,0 +1,13 @@
+node_modules
+pnpm-lock.yaml
+.agents
+.claude
+.husky
+.turbo
+.output
+.nitro
+.tanstack
+dist
+build
+generated
+**/routeTree.gen.ts

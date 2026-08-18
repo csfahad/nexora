@@ -19,9 +19,6 @@ coverage
 # Vercel
 .vercel
 
-# Lint stages
-.husky
-
 # Build Outputs
 .next/
 out/
@@ -38,13 +35,16 @@ yarn-error.log*
 *.pem
 
 # Skills
+.claude
+.claude/
+.claude*
 .agents
 .agents*
-CLAUDE.md
 .skills
-skills
-skills*
-docs
+/skills/
+/.skills
 
 
 
+# Only one lockfile: the root one. apps/web must not be its own pnpm root.
+apps/web/pnpm-lock.yaml
