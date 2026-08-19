@@ -8,6 +8,6 @@ var t=c==="system"?(window.matchMedia("(prefers-color-scheme: light)").matches?"
 var r=document.documentElement;
 r.classList.remove("dark","light");
 r.classList.add(t);
-r.setAttribute("data-theme-choice",c);
+r.setAttribute("data-theme-choice",c);c
 }catch(e){document.documentElement.classList.add("dark");}
 })();`;
