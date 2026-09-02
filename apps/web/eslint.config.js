@@ -4,16 +4,11 @@ import { tanstackConfig } from "@tanstack/eslint-config";
 
 export default [
     {
-        /**
-         * A global ignore, and it has to be its own object with nothing else in
-         * it. An `ignores` key sitting alongside `rules` is scoped to that block
-         * only, which let build output reach the parser and fail with a confusing
-         * `"parserOptions.project" ... file was not found` error.
-         */
         ignores: [
             "eslint.config.js",
             "prettier.config.js",
             "src/routeTree.gen.ts",
+            "src/generated/**",
             ".output/**",
             ".nitro/**",
             ".tanstack/**",
@@ -25,12 +20,7 @@ export default [
             "import/no-cycle": "off",
             "import/order": "off",
             "sort-imports": "off",
-            "@typescript-eslint/array-type": "off",
-            "@typescript-eslint/require-await": "off",
             "pnpm/json-enforce-catalog": "off",
-
-            // Strict TypeScript, no `any`.
-            "@typescript-eslint/no-explicit-any": "error",
 
             // Immutable data.
             "prefer-const": "error",
@@ -50,6 +40,20 @@ export default [
                         "Read config through serverEnv() in infrastructure/env.ts or publicEnv in infrastructure/public-env.ts.",
                 },
             ],
+        },
+    },
+    {
+        files: ["**/*.{ts,tsx}"],
+        rules: {
+            "@typescript-eslint/array-type": "off",
+            "@typescript-eslint/require-await": "off",
+            "@typescript-eslint/no-explicit-any": "error",
+        },
+    },
+    {
+        files: ["scripts/**/*.mjs"],
+        rules: {
+            "no-console": "off",
         },
     },
     {
