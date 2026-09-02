@@ -45,6 +45,5 @@ yarn-error.log*
 /.skills
 
 
-
-# Only one lockfile: the root one. apps/web must not be its own pnpm root.
 apps/web/pnpm-lock.yaml
+apps/web/src/generated/
