@@ -1,20 +1,54 @@
 import { useEffect, useRef, useState } from "react";
-import { IconArrowUp, IconPlus } from "@tabler/icons-react";
+import type { ReactNode } from "react";
+import { IconArrowUp, IconPlayerStopFilled } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-const MAX_HEIGHT_PX = 240;
+const MAX_HEIGHT_PX = 120;
+
+const draftStorageKey = (key: string): string => `nexora:draft:${key}`;
 
 export const PromptComposer = ({
     onSubmit,
-    onAddModel,
-    canAddModel = true,
+    controls,
+    busy = false,
+    draftKey = "arena",
+    onStop,
 }: {
-    readonly onSubmit: (prompt: string) => void;
-    readonly onAddModel: () => void;
-    readonly canAddModel?: boolean;
+    readonly onSubmit: (prompt: string) => boolean | Promise<boolean>;
+    readonly controls?: ReactNode;
+    readonly busy?: boolean;
+    readonly draftKey?: string;
+    readonly onStop?: () => void;
 }) => {
     const [draft, setDraft] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const storageKey = draftStorageKey(draftKey);
+
+    useEffect(() => {
+        try {
+            const saved = window.sessionStorage.getItem(storageKey);
+
+            if (saved !== null && saved.length > 0) setDraft(saved);
+        } catch {}
+    }, [storageKey]);
+
+    const persisted = useRef(false);
+
+    useEffect(() => {
+        if (!persisted.current) {
+            persisted.current = true;
+
+            return;
+        }
+
+        try {
+            if (draft.length === 0) {
+                window.sessionStorage.removeItem(storageKey);
+            } else {
+                window.sessionStorage.setItem(storageKey, draft);
+            }
+        } catch {}
+    }, [draft, storageKey]);
 
     useEffect(() => {
         const el = textareaRef.current;
@@ -25,17 +59,18 @@ export const PromptComposer = ({
     }, [draft]);
 
     const trimmed = draft.trim();
-    const canSubmit = trimmed.length > 0;
+    const canSubmit = trimmed.length > 0 && !busy;
 
-    const submit = () => {
+    const submit = async () => {
         if (!canSubmit) return;
-        onSubmit(trimmed);
+
+        if (await onSubmit(trimmed)) setDraft("");
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
             event.preventDefault();
-            submit();
+            void submit();
         }
     };
 
@@ -52,41 +87,40 @@ export const PromptComposer = ({
                 onKeyDown={handleKeyDown}
                 rows={1}
                 placeholder="Ask anything. Enter to send, Shift + Enter for a new line."
-                className="text-foreground min-h-22 w-full resize-none bg-transparent text-sm leading-relaxed focus-visible:outline-none"
+                className="text-foreground min-h-6 w-full resize-none bg-transparent text-sm leading-relaxed focus-visible:outline-none"
             />
 
-            <div className="mt-2 flex items-center justify-between gap-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onAddModel}
-                    disabled={!canAddModel}
-                    title={
-                        canAddModel
-                            ? undefined
-                            : "Three models is the maximum for one thread."
-                    }
-                >
-                    <IconPlus aria-hidden stroke={1.75} />
-                    Add model
-                </Button>
+            <div className="mt-1.5 flex items-center justify-between gap-2">
+                {controls ?? <span />}
 
-                <Button
-                    variant="primary"
-                    size="icon"
-                    onClick={submit}
-                    disabled={!canSubmit}
-                    aria-label="Send prompt"
-                    className="size-10 [&>svg]:size-5"
-                >
-                    <IconArrowUp aria-hidden stroke={2} />
-                </Button>
+                {onStop === undefined ? (
+                    <Button
+                        variant="primary"
+                        size="icon"
+                        onClick={() => void submit()}
+                        disabled={!canSubmit}
+                        loading={busy}
+                        aria-label="Send prompt"
+                    >
+                        <IconArrowUp aria-hidden stroke={2} />
+                    </Button>
+                ) : (
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={onStop}
+                        aria-label="Stop answering"
+                        className="[&>svg]:size-3.5"
+                    >
+                        <IconPlayerStopFilled aria-hidden stroke={2} />
+                    </Button>
+                )}
             </div>
         </div>
     );
 };
 
 const cnComposer =
-    "transition-state rounded-xl border border-input bg-card p-3 " +
+    "transition-state rounded-xl border border-input bg-card px-3 py-2.5 " +
     "focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 " +
     "focus-within:[outline-color:var(--ring)]";
