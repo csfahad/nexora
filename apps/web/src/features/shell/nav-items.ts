@@ -13,8 +13,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     { to: "/models", label: "Models", icon: IconStack2 },
 ];
 
-/** What the top bar's breadcrumb says for a given path. */
+const OFF_NAV_CRUMBS: Readonly<Record<string, string>> = {
+    "/sign-in": "Sign in",
+};
+
 export const breadcrumbFor = (pathname: string): readonly string[] => {
+    const offNav = OFF_NAV_CRUMBS[pathname];
+    if (offNav) return [offNav];
+
     const match = NAV_ITEMS.find(
         (item) =>
             item.to === pathname || (item.to !== "/" && pathname.startsWith(item.to)),
