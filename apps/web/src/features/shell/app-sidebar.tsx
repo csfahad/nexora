@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { IconMessagePlus, IconUser } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+import { IconMessagePlus } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { AccountRow } from "./account-row";
 import { NAV_ITEMS } from "./nav-items";
 
 export const AppSidebar = ({ onNavigate }: { readonly onNavigate?: () => void }) => (
@@ -58,19 +58,7 @@ export const AppSidebar = ({ onNavigate }: { readonly onNavigate?: () => void })
         </div>
 
         <div className="border-border flex items-center justify-between gap-2 border-t px-3 py-3">
-            <button
-                type="button"
-                className={cn(
-                    "transition-state flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5",
-                    "text-muted-foreground hover:bg-accent hover:text-foreground text-sm",
-                    "active:translate-y-px",
-                )}
-            >
-                <span className="border-input bg-muted grid size-7 shrink-0 place-items-center rounded-full border">
-                    <IconUser aria-hidden className="size-4" stroke={1.75} />
-                </span>
-                <span className="truncate">Guest</span>
-            </button>
+            <AccountRow onNavigate={onNavigate} />
             <ThemeToggle />
         </div>
     </div>
