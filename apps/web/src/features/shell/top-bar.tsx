@@ -13,8 +13,9 @@ export const TopBar = ({
     readonly sidebarShown: boolean;
 }) => {
     const pathname = useRouterState({ select: (state) => state.location.pathname });
-    const crumbs = breadcrumbFor(pathname);
-    const trailing = useShellChrome()?.trailing ?? null;
+    const chrome = useShellChrome();
+    const crumbs = chrome?.crumbs ?? breadcrumbFor(pathname);
+    const trailing = chrome?.trailing ?? null;
 
     return (
         <header className="border-border flex h-14 shrink-0 items-center gap-2 border-b px-3">
@@ -33,7 +34,7 @@ export const TopBar = ({
                     {crumbs.map((crumb, index) => {
                         const last = index === crumbs.length - 1;
                         return (
-                            <Fragment key={crumb}>
+                            <Fragment key={`${index}-${crumb}`}>
                                 {index > 0 && (
                                     <IconChevronRight
                                         aria-hidden
