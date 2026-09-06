@@ -1,0 +1,87 @@
+export type Grammar =
+    | "typescript"
+    | "tsx"
+    | "javascript"
+    | "jsx"
+    | "python"
+    | "json"
+    | "shellscript"
+    | "sql"
+    | "css"
+    | "html"
+    | "markdown"
+    | "go"
+    | "rust"
+    | "java"
+    | "c"
+    | "cpp"
+    | "csharp"
+    | "php"
+    | "ruby"
+    | "swift"
+    | "kotlin"
+    | "yaml"
+    | "toml"
+    | "prisma"
+    | "diff";
+
+const ALIASES: Readonly<Record<string, Grammar>> = {
+    ts: "typescript",
+    typescript: "typescript",
+    mts: "typescript",
+    cts: "typescript",
+    tsx: "tsx",
+    js: "javascript",
+    javascript: "javascript",
+    mjs: "javascript",
+    cjs: "javascript",
+    node: "javascript",
+    jsx: "jsx",
+    py: "python",
+    python: "python",
+    json: "json",
+    sh: "shellscript",
+    bash: "shellscript",
+    shell: "shellscript",
+    zsh: "shellscript",
+    console: "shellscript",
+    sql: "sql",
+    postgres: "sql",
+    css: "css",
+    html: "html",
+    xml: "html",
+    svg: "html",
+    md: "markdown",
+    markdown: "markdown",
+    go: "go",
+    golang: "go",
+    rs: "rust",
+    rust: "rust",
+    java: "java",
+    c: "c",
+    h: "c",
+    cpp: "cpp",
+    "c++": "cpp",
+    cxx: "cpp",
+    cc: "cpp",
+    hpp: "cpp",
+    cs: "csharp",
+    csharp: "csharp",
+    "c#": "csharp",
+    php: "php",
+    rb: "ruby",
+    ruby: "ruby",
+    swift: "swift",
+    kt: "kotlin",
+    kts: "kotlin",
+    kotlin: "kotlin",
+    yml: "yaml",
+    yaml: "yaml",
+    toml: "toml",
+    prisma: "prisma",
+    diff: "diff",
+    patch: "diff",
+};
+
+export const grammarFor = (language: string | null): Grammar | null =>
+    language === null ? null : (ALIASES[language.toLowerCase()] ?? null);
