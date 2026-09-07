@@ -40,6 +40,15 @@
     --destructive: oklch(0.68 0.196 18);
     --destructive-foreground: oklch(0.18 0.02 20);
 
+    /* Four hues nothing else has claimed, used only inside a code block. Rust is
+     * reserved for things you operate and code is not, so the syntax palette
+     * cannot borrow it. Low chroma on purpose: tinted graphite, not a rainbow.
+     * Comments reuse --muted-foreground; everything else falls to --foreground. */
+    --code-keyword: oklch(0.775 0.098 255);
+    --code-string: oklch(0.8 0.088 190);
+    --code-number: oklch(0.79 0.098 305);
+    --code-function: oklch(0.855 0.106 96);
+
     --sidebar: oklch(0.216 0.013 44);
     --sidebar-foreground: oklch(0.955 0.008 72);
     --sidebar-primary: oklch(0.7 0.152 48);
@@ -86,6 +95,11 @@
     --win-foreground: oklch(0.985 0.008 150);
     --destructive: oklch(0.485 0.194 20);
     --destructive-foreground: oklch(0.985 0.007 20);
+
+    --code-keyword: oklch(0.47 0.1 262);
+    --code-string: oklch(0.47 0.072 195);
+    --code-number: oklch(0.47 0.1 305);
+    --code-function: oklch(0.47 0.09 74);
 
     --sidebar: oklch(0.995 0.004 78);
     --sidebar-foreground: oklch(0.235 0.016 46);
@@ -151,15 +165,24 @@
         border-color: var(--border);
     }
 
+    /* `dvh` rather than `%`, so a mobile toolbar sliding away resizes the shell
+     * instead of hiding the composer behind itself. */
     html {
-        min-height: 100%;
+        height: 100dvh;
         font-family: var(--font-sans);
         -webkit-text-size-adjust: 100%;
     }
 
+    /* The shell fills the viewport and the transcript is the one scroll container,
+     * so the document itself must never scroll. It was: something sitting beside
+     * `#app` under `body` — dev tooling, a browser extension — made the page taller
+     * than the shell, and scrolling it dragged the whole app up and left an empty
+     * band under the composer. Pinning the document removes the second scrollbar
+     * whatever put it there, which is the right shape for a full-height app anyway. */
     body {
-        min-height: 100%;
+        height: 100%;
         margin: 0;
+        overflow: hidden;
         background-color: var(--background);
         color: var(--foreground);
         -webkit-font-smoothing: antialiased;
@@ -167,7 +190,7 @@
     }
 
     #app {
-        min-height: 100%;
+        height: 100%;
     }
 
     h1,
@@ -260,8 +283,11 @@
          * spinner is the only thing on screen reporting that work is still in
          * flight; frozen at 0.01ms it reports nothing, so "reduce motion" would
          * cost a user the information instead of the animation. It is slowed
-         * rather than stopped, which is what the guideline actually asks for. */
-        [data-spinner] {
+         * rather than stopped, which is what the guideline actually asks for.
+         * Descendants are covered too, because the thinking indicator animates
+         * three child dots rather than itself. */
+        [data-spinner],
+        [data-spinner] * {
             animation-duration: 1.6s !important;
             animation-iteration-count: infinite !important;
         }
@@ -272,6 +298,30 @@
  * Shared patterns. These exist because the same handful of classes would
  * otherwise be pasted across the sidebar, top bar, leaderboard and arena.
  * ------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+ * A screen inside the shell. It fills the shell's content box exactly.
+ *
+ * Absolutely positioned rather than laid out as `main`'s only flex child, because
+ * twice now something has ended up beside it in `main` — dev tooling, a browser
+ * extension, DOM an orphaned hot reload left behind — and as a flex child that
+ * pushed `main` into a second scrollbar with several hundred pixels of blank under
+ * the composer. `main` clips, so anything of the sort is now simply invisible and
+ * the screen keeps the full height either way.
+ * ------------------------------------------------------------------------- */
+
+.screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Screens whose whole page scrolls. Not the thread: there the transcript scrolls
+ * and the composer must hold still, so it manages its own. */
+.screen-scroll {
+    overflow-y: auto;
+}
 
 /* Every measured number in the app. Both installed faces ship `tnum`, verified
  * by reading their GSUB tables, so this is real and not a no-op: without it the
@@ -346,5 +396,390 @@
 
 .side-row:disabled:hover {
     background-color: transparent;
+    color: var(--muted-foreground);
+}
+
+/* ---------------------------------------------------------------------------
+ * A model's answer. The typography plugin is tuned for documents on white, so
+ * every prose colour is mapped onto the app's own tokens instead — one place,
+ * both themes, rather than a `dark:` variant per element.
+ * ------------------------------------------------------------------------- */
+
+.md-answer {
+    --tw-prose-body: var(--card-foreground);
+    --tw-prose-headings: var(--foreground);
+    --tw-prose-lead: var(--muted-foreground);
+    --tw-prose-links: var(--primary);
+    --tw-prose-bold: var(--foreground);
+    --tw-prose-counters: var(--muted-foreground);
+    --tw-prose-bullets: var(--input);
+    --tw-prose-hr: var(--border);
+    --tw-prose-quotes: var(--foreground);
+    --tw-prose-quote-borders: var(--primary);
+    --tw-prose-captions: var(--muted-foreground);
+    --tw-prose-code: var(--foreground);
+    --tw-prose-pre-code: var(--foreground);
+    --tw-prose-pre-bg: var(--muted);
+    --tw-prose-th-borders: var(--border);
+    --tw-prose-td-borders: var(--border);
+
+    /* A model can emit a 90-character identifier. The column is not allowed to
+     * grow to fit it, so it breaks instead. */
+    overflow-wrap: break-word;
+}
+
+.md-answer > :first-child {
+    margin-top: 0;
+}
+
+.md-answer > :last-child {
+    margin-bottom: 0;
+}
+
+/* Inline code is a chip. The plugin's decorative backticks are dropped: a real
+ * one inside the text would then be indistinguishable from the decoration. */
+.md-answer :where(code):not(:where(pre code))::before,
+.md-answer :where(code):not(:where(pre code))::after {
+    content: none;
+}
+
+.md-answer :where(code):not(:where(pre code)) {
+    padding: 0.125em 0.35em;
+    border-radius: var(--radius-sm);
+    background-color: var(--muted);
+    font-weight: 500;
+}
+
+/* `pre` is stripped back to nothing, because the code block is a component that
+ * owns its own frame, label and copy button. */
+.md-answer :where(pre) {
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    background-color: transparent;
+    color: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+/* The beat between sending and the first token, per column, because three models
+ * start answering at three different moments. Without it the only thing reporting
+ * that work is in flight is a 8px dot in the header, which reads as nothing
+ * happening — and this is the one stretch of a turn where nothing can be shown yet. */
+.thinking {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+}
+
+.thinking-dots {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+/* The accent's one non-interactive use, shared with the header's streaming dot: it
+ * reports that work is in flight, which is information rather than decoration. */
+.thinking-dots > span {
+    width: 0.3125rem;
+    height: 0.3125rem;
+    border-radius: 9999px;
+    background-color: var(--primary);
+    animation: thinking-dot 1.2s var(--ease-out-expo) infinite;
+}
+
+.thinking-dots > span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.thinking-dots > span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes thinking-dot {
+    0%,
+    60%,
+    100% {
+        opacity: 0.3;
+    }
+
+    30% {
+        opacity: 1;
+    }
+}
+
+/* A fenced code block. Written here rather than as utilities because the rules
+ * above deliberately strip `pre` back to nothing, and an unlayered rule beats a
+ * utility — so the block's own frame has to live in the same layer to win. */
+.code-block {
+    margin: 1em 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background-color: var(--muted);
+    overflow: hidden;
+}
+
+.code-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.25rem 0.25rem 0.25rem 0.625rem;
+    border-bottom: 1px solid var(--border);
+}
+
+/* The scroll container is the code itself, so one 300-character line scrolls
+ * inside the block instead of widening the column it sits in. */
+.code-body {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    white-space: pre;
+    tab-size: 4;
+}
+
+.code-body code {
+    font-size: inherit;
+    background: none;
+    padding: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * A turn: the prompt, then one column per model.
+ * ------------------------------------------------------------------------- */
+
+/* The prompt as sent, and the one action it offers. Right-aligned block, capped so a
+ * long paragraph does not stretch the full width of a three-column screen.
+ *
+ * The copy button is simply there. Revealing it on hover hid it from anyone who had
+ * not thought to hover, and the ghost variant already goes quiet until you reach for
+ * it, which is the restraint the hover trick was after. */
+.prompt-turn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.125rem;
+}
+
+.prompt-bubble {
+    max-width: min(48rem, 100%);
+    margin: 0;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background-color: var(--card);
+    color: var(--card-foreground);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+/* Three initials overlapped read as one control rather than three chips. The ring is
+ * the composer's own surface, so they cut into each other cleanly. */
+.model-stack {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.model-stack > * + * {
+    margin-left: -0.4375rem;
+}
+
+.model-stack > * {
+    box-shadow: 0 0 0 2px var(--card);
+}
+
+/* One column stacked per model until there is room to compare them side by side,
+ * which is the entire point of the screen. `--columns` is set per turn, so a
+ * two-model thread gets two real columns rather than three with a hole. */
+.turn-columns {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+}
+
+@media (min-width: 64rem) {
+    .turn-columns {
+        grid-template-columns: repeat(var(--columns, 1), minmax(0, 1fr));
+    }
+}
+
+.answer-card {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background-color: var(--card);
+    overflow: hidden;
+}
+
+.answer-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.answer-state {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.answer-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background-color: var(--input);
+}
+
+/* The accent's one non-interactive use, the same exemption `.thinking-dots` takes:
+ * it reports that work is in flight, which is information rather than decoration. */
+.answer-state[data-state="streaming"] .answer-dot {
+    background-color: var(--primary);
+    animation: answer-pulse 1.4s var(--ease-out-expo) infinite;
+}
+
+.answer-state[data-state="failed"] .answer-dot {
+    background-color: var(--destructive);
+}
+
+@keyframes answer-pulse {
+    50% {
+        opacity: 0.3;
+    }
+}
+
+/* No inner scroll. The transcript is the app's one scroll container, and a column
+ * that scrolled on its own trapped the wheel over two thirds of the screen and hid
+ * its own progress from the follow-the-bottom behaviour — the answer grew inside a
+ * box that never moved. A long line still scrolls inside its own code block. */
+.answer-body {
+    flex: 1;
+    min-width: 0;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.answer-foot {
+    border-top: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+}
+
+/* ---------------------------------------------------------------------------
+ * The vote. Its own strip between the answer and its numbers, because the
+ * metrics row already wraps to two lines in a three-way turn and a button
+ * wrapping into the middle of six figures is not where a person looks for one.
+ *
+ * Green is spent on exactly one thing in this app and this is it: the winner.
+ * ------------------------------------------------------------------------- */
+
+.answer-vote {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid var(--border);
+}
+
+/* Doubled deliberately. A scan across three columns should land on the winner
+ * before any word is read, and one pixel of green at card scale does not. */
+.answer-card[data-winner] {
+    border-color: var(--win);
+    box-shadow: inset 0 0 0 1px var(--win);
+}
+
+.winner-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0;
+    color: var(--win);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.winner-mark > svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+}
+
+/* The same tally in the top bar. Hidden on narrow screens rather than shrunk:
+ * it is a summary of what every card already says, so the small screen loses
+ * the convenience and none of the information. */
+.win-pills {
+    display: none;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 48rem) {
+    .win-pills {
+        display: flex;
+    }
+}
+
+.win-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.125rem 0.5rem 0.125rem 0.125rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.win-pill[data-leading] {
+    border-color: var(--win);
+    color: var(--win);
+}
+
+/* ---------------------------------------------------------------------------
+ * The measured numbers. One row, an icon per figure instead of a label above it,
+ * because six stacked label-and-value columns spent more height on the words than
+ * on the numbers and wrapped to two rows in a three-way turn anyway.
+ * ------------------------------------------------------------------------- */
+
+.metrics-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.875rem;
+    margin: 0;
+}
+
+.metric {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.3125rem;
+}
+
+/* Sized here rather than per icon: this is the only place they appear, and the
+ * component should not have to restate it six times. */
+.metric > svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    flex-shrink: 0;
     color: var(--muted-foreground);
 }
