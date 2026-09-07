@@ -10,33 +10,115 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as LeaderboardRouteImport } from "./routes/leaderboard";
+import { Route as ModelsRouteImport } from "./routes/models";
+import { Route as SignInRouteImport } from "./routes/sign-in";
+import { Route as ApiChatRouteImport } from "./routes/api.chat";
+import { Route as ThreadThreadIdRouteImport } from "./routes/thread.$threadId";
+import { Route as ApiAuthSplatRouteImport } from "./routes/api.auth.$";
 
 const IndexRoute = IndexRouteImport.update({
     id: "/",
     path: "/",
     getParentRoute: () => rootRouteImport,
 } as any);
+const LeaderboardRoute = LeaderboardRouteImport.update({
+    id: "/leaderboard",
+    path: "/leaderboard",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const ModelsRoute = ModelsRouteImport.update({
+    id: "/models",
+    path: "/models",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const SignInRoute = SignInRouteImport.update({
+    id: "/sign-in",
+    path: "/sign-in",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const ApiChatRoute = ApiChatRouteImport.update({
+    id: "/api/chat",
+    path: "/api/chat",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const ThreadThreadIdRoute = ThreadThreadIdRouteImport.update({
+    id: "/thread/$threadId",
+    path: "/thread/$threadId",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+    id: "/api/auth/$",
+    path: "/api/auth/$",
+    getParentRoute: () => rootRouteImport,
+} as any);
 
 export interface FileRoutesByFullPath {
     "/": typeof IndexRoute;
+    "/leaderboard": typeof LeaderboardRoute;
+    "/models": typeof ModelsRoute;
+    "/sign-in": typeof SignInRoute;
+    "/api/chat": typeof ApiChatRoute;
+    "/thread/$threadId": typeof ThreadThreadIdRoute;
+    "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRoutesByTo {
     "/": typeof IndexRoute;
+    "/leaderboard": typeof LeaderboardRoute;
+    "/models": typeof ModelsRoute;
+    "/sign-in": typeof SignInRoute;
+    "/api/chat": typeof ApiChatRoute;
+    "/thread/$threadId": typeof ThreadThreadIdRoute;
+    "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRoutesById {
     __root__: typeof rootRouteImport;
     "/": typeof IndexRoute;
+    "/leaderboard": typeof LeaderboardRoute;
+    "/models": typeof ModelsRoute;
+    "/sign-in": typeof SignInRoute;
+    "/api/chat": typeof ApiChatRoute;
+    "/thread/$threadId": typeof ThreadThreadIdRoute;
+    "/api/auth/$": typeof ApiAuthSplatRoute;
 }
 export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath;
-    fullPaths: "/";
+    fullPaths:
+        | "/"
+        | "/leaderboard"
+        | "/models"
+        | "/sign-in"
+        | "/api/chat"
+        | "/thread/$threadId"
+        | "/api/auth/$";
     fileRoutesByTo: FileRoutesByTo;
-    to: "/";
-    id: "__root__" | "/";
+    to:
+        | "/"
+        | "/leaderboard"
+        | "/models"
+        | "/sign-in"
+        | "/api/chat"
+        | "/thread/$threadId"
+        | "/api/auth/$";
+    id:
+        | "__root__"
+        | "/"
+        | "/leaderboard"
+        | "/models"
+        | "/sign-in"
+        | "/api/chat"
+        | "/thread/$threadId"
+        | "/api/auth/$";
     fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
     IndexRoute: typeof IndexRoute;
+    LeaderboardRoute: typeof LeaderboardRoute;
+    ModelsRoute: typeof ModelsRoute;
+    SignInRoute: typeof SignInRoute;
+    ApiChatRoute: typeof ApiChatRoute;
+    ThreadThreadIdRoute: typeof ThreadThreadIdRoute;
+    ApiAuthSplatRoute: typeof ApiAuthSplatRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -48,12 +130,69 @@ declare module "@tanstack/react-router" {
             preLoaderRoute: typeof IndexRouteImport;
             parentRoute: typeof rootRouteImport;
         };
+        "/leaderboard": {
+            id: "/leaderboard";
+            path: "/leaderboard";
+            fullPath: "/leaderboard";
+            preLoaderRoute: typeof LeaderboardRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/models": {
+            id: "/models";
+            path: "/models";
+            fullPath: "/models";
+            preLoaderRoute: typeof ModelsRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/sign-in": {
+            id: "/sign-in";
+            path: "/sign-in";
+            fullPath: "/sign-in";
+            preLoaderRoute: typeof SignInRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/api/chat": {
+            id: "/api/chat";
+            path: "/api/chat";
+            fullPath: "/api/chat";
+            preLoaderRoute: typeof ApiChatRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/thread/$threadId": {
+            id: "/thread/$threadId";
+            path: "/thread/$threadId";
+            fullPath: "/thread/$threadId";
+            preLoaderRoute: typeof ThreadThreadIdRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/api/auth/$": {
+            id: "/api/auth/$";
+            path: "/api/auth/$";
+            fullPath: "/api/auth/$";
+            preLoaderRoute: typeof ApiAuthSplatRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
     }
 }
 
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
+    LeaderboardRoute: LeaderboardRoute,
+    ModelsRoute: ModelsRoute,
+    SignInRoute: SignInRoute,
+    ApiChatRoute: ApiChatRoute,
+    ThreadThreadIdRoute: ThreadThreadIdRoute,
+    ApiAuthSplatRoute: ApiAuthSplatRoute,
 };
 export const routeTree = rootRouteImport
     ._addFileChildren(rootRouteChildren)
     ._addFileTypes<FileRouteTypes>();
+
+import type { getRouter } from "./router.tsx";
+import type { createStart } from "@tanstack/react-start";
+declare module "@tanstack/react-start" {
+    interface Register {
+        ssr: true;
+        router: Awaited<ReturnType<typeof getRouter>>;
+    }
+}

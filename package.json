@@ -7,6 +7,10 @@
         "lint": "turbo run lint",
         "typecheck": "turbo run typecheck",
         "check:contrast": "node scripts/check-contrast.mjs",
+        "check:auth-schema": "pnpm --dir apps/web check:auth-schema",
+        "db:generate": "pnpm --dir apps/web db:generate",
+        "db:migrate": "pnpm --dir apps/web db:migrate",
+        "db:studio": "pnpm --dir apps/web db:studio",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "prepare": "husky"
