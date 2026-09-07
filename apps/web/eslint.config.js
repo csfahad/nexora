@@ -7,7 +7,6 @@ export default [
         ignores: [
             "eslint.config.js",
             "prettier.config.js",
-            "src/routeTree.gen.ts",
             "src/generated/**",
             ".output/**",
             ".nitro/**",
