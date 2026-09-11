@@ -38,7 +38,7 @@ export const useStartTurn = (): Readonly<{
 
             start(result.responses);
 
-            if (input.threadId !== undefined) void router.invalidate();
+            if (input.threadId !== undefined) await router.invalidate();
             return result.threadId;
         },
         [start, router],
