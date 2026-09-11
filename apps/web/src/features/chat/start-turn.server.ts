@@ -6,13 +6,9 @@ import { CATALOG_UNAVAILABLE, freeModelCatalog } from "@/infrastructure/model-ca
 import { readSessionState } from "@/infrastructure/session.server";
 import { byModelName, latestAttempts } from "@/infrastructure/response-order";
 import { RESPONSE_FAILURE } from "./response-failure";
-import {
-    THREAD_NOT_FOUND,
-    TURN_MODELS_GONE,
-    TURN_SAVE_FAILED,
-    threadTitleFrom,
-} from "./start-turn";
+import { THREAD_NOT_FOUND, TURN_MODELS_GONE, TURN_SAVE_FAILED } from "./start-turn";
 import type { StartTurnInput, StartTurnResult } from "./start-turn";
+import { threadTitleFrom } from "./thread-title";
 
 type PlannedModel = Readonly<{
     modelId: string;
