@@ -24,3 +24,8 @@ export const readSessionState = async (headers: Headers): Promise<SessionState> 
         return { status: "unavailable" };
     }
 };
+
+export const readOwnerId = async (headers: Headers): Promise<string | null> => {
+    const session = await readSessionState(headers);
+    return session.status === "signed-in" ? session.user.id : null;
+};
