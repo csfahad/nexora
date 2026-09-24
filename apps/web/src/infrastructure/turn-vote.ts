@@ -51,3 +51,8 @@ export const voteFor = (
     votes: ReadonlyMap<string, ColumnVote>,
     responseId: string,
 ): ColumnVote => votes.get(responseId) ?? CLOSED;
+
+export const sealVotes = (
+    votes: ReadonlyMap<string, ColumnVote>,
+): ReadonlyMap<string, ColumnVote> =>
+    new Map([...votes].map(([id, vote]) => [id, vote.state === "open" ? CLOSED : vote]));
