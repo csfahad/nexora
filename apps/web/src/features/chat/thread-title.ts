@@ -5,8 +5,8 @@ export const TITLE_WATCH_TURNS = 3;
 export const TITLE_MAX_LENGTH = 120;
 
 export const TITLE_TIMEOUT_MS = 12_000;
-export const TITLE_MAX_OUTPUT_TOKENS = 32;
-export const TITLE_MODEL_ATTEMPTS = 3;
+export const TITLE_MAX_OUTPUT_TOKENS = 512;
+export const TITLE_MODEL_ATTEMPTS = 4;
 
 export const ensureThreadTitleSchema = z.object({
     threadId: z.string().min(1).max(64),
@@ -36,17 +36,19 @@ const REASONING_MARKERS = [
     "-r1",
 ] as const;
 
-const SMALL_MARKERS = [
-    "mini",
-    "small",
-    "flash",
-    "lite",
-    "nano",
-    "tiny",
-    "micro",
+const NOT_A_NAMER_MARKERS = [
+    "content-safety",
+    "safety",
+    "moderation",
+    "guard",
+    "omni",
+    "vl",
+    "clip",
+    "embed",
+    "rerank",
 ] as const;
 
-const INSTRUCT_MARKERS = ["instruct", "-it", "chat"] as const;
+const INSTRUCT_MARKERS = ["instruct", "-it", "chat", "code"] as const;
 
 /** Parameter counts as written in model ids: `-8b`, `-3.8b`, `-27b`. */
 const parameterBillions = (id: string): number | null => {
@@ -66,11 +68,19 @@ const titleModelCost = (model: Readonly<{ id: string; name: string }>): number =
     const billions = parameterBillions(text);
 
     const reasoning = includesAny(text, REASONING_MARKERS) ? 100 : 0;
-    const small = includesAny(text, SMALL_MARKERS) ? -10 : 0;
+    const notANamer = includesAny(text, NOT_A_NAMER_MARKERS) ? 60 : 0;
     const instruct = includesAny(text, INSTRUCT_MARKERS) ? -4 : 0;
-    const size = billions === null ? 0 : Math.min(billions, 60) / 4;
 
-    return reasoning + small + instruct + size;
+    const size =
+        billions === null
+            ? 0
+            : billions < 1
+              ? 30
+              : billions > 70
+                ? 20
+                : Math.min(billions, 40) / 8;
+
+    return reasoning + notANamer + instruct + size;
 };
 
 export const rankTitleModels = <T extends Readonly<{ id: string; name: string }>>(
@@ -83,6 +93,22 @@ export const rankTitleModels = <T extends Readonly<{ id: string; name: string }>
 const LEADING_LABEL = /^(?:title|thread title|chat title|subject)\s*[:\-–—]\s*/i;
 const WRAPPING_QUOTES = /^["'“”‘’`*\s]+|["'“”‘’`*\s]+$/g;
 
+const VERDICT =
+    /^(?:user\s+)?(?:safety|moderation|content|category|label|verdict)\s*[:\-–—]\s*\S+$/i;
+
+const ECHOED_SHAPE = /^(?:messages?|prompt|question)\s*\d*\s*[:\-–—]\s*/i;
+
+const collapseDoubled = (text: string): string => {
+    if (text.length % 2 !== 0) return text;
+
+    const half = text.length / 2;
+    const first = text.slice(0, half);
+
+    if (first !== text.slice(half) || half < 8 || !first.includes(" ")) return text;
+
+    return first.trim();
+};
+
 export const cleanGeneratedTitle = (raw: string): string | null => {
     const firstLine = raw
         .split("\n")
@@ -91,17 +117,22 @@ export const cleanGeneratedTitle = (raw: string): string | null => {
 
     if (firstLine === undefined) return null;
 
-    const stripped = firstLine
-        .replace(WRAPPING_QUOTES, "")
-        .replace(LEADING_LABEL, "")
-        .replace(WRAPPING_QUOTES, "")
-        .replace(/\s+/g, " ")
-        .replace(/[.,;:]+$/, "")
-        .trim();
+    const stripped = collapseDoubled(
+        firstLine
+            .replace(WRAPPING_QUOTES, "")
+            .replace(LEADING_LABEL, "")
+            .replace(ECHOED_SHAPE, "")
+            .replace(WRAPPING_QUOTES, "")
+            .replace(/\s+/g, " ")
+            .replace(/[.,;:]+$/, "")
+            .trim(),
+    );
 
     if (stripped.length < 2) return null;
 
     if (stripped.length > 72) return null;
+
+    if (VERDICT.test(stripped)) return null;
 
     return stripped;
 };
