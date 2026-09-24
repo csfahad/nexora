@@ -1,8 +1,7 @@
-import { IconDeviceDesktop, IconMoon, IconSun } from "@tabler/icons-react";
 import { useRef } from "react";
-import type { TablerIcon } from "@tabler/icons-react";
 import type { KeyboardEvent } from "react";
-
+import { IconDeviceDesktop, IconMoon, IconSun } from "@tabler/icons-react";
+import type { TablerIcon } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { THEME_CHOICES, themeChoiceLabel } from "@/components/theme/theme";
 import { useTheme } from "@/components/theme/use-theme";
@@ -21,7 +20,13 @@ const STEP: Readonly<Record<string, number | undefined>> = {
     ArrowUp: -1,
 };
 
-export const ThemeToggle = ({ className }: { readonly className?: string }) => {
+export const ThemeToggle = ({
+    className,
+    orientation = "horizontal",
+}: {
+    readonly className?: string;
+    readonly orientation?: "horizontal" | "vertical";
+}) => {
     const { choice, ready, select } = useTheme();
     const groupRef = useRef<HTMLDivElement>(null);
 
@@ -36,8 +41,6 @@ export const ThemeToggle = ({ className }: { readonly className?: string }) => {
                     THEME_CHOICES.length
             ];
         select(next);
-        // Focus has to travel with the selection, or the ring stays behind on the
-        // option the user just moved off.
         groupRef.current
             ?.querySelector<HTMLButtonElement>(`[data-choice="${next}"]`)
             ?.focus();
@@ -48,9 +51,11 @@ export const ThemeToggle = ({ className }: { readonly className?: string }) => {
             ref={groupRef}
             role="radiogroup"
             aria-label="Color theme"
+            aria-orientation={orientation}
             onKeyDown={onKeyDown}
             className={cn(
                 "border-border inline-flex items-center gap-0.5 rounded-md border p-0.5",
+                orientation === "vertical" && "flex-col",
                 className,
             )}
         >
