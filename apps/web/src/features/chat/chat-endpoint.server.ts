@@ -5,7 +5,7 @@ import { SESSION_UNAVAILABLE } from "@/infrastructure/session";
 import { readSessionState } from "@/infrastructure/session.server";
 import { CATALOG_UNAVAILABLE, freeModelCatalog } from "@/infrastructure/model-catalog";
 import { chatRequestSchema } from "./chat-stream-protocol";
-import { RESPONSE_FAILURE, failureSentence } from "./response-failure";
+import { RESPONSE_FAILURE, failureSentence } from "@/infrastructure/response-failure";
 import { failureStream, streamModelResponse } from "./stream-model-response.server";
 import { conversationFor } from "./thread-conversation";
 

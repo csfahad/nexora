@@ -8,8 +8,8 @@ import { encodeStreamEvent } from "./chat-stream-protocol";
 import type { ChatStreamEvent } from "./chat-stream-protocol";
 import { computeMetrics } from "./model-response-metrics";
 import type { ModelResponseMetrics } from "./model-response-metrics";
-import { RESPONSE_FAILURE, failureSentence } from "./response-failure";
-import type { ResponseFailure } from "./response-failure";
+import { RESPONSE_FAILURE, failureSentence } from "@/infrastructure/response-failure";
+import type { ResponseFailure } from "@/infrastructure/response-failure";
 
 const NDJSON_HEADERS: Readonly<Record<string, string>> = {
     "Content-Type": "application/x-ndjson; charset=utf-8",

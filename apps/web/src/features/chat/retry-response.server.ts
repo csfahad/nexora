@@ -3,7 +3,7 @@ import { database } from "@/infrastructure/database";
 import { screenRetry } from "@/infrastructure/arcjet";
 import { readSessionState } from "@/infrastructure/session.server";
 import { CATALOG_UNAVAILABLE, freeModelCatalog } from "@/infrastructure/model-catalog";
-import { RESPONSE_FAILURE } from "./response-failure";
+import { RESPONSE_FAILURE } from "@/infrastructure/response-failure";
 import { RETRY_ALREADY_DONE, RETRY_FAILED, RETRY_MODEL_GONE } from "./retry-response";
 import type { RetryResponseInput, RetryResponseResult } from "./retry-response";
 

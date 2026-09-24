@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 import { useRouter } from "@tanstack/react-router";
 import type { ModelResponseMetrics } from "./model-response-metrics";
 import { readModelStream } from "./read-model-stream";
-import { RESPONSE_FAILURE, failureSentence } from "./response-failure";
+import { RESPONSE_FAILURE, failureSentence } from "@/infrastructure/response-failure";
 import { RETRY_FAILED, RETRY_SIGNED_OUT, retryResponse } from "./retry-response";
 import type { StartedResponse } from "./start-turn";
 
