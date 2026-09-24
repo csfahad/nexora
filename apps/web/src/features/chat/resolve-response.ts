@@ -1,4 +1,4 @@
-import { RESPONSE_FAILURE, failureSentence } from "./response-failure";
+import { RESPONSE_FAILURE, failureSentence } from "@/infrastructure/response-failure";
 import type { LiveResponse } from "./arena-stream";
 import type { ThreadResponse } from "./get-thread";
 import type { ModelResponseMetrics } from "./model-response-metrics";
