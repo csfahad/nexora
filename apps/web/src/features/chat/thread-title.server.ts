@@ -18,6 +18,8 @@ import type { EnsureThreadTitleResult } from "./thread-title";
 const PROMPT_EXCERPT = 600;
 const ANSWER_EXCERPT = 400;
 
+const NO_REASONING = { enabled: false, exclude: true, effort: "none" } as const;
+
 const SYSTEM = [
     "You name conversations. Reply with nothing but the name.",
     "Two to six words, under 60 characters, sentence case.",
@@ -96,7 +98,9 @@ const generateTitle = async (brief: string): Promise<string | null> => {
                 prompt: brief,
                 maxOutputTokens: TITLE_MAX_OUTPUT_TOKENS,
                 temperature: 0.3,
+                maxRetries: 0,
                 abortSignal: AbortSignal.timeout(TITLE_TIMEOUT_MS),
+                providerOptions: { openrouter: { reasoning: NO_REASONING } },
             });
 
             const title = cleanGeneratedTitle(result.text);
