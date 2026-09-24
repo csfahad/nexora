@@ -1,20 +1,24 @@
 import type { CSSProperties } from "react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { latestAttempts } from "@/infrastructure/response-order";
-import { columnVotes, voteFor } from "@/infrastructure/turn-vote";
+import { columnVotes, sealVotes, voteFor } from "@/infrastructure/turn-vote";
 import { resolveResponse } from "./resolve-response";
 import type { LiveResponse } from "./arena-stream";
 import type { ThreadTurn } from "./get-thread";
 import { ResponseColumn } from "./response-column";
 
+const NOTHING_LIVE: ReadonlyMap<string, LiveResponse> = new Map();
+
 export const TurnBlock = ({
     turn,
-    live,
+    live = NOTHING_LIVE,
     onRetry,
+    sealed = false,
 }: {
     readonly turn: ThreadTurn;
-    readonly live: ReadonlyMap<string, LiveResponse>;
-    readonly onRetry: (responseId: string) => void;
+    readonly live?: ReadonlyMap<string, LiveResponse>;
+    readonly onRetry?: (responseId: string) => void;
+    readonly sealed?: boolean;
 }) => {
     const responses = latestAttempts(turn.responses).map((row) =>
         resolveResponse(row, live),
@@ -24,6 +28,8 @@ export const TurnBlock = ({
         { id: turn.id, winnerResponseId: turn.vote?.winnerResponseId ?? null },
         responses,
     );
+
+    const shown = sealed ? sealVotes(votes) : votes;
 
     return (
         <section className="flex flex-col gap-3" aria-label="Turn">
@@ -40,8 +46,8 @@ export const TurnBlock = ({
                     <ResponseColumn
                         key={response.modelId}
                         response={response}
-                        vote={voteFor(votes, response.id)}
-                        onRetry={onRetry}
+                        vote={voteFor(shown, response.id)}
+                        onRetry={sealed ? undefined : onRetry}
                     />
                 ))}
             </div>
