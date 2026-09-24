@@ -33,7 +33,7 @@ export const ResponseColumn = ({
 }: {
     readonly response: ResolvedResponse;
     readonly vote: ColumnVote;
-    readonly onRetry: (responseId: string) => void;
+    readonly onRetry?: (responseId: string) => void;
 }) => {
     const streaming = response.state === "streaming";
     const empty = response.text.length === 0;
@@ -79,7 +79,7 @@ export const ResponseColumn = ({
                     </p>
                 )}
 
-                {response.state === "failed" && (
+                {response.state === "failed" && onRetry !== undefined && (
                     <div className="mt-3">
                         <Button
                             variant="outline"
