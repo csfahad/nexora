@@ -32,6 +32,11 @@ const cnRowInteractive = cn(
     "hover:bg-accent hover:text-foreground active:translate-y-px",
 );
 
+const cnRailRow = cn(
+    "transition-state text-muted-foreground grid size-9 shrink-0 place-items-center rounded-md",
+    "hover:bg-accent hover:text-foreground active:translate-y-px",
+);
+
 const Avatar = ({ user }: { readonly user: SessionUser }) => (
     <span className="border-input bg-muted grid size-7 shrink-0 place-items-center overflow-hidden rounded-full border">
         {user.image ? (
@@ -51,13 +56,32 @@ const Avatar = ({ user }: { readonly user: SessionUser }) => (
     </span>
 );
 
-export const AccountRow = ({ onNavigate }: { readonly onNavigate?: () => void }) => {
+export const AccountRow = ({
+    onNavigate,
+    compact = false,
+}: {
+    readonly onNavigate?: () => void;
+    readonly compact?: boolean;
+}) => {
     const session = useSessionState();
     const router = useRouter();
     const [signingOut, setSigningOut] = useState(false);
     const [failed, setFailed] = useState(false);
 
     if (session.status === "unavailable") {
+        if (compact) {
+            return (
+                <p role="alert" className={cn(cnRailRow, "text-foreground")}>
+                    <IconAlertTriangle
+                        aria-hidden
+                        stroke={1.75}
+                        className="text-destructive size-4.5 shrink-0"
+                    />
+                    <span className="sr-only">{SESSION_UNAVAILABLE}</span>
+                </p>
+            );
+        }
+
         return (
             <p role="alert" className={cn(cnRow, "text-foreground")}>
                 <IconAlertTriangle
@@ -73,6 +97,21 @@ export const AccountRow = ({ onNavigate }: { readonly onNavigate?: () => void })
     }
 
     if (session.status === "signed-out") {
+        if (compact) {
+            return (
+                <Link
+                    to="/sign-in"
+                    search={{ next: "/" }}
+                    onClick={onNavigate}
+                    aria-label="Sign in"
+                    title="Sign in"
+                    className={cnRailRow}
+                >
+                    <IconLogin2 aria-hidden stroke={1.75} className="size-4.5 shrink-0" />
+                </Link>
+            );
+        }
+
         return (
             <Link
                 to="/sign-in"
@@ -116,18 +155,28 @@ export const AccountRow = ({ onNavigate }: { readonly onNavigate?: () => void })
 
     return (
         <Popover>
-            <PopoverTrigger className={cn(cnRowInteractive, "group/account")}>
-                <Avatar user={user} />
-                <span className="truncate">{user.name}</span>
-                <IconChevronUp
-                    aria-hidden
-                    stroke={1.75}
-                    className="transition-state ml-auto size-4 shrink-0 group-data-[state=open]/account:rotate-180"
-                />
-            </PopoverTrigger>
+            {compact ? (
+                <PopoverTrigger
+                    aria-label={user.name}
+                    title={user.name}
+                    className={cn(cnRailRow, "group/account")}
+                >
+                    <Avatar user={user} />
+                </PopoverTrigger>
+            ) : (
+                <PopoverTrigger className={cn(cnRowInteractive, "group/account")}>
+                    <Avatar user={user} />
+                    <span className="truncate">{user.name}</span>
+                    <IconChevronUp
+                        aria-hidden
+                        stroke={1.75}
+                        className="transition-state ml-auto size-4 shrink-0 group-data-[state=open]/account:rotate-180"
+                    />
+                </PopoverTrigger>
+            )}
 
             <PopoverContent
-                align="start"
+                align={compact ? "center" : "start"}
                 side="top"
                 className="w-[min(15rem,calc(100vw-2rem))] gap-3"
             >
