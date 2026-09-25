@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, createFileRoute, redirect } from "@tanstack/react-router";
-import { buttonClasses } from "@/components/ui/button";
+import { IconShare } from "@tabler/icons-react";
+import { Button, buttonClasses } from "@/components/ui/button";
 import { LoaderErrorNotice } from "@/components/ui/retry-notice";
 import { PromptComposer } from "@/features/arena/prompt-composer";
 import { useArenaStream } from "@/features/chat/arena-stream";
@@ -9,8 +10,10 @@ import { LockedModels } from "@/features/chat/locked-models";
 import { THREAD_NOT_FOUND } from "@/features/chat/start-turn";
 import { ThreadScreen } from "@/features/chat/thread-screen";
 import { ThreadWinRates } from "@/features/chat/thread-win-rates";
+import { useEnsureThreadTitle } from "@/features/chat/use-ensure-thread-title";
 import { useStartTurn } from "@/features/chat/use-start-turn";
 import { VoteSlotProvider } from "@/features/chat/vote-slot";
+import { ShareThreadDialog } from "@/features/shell/share-dialog";
 import { useTopBarCrumbs, useTopBarTrailing } from "@/features/shell/shell-chrome";
 import { VoteControl } from "@/features/voting/vote-control";
 import type { ThreadView } from "@/features/chat/get-thread";
@@ -65,11 +68,30 @@ function LoadedThread({ thread }: { readonly thread: ThreadView }) {
     const { streaming, answering, stop } = useArenaStream();
     const { send, notice } = useStartTurn();
     const [sending, setSending] = useState(false);
+    const [sharing, setSharing] = useState(false);
 
-    const winRates = useMemo(() => <ThreadWinRates thread={thread} />, [thread]);
+    const trailing = useMemo(
+        () => (
+            <>
+                <ThreadWinRates thread={thread} />
 
+                <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Share this thread"
+                    title="Share this thread"
+                    onClick={() => setSharing(true)}
+                >
+                    <IconShare aria-hidden stroke={1.75} />
+                </Button>
+            </>
+        ),
+        [thread],
+    );
+
+    useEnsureThreadTitle(threadId, thread.turns.length);
     useTopBarCrumbs(["Arena", thread.title]);
-    useTopBarTrailing(winRates);
+    useTopBarTrailing(trailing);
 
     const locked = thread.turns[0]?.responses ?? [];
 
@@ -123,6 +145,13 @@ function LoadedThread({ thread }: { readonly thread: ThreadView }) {
                         />
                     </div>
                 }
+            />
+
+            <ShareThreadDialog
+                threadId={threadId}
+                title={thread.title}
+                open={sharing}
+                onOpenChange={setSharing}
             />
         </VoteSlotProvider>
     );
