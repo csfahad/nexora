@@ -1,21 +1,49 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Dialog, VisuallyHidden } from "radix-ui";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
 import { AppSidebar } from "./app-sidebar";
+import { isSearchShortcut } from "./search-shortcut";
+import { ThreadSearchDialog } from "./thread-search-dialog";
 import { TopBar } from "./top-bar";
+import type { ThreadHistoryGroup } from "./thread-history";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
-export const AppShell = ({ children }: { readonly children: ReactNode }) => {
+export const AppShell = ({
+    children,
+    threadGroups,
+}: {
+    readonly children: ReactNode;
+    readonly threadGroups: readonly ThreadHistoryGroup[];
+}) => {
     const isDesktop = useMediaQuery(DESKTOP_QUERY, true);
     const [collapsed, setCollapsed] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
 
     useEffect(() => {
         if (isDesktop && drawerOpen) setDrawerOpen(false);
     }, [isDesktop, drawerOpen]);
+
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (!isSearchShortcut(event)) return;
+
+            event.preventDefault();
+            setDrawerOpen(false);
+            setSearchOpen((value) => !value);
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, []);
+
+    const openSearch = useCallback(() => {
+        setDrawerOpen(false);
+        setSearchOpen(true);
+    }, []);
 
     const sidebarShown = isDesktop ? !collapsed : drawerOpen;
     const toggleSidebar = () => {
@@ -29,15 +57,19 @@ export const AppShell = ({ children }: { readonly children: ReactNode }) => {
     return (
         <div className="flex h-full overflow-hidden">
             <aside
-                inert={!isDesktop || collapsed}
+                inert={!isDesktop}
                 className={cn(
                     "border-sidebar-border hidden shrink-0 overflow-hidden border-r lg:block",
                     "duration-(--dur-panel) ease-(--ease-out-expo) transition-[width]",
-                    collapsed ? "lg:w-0" : "lg:w-68",
+                    collapsed ? "lg:w-16" : "lg:w-68",
                 )}
             >
-                <div className="w-68 h-full">
-                    <AppSidebar />
+                <div className={cn("h-full", collapsed ? "w-16" : "w-68")}>
+                    <AppSidebar
+                        threadGroups={threadGroups}
+                        collapsed={collapsed}
+                        onOpenSearch={openSearch}
+                    />
                 </div>
             </aside>
 
@@ -69,10 +101,21 @@ export const AppShell = ({ children }: { readonly children: ReactNode }) => {
                         <VisuallyHidden.Root>
                             <Dialog.Title>Navigation</Dialog.Title>
                         </VisuallyHidden.Root>
-                        <AppSidebar onNavigate={() => setDrawerOpen(false)} />
+                        <AppSidebar
+                            threadGroups={threadGroups}
+                            onOpenSearch={openSearch}
+                            onNavigate={() => setDrawerOpen(false)}
+                        />
                     </Dialog.Content>
                 </Dialog.Portal>
             </Dialog.Root>
+
+            <ThreadSearchDialog
+                open={searchOpen}
+                onOpenChange={setSearchOpen}
+                threadGroups={threadGroups}
+                onNavigate={() => setDrawerOpen(false)}
+            />
         </div>
     );
 };
