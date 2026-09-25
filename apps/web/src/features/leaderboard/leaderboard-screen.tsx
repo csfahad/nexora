@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { DemoBadge } from "@/components/ui/demo-badge";
+import { Link } from "@tanstack/react-router";
+import { buttonClasses } from "@/components/ui/button";
 import { ModelAvatar } from "@/components/ui/model-avatar";
-import { DEMO_STANDINGS, winRate } from "./demo-standings";
-import type { StandingRow } from "./demo-standings";
+import { winRateOf } from "./standings";
+import type { RankedRow, Standings, StandingsView } from "./standings";
 import { ViewToggle } from "./view-toggle";
 import type { ViewOption } from "./view-toggle";
+import { VoteVolumeNotice } from "./vote-volume-notice";
 
 type View = "global" | "personal";
 
@@ -13,7 +15,7 @@ const VIEWS: readonly ViewOption<View>[] = [
     { value: "personal", label: "Personal", panelId: "leaderboard-personal" },
 ];
 
-export const LeaderboardScreen = () => {
+export const LeaderboardScreen = ({ standings }: { readonly standings: Standings }) => {
     const [view, setView] = useState<View>("global");
 
     return (
@@ -42,19 +44,16 @@ export const LeaderboardScreen = () => {
                         aria-labelledby="leaderboard-global-tab"
                         className="mt-6"
                     >
-                        <div className="flex flex-wrap items-end justify-between gap-3">
-                            <div className="flex flex-col gap-1">
-                                <h2 className="font-heading text-lg font-semibold">
-                                    Global ranking
-                                </h2>
-                                <p className="text-muted-foreground text-sm">
-                                    Every vote, every user, ranked by real wins.
-                                </p>
-                            </div>
-                            <DemoBadge />
+                        <div className="flex flex-col gap-1">
+                            <h2 className="font-heading text-lg font-semibold">
+                                Global ranking
+                            </h2>
+                            <p className="text-muted-foreground text-sm">
+                                Every vote, every user, ranked by real wins.
+                            </p>
                         </div>
 
-                        <StandingsTable rows={DEMO_STANDINGS} />
+                        <Scope view={standings.global} scope="global" />
                     </section>
                 ) : (
                     <section
@@ -63,7 +62,25 @@ export const LeaderboardScreen = () => {
                         aria-labelledby="leaderboard-personal-tab"
                         className="mt-6"
                     >
-                        <EmptyPersonal />
+                        {standings.personal === null ? (
+                            <SignedOutPersonal />
+                        ) : standings.personal.votes === 0 ? (
+                            <EmptyPersonal />
+                        ) : (
+                            <>
+                                <div className="flex flex-col gap-1">
+                                    <h2 className="font-heading text-lg font-semibold">
+                                        Your ranking
+                                    </h2>
+                                    <p className="text-muted-foreground text-sm">
+                                        Built from the votes you cast, and nobody
+                                        else&rsquo;s.
+                                    </p>
+                                </div>
+
+                                <Scope view={standings.personal} scope="personal" />
+                            </>
+                        )}
                     </section>
                 )}
             </div>
@@ -71,7 +88,26 @@ export const LeaderboardScreen = () => {
     );
 };
 
-const StandingsTable = ({ rows }: { readonly rows: readonly StandingRow[] }) => (
+const Scope = ({
+    view,
+    scope,
+}: {
+    readonly view: StandingsView;
+    readonly scope: View;
+}) =>
+    view.rows.length === 0 ? (
+        <NoModelsYet />
+    ) : (
+        <>
+            <div className="mt-4">
+                <VoteVolumeNotice votes={view.votes} scope={scope} />
+            </div>
+
+            <StandingsTable rows={view.rows} />
+        </>
+    );
+
+const StandingsTable = ({ rows }: { readonly rows: readonly RankedRow[] }) => (
     <div className="border-border mt-4 overflow-x-auto rounded-xl border">
         <table className="min-w-184 w-full border-collapse text-left">
             <thead>
@@ -86,17 +122,17 @@ const StandingsTable = ({ rows }: { readonly rows: readonly StandingRow[] }) => 
             <tbody>
                 {rows.map((row) => (
                     <tr
-                        key={row.rank}
+                        key={row.modelId}
                         className="border-border hover:bg-muted/50 border-b last:border-b-0"
                     >
                         <td className="numeric text-muted-foreground px-3 py-3.5 text-right text-sm">
-                            {row.rank}
+                            {row.rank ?? <Absent label="Unranked" />}
                         </td>
                         <td className="px-3 py-3.5">
                             <div className="flex items-center gap-2.5">
-                                <ModelAvatar name={row.model} size="sm" />
+                                <ModelAvatar name={row.modelName} size="sm" />
                                 <span className="text-foreground font-medium">
-                                    {row.model}
+                                    {row.modelName}
                                 </span>
                             </div>
                         </td>
@@ -104,10 +140,18 @@ const StandingsTable = ({ rows }: { readonly rows: readonly StandingRow[] }) => 
                             <WinRateCell row={row} />
                         </td>
                         <td className="numeric text-foreground px-3 py-3.5 text-right text-sm">
-                            {row.ttftMs} ms
+                            {row.ttftMs === null ? (
+                                <Absent label="Not measured" />
+                            ) : (
+                                `${row.ttftMs} ms`
+                            )}
                         </td>
                         <td className="numeric text-foreground px-3 py-3.5 text-right text-sm">
-                            {row.tokensPerSecond} tok/s
+                            {row.tokensPerSecond === null ? (
+                                <Absent label="Not measured" />
+                            ) : (
+                                `${row.tokensPerSecond.toFixed(1)} tok/s`
+                            )}
                         </td>
                     </tr>
                 ))}
@@ -116,8 +160,17 @@ const StandingsTable = ({ rows }: { readonly rows: readonly StandingRow[] }) => 
     </div>
 );
 
-const WinRateCell = ({ row }: { readonly row: StandingRow }) => {
-    const pct = winRate(row);
+const WinRateCell = ({ row }: { readonly row: RankedRow }) => {
+    const pct = winRateOf(row);
+
+    if (pct === null) {
+        return (
+            <span className="text-muted-foreground text-sm">
+                <Absent label="No votes yet" />
+            </span>
+        );
+    }
+
     return (
         <div className="flex items-center gap-3">
             <span className="numeric text-foreground w-10 shrink-0 text-sm font-semibold">
@@ -140,6 +193,26 @@ const WinRateCell = ({ row }: { readonly row: StandingRow }) => {
     );
 };
 
+const Absent = ({ label }: { readonly label: string }) => (
+    <>
+        <span aria-hidden>&mdash;</span>
+        <span className="sr-only">{label}</span>
+    </>
+);
+
+const NoModelsYet = () => (
+    <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
+        <h3 className="font-heading text-lg font-semibold">Nothing measured yet</h3>
+        <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
+            Send a prompt in the arena and the models that answer will appear here with
+            their real numbers.
+        </p>
+        <Link to="/" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
+            Go to the arena
+        </Link>
+    </div>
+);
+
 const EmptyPersonal = () => (
     <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
         <h2 className="font-heading text-lg font-semibold">No personal ranking yet</h2>
@@ -147,6 +220,28 @@ const EmptyPersonal = () => (
             Your ranking is built from your own votes. Send a prompt in the arena and pick
             a winner, and your head-to-head record will appear here.
         </p>
+        <Link to="/" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
+            Go to the arena
+        </Link>
+    </div>
+);
+
+const SignedOutPersonal = () => (
+    <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
+        <h2 className="font-heading text-lg font-semibold">
+            Sign in to see your ranking
+        </h2>
+        <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
+            A personal ranking is built from the votes you cast. The global one beside it
+            reads the same whether you are signed in or not.
+        </p>
+        <Link
+            to="/sign-in"
+            search={{ next: "/leaderboard" }}
+            className={buttonClasses({ variant: "primary", class: "mt-5" })}
+        >
+            Sign in
+        </Link>
     </div>
 );
 
