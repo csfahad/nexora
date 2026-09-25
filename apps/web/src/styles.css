@@ -60,11 +60,13 @@
 
     --radius: 0.625rem;
 
-    /* Motion. One duration for state feedback, one for a panel that travels.
+    /* Motion. One duration for state feedback, one for a panel that travels,
+     * one for a reveal that hands back text the layout had to cut.
      * Exponential ease-out from an already-visible default. */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --dur-state: 120ms;
     --dur-panel: 260ms;
+    --dur-reveal: 2.2s;
 }
 
 .light {
@@ -400,6 +402,170 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * A row inside a dropdown menu. Deliberately not `.side-row`: Tailwind's
+ * utilities live in a cascade layer, so a plain class outranks them and
+ * `text-destructive` on the markup renders grey. The danger colour has to be
+ * declared here, in the same cascade as the base row, to actually win.
+ * ------------------------------------------------------------------------- */
+
+.menu-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.4375rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8125rem;
+    color: var(--foreground);
+    text-align: left;
+    cursor: default;
+    user-select: none;
+    outline: none;
+    transition-property: background-color, color;
+    transition-duration: var(--dur-state);
+    transition-timing-function: var(--ease-out-expo);
+}
+
+/* Radix drives `data-highlighted` from the pointer and the arrow keys alike, so
+ * this is the entire hover/focus state. A `:hover` rule as well would light two
+ * rows at once the moment the two disagree. */
+.menu-row[data-highlighted] {
+    background-color: var(--accent);
+}
+
+.menu-row[data-variant="danger"] {
+    color: var(--destructive);
+}
+
+.menu-row > svg {
+    flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * A thread in the sidebar: message icon, title, actions.
+ * ------------------------------------------------------------------------- */
+
+.thread-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.thread-row > .side-row {
+    padding-right: 2.125rem;
+}
+
+.thread-actions {
+    position: absolute;
+    right: 0.25rem;
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: var(--dur-state);
+    transition-timing-function: var(--ease-out-expo);
+}
+
+.thread-row:hover .thread-actions,
+.thread-actions:focus-visible,
+.thread-actions[aria-expanded="true"] {
+    opacity: 1;
+}
+
+/* Without hover there is no way to reveal it, and an invisible button that
+ * still takes taps is worse than a visible one. */
+@media (hover: none) {
+    .thread-actions {
+        opacity: 1;
+    }
+}
+
+.thread-title {
+    container-type: inline-size;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.thread-title > span {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.thread-row:hover .thread-title > span,
+.thread-row:has(:focus-visible) .thread-title > span {
+    width: max-content;
+    overflow: visible;
+    text-overflow: clip;
+    transform: translateX(var(--slide-shift, min(0px, calc(100cqw - 100%))));
+    transition: transform var(--slide-dur, var(--dur-reveal)) linear;
+}
+
+/* ---------------------------------------------------------------------------
+ * Thread search. A result is two lines, so it cannot reuse `.side-row`.
+ * ------------------------------------------------------------------------- */
+
+.palette-hit {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    width: 100%;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--radius-md);
+    color: var(--foreground);
+    text-align: left;
+    text-decoration: none;
+    transition-property: background-color;
+    transition-duration: var(--dur-state);
+    transition-timing-function: var(--ease-out-expo);
+}
+
+/* One highlight, and the keyboard cursor owns it. Pointer movement writes the
+ * same index, so hover and the arrow keys can never light two rows at once. */
+.palette-hit[data-active="true"] {
+    background-color: var(--accent);
+}
+
+.palette-hit > svg {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    color: var(--muted-foreground);
+}
+
+.palette-snippet {
+    display: block;
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    line-height: 1.05rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The matched span, marked by weight and a step up in colour. No highlighter
+ * fill: rust means "you operate this" and a search hit is not operable. */
+.palette-snippet mark {
+    background-color: transparent;
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+/* A key you can actually press. Same tier as `.label-meta`, different job. */
+.kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    padding: 0.0625rem 0.3125rem;
+    border-radius: var(--radius-sm);
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    font-family: inherit;
+    font-size: var(--text-2xs);
+    line-height: 1.15rem;
+}
+
+/* ---------------------------------------------------------------------------
  * A model's answer. The typography plugin is tuned for documents on white, so
  * every prose colour is mapped onto the app's own tokens instead — one place,
  * both themes, rather than a `dark:` variant per element.
@@ -718,6 +884,31 @@
     flex-shrink: 0;
 }
 
+/* States what a shared page is, next to the title it applies to. Muted on
+ * purpose: it reports a condition of the page, and neither the accent nor the
+ * two reserved colours mean "read-only". */
+.share-badge {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.share-badge > svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    flex-shrink: 0;
+}
+
 /* The same tally in the top bar. Hidden on narrow screens rather than shrunk:
  * it is a summary of what every card already says, so the small screen loses
  * the convenience and none of the information. */
@@ -782,4 +973,46 @@
     height: 0.875rem;
     flex-shrink: 0;
     color: var(--muted-foreground);
+}
+
+/* ---------------------------------------------------------------------------
+ * What the leaderboard's numbers are worth. Not an alert — nothing has gone
+ * wrong, the votes are real and the arithmetic is honest; there are just too few
+ * of them to rank on yet. So it takes the muted panel rather than any of the
+ * three meaning colours: rust means "you operate this", and green and red are
+ * spent on won and failed. It sits above the table rather than under it, because
+ * a caveat a reader meets after the ranking has already done its work.
+ * ------------------------------------------------------------------------- */
+
+.evidence-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background-color: var(--muted);
+}
+
+.evidence-note > svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.0625rem;
+    color: var(--muted-foreground);
+}
+
+.evidence-note p {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--muted-foreground);
+    text-wrap: pretty;
+}
+
+/* The count itself carries full strength: it is the fact the panel exists to
+ * state, and the reason follows it in the metadata tier. */
+.evidence-note strong {
+    color: var(--foreground);
+    font-weight: 600;
 }
