@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { LoaderErrorNotice } from "@/components/ui/retry-notice";
 import { ArenaScreen } from "@/features/arena/arena-screen";
 import { useStartTurn } from "@/features/chat/use-start-turn";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/")({
 
 function ArenaRoute() {
     const navigate = useNavigate();
+    const router = useRouter();
     const { send, notice } = useStartTurn();
 
     const submit = async (
@@ -27,7 +28,8 @@ function ArenaRoute() {
 
         if (threadId === null) return false;
 
-        void navigate({ to: "/thread/$threadId", params: { threadId } });
+        await navigate({ to: "/thread/$threadId", params: { threadId } });
+        await router.invalidate();
 
         return true;
     };
