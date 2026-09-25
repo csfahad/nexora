@@ -109,9 +109,13 @@ const PAIRS = [
     ["code-function", "muted", 4.5, "function name inside a code block"],
     ["destructive", "card", 4.5, "error text in a column"],
     ["destructive", "background", 4.5, "error text on the page"],
+    ["destructive", "popover", 4.5, "Delete in a thread's action menu"],
+    ["destructive", "accent", 4.5, "Delete while its menu row is highlighted"],
     ["destructive-foreground", "destructive", 4.5, "label on a filled error chip"],
     ["sidebar-foreground", "sidebar", 4.5, "sidebar text"],
     ["sidebar-accent-foreground", "sidebar-accent", 4.5, "hovered sidebar row"],
+    ["foreground", "popover", 4.5, "menu item and search-result text"],
+    ["muted-foreground", "popover", 4.5, "search-result snippet"],
 
     ["input", "background", 3.0, "control edge against the page"],
     ["input", "card", 3.0, "control edge against a column"],
