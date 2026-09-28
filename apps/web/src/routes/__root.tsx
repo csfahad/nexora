@@ -8,6 +8,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { themeInitScript } from "@/components/theme/theme-init-script";
 import { ArenaStreamProvider } from "@/features/chat/arena-stream";
 import { AppShell } from "@/features/shell/app-shell";
@@ -85,6 +86,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     />
                 )}
                 <Analytics />
+                <SpeedInsights />
                 <Scripts />
             </body>
         </html>
