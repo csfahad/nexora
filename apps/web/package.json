@@ -14,7 +14,8 @@
         "db:migrate": "prisma migrate dev",
         "db:deploy": "prisma migrate deploy",
         "db:studio": "prisma studio",
-        "check:auth-schema": "node scripts/check-auth-schema.mjs"
+        "check:auth-schema": "node scripts/check-auth-schema.mjs",
+        "reconcile:usage": "node --experimental-strip-types scripts/reconcile-usage.mjs"
     },
     "dependencies": {
         "@arcjet/node": "1.11.0",
