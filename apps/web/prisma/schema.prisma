@@ -22,6 +22,9 @@ model User {
   threads Thread[]
   votes   Vote[]
 
+  subscription Subscription?
+  usagePeriods UsagePeriod[]
+
   @@map("user")
 }
 
@@ -82,6 +85,87 @@ enum ResponseStatus {
   @@map("response_status")
 }
 
+enum ModelTier {
+  FREE
+  STANDARD
+  ADVANCED
+  FRONTIER
+
+  @@map("model_tier")
+}
+
+enum Plan {
+  FREE
+  PRO
+  PRO_PLUS
+  MAX
+
+  @@map("plan")
+}
+
+enum BillingInterval {
+  MONTHLY
+  ANNUAL
+
+  @@map("billing_interval")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  ON_HOLD
+  CANCELLED
+  EXPIRED
+  FAILED
+
+  @@map("subscription_status")
+}
+
+enum UsageScope {
+  DAILY
+  BILLING
+
+  @@map("usage_scope")
+}
+
+model Subscription {
+  id                 String             @id @default(cuid())
+  userId             String             @unique
+  plan               Plan
+  interval           BillingInterval
+  status             SubscriptionStatus
+  dodoSubscriptionId String             @unique
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+  pastDueEndsAt      DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscription")
+}
+
+model UsagePeriod {
+  id          String     @id @default(cuid())
+  userId      String
+  scope       UsageScope
+  periodStart DateTime
+  periodEnd   DateTime
+  freeAnswers Int        @default(0)
+  standard    Int        @default(0)
+  advanced    Int        @default(0)
+  frontier    Int        @default(0)
+  spentUsd    Decimal    @default(0) @db.Decimal(12, 6)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scope, periodStart])
+  @@index([userId, scope])
+  @@map("usage_period")
+}
+
 model Thread {
   id          String   @id @default(cuid())
   userId      String
@@ -126,6 +210,8 @@ model ModelResponse {
   totalTokens      Int?
   tokensPerSecond  Decimal?       @db.Decimal(10, 2)
   costUsd          Decimal        @default(0) @db.Decimal(10, 6)
+  costEstimated    Boolean        @default(false)
+  tier             ModelTier      @default(FREE)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   turn             Turn           @relation(fields: [turnId], references: [id], onDelete: Cascade)
