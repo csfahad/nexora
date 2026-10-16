@@ -6,7 +6,10 @@ export type ModelResponseMetrics = Readonly<{
     totalTokens: number | null;
     tokensPerSecond: number | null;
     costUsd: number;
+    costEstimated: boolean;
 }>;
+
+export type ModelPrices = Readonly<{ prompt: number; completion: number }>;
 
 export type MetricsInput = Readonly<{
     startedAt: number;
@@ -14,6 +17,8 @@ export type MetricsInput = Readonly<{
     finishedAt: number;
     promptTokens: number | null;
     completionTokens: number | null;
+    reportedCostUsd: number | null;
+    prices: ModelPrices | null;
 }>;
 
 const round = (value: number, places: number): number => {
@@ -29,6 +34,30 @@ const computeTokensPerSecond = (
     if (durationMs <= 0) return null;
 
     return round(completionTokens / (durationMs / 1000), 2);
+};
+
+const COST_PLACES = 6;
+
+type Cost = Readonly<{ costUsd: number; costEstimated: boolean }>;
+
+const computeCost = (
+    reportedCostUsd: number | null,
+    prices: ModelPrices | null,
+    promptTokens: number | null,
+    completionTokens: number | null,
+): Cost => {
+    if (reportedCostUsd !== null && Number.isFinite(reportedCostUsd)) {
+        return { costUsd: round(reportedCostUsd, COST_PLACES), costEstimated: false };
+    }
+
+    if (prices === null || (promptTokens === null && completionTokens === null)) {
+        return { costUsd: 0, costEstimated: prices !== null };
+    }
+
+    const derived =
+        prices.prompt * (promptTokens ?? 0) + prices.completion * (completionTokens ?? 0);
+
+    return { costUsd: round(derived, COST_PLACES), costEstimated: true };
 };
 
 export const computeMetrics = (input: MetricsInput): ModelResponseMetrics => {
@@ -48,6 +77,11 @@ export const computeMetrics = (input: MetricsInput): ModelResponseMetrics => {
         completionTokens,
         totalTokens,
         tokensPerSecond: computeTokensPerSecond(completionTokens, durationMs),
-        costUsd: 0,
+        ...computeCost(
+            input.reportedCostUsd,
+            input.prices,
+            promptTokens,
+            completionTokens,
+        ),
     };
 };
