@@ -1,12 +1,22 @@
-import { ResponseStatus } from "@/generated/prisma/enums";
+import { ResponseStatus, ModelTier, UsageScope } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
 import { screenPrompt } from "@/infrastructure/arcjet";
 import { capturePromptSent } from "@/infrastructure/posthog";
-import { CATALOG_UNAVAILABLE, freeModelCatalog } from "@/infrastructure/model-catalog";
+import { CATALOG_UNAVAILABLE, arenaCatalog } from "@/infrastructure/model-catalog";
 import { readSessionState } from "@/infrastructure/session.server";
+import { readEntitlement } from "@/infrastructure/entitlement.server";
+import { chargeFor, limitFor, reserveOne } from "@/infrastructure/allowance.server";
+import { dailyWindow } from "@/infrastructure/billing-window";
+import { isPaidTier } from "@/infrastructure/plans";
 import { byModelName, latestAttempts } from "@/infrastructure/response-order";
 import { RESPONSE_FAILURE } from "@/infrastructure/response-failure";
-import { THREAD_NOT_FOUND, TURN_MODELS_GONE, TURN_SAVE_FAILED } from "./start-turn";
+import type { ResponseFailure } from "@/infrastructure/response-failure";
+import {
+    THREAD_NOT_FOUND,
+    TURN_ALLOWANCE_SPENT,
+    TURN_MODELS_GONE,
+    TURN_SAVE_FAILED,
+} from "./start-turn";
 import type { StartTurnInput, StartTurnResult } from "./start-turn";
 import { threadTitleFrom } from "./thread-title";
 
@@ -14,11 +24,13 @@ type PlannedModel = Readonly<{
     modelId: string;
     modelName: string;
     available: boolean;
+    tier: ModelTier;
+    blocked: ResponseFailure | null;
 }>;
 
 const planModels = (
     wanted: readonly Readonly<{ modelId: string; modelName: string | null }>[],
-    catalog: readonly Readonly<{ id: string; name: string }>[],
+    catalog: readonly Readonly<{ id: string; name: string; tier: ModelTier | null }>[],
 ): readonly PlannedModel[] =>
     wanted.map(({ modelId, modelName }) => {
         const listed = catalog.find((model) => model.id === modelId);
@@ -27,6 +39,8 @@ const planModels = (
             modelId,
             modelName: listed?.name ?? modelName ?? modelId,
             available: listed !== undefined,
+            tier: listed?.tier ?? ModelTier.FREE,
+            blocked: null,
         };
     });
 
@@ -42,9 +56,13 @@ export const runStartTurn = async (
     }
 
     const userId = session.user.id;
+    const now = new Date();
+
+    const entitlement = await readEntitlement(userId, now);
 
     const verdict = await screenPrompt(request, {
         userId,
+        plan: entitlement.plan,
         prompt: input.prompt,
         models: input.modelIds.length,
     });
@@ -53,7 +71,7 @@ export const runStartTurn = async (
         return { status: "error", message: verdict.message };
     }
 
-    const catalog = await freeModelCatalog().catch((error: unknown) => {
+    const catalog = await arenaCatalog().catch((error: unknown) => {
         console.error("[chat] catalog unavailable while starting a turn:", error);
 
         return null;
@@ -119,16 +137,74 @@ export const runStartTurn = async (
                     select: { id: true },
                 });
 
+                const reserved = await Promise.all(
+                    planned.map(async (model): Promise<PlannedModel> => {
+                        if (!model.available) return model;
+
+                        const charge = chargeFor(model.tier, entitlement.window, now);
+
+                        if (charge === null) {
+                            return {
+                                ...model,
+                                blocked: RESPONSE_FAILURE.ALLOWANCE_SPENT,
+                            };
+                        }
+
+                        const window =
+                            charge.scope === UsageScope.BILLING
+                                ? entitlement.window
+                                : dailyWindow(now);
+
+                        if (window === null) {
+                            return {
+                                ...model,
+                                blocked: RESPONSE_FAILURE.ALLOWANCE_SPENT,
+                            };
+                        }
+
+                        const got = await reserveOne(tx, {
+                            userId,
+                            charge,
+                            window,
+                            limit: limitFor(model.tier, entitlement.allowance),
+                        });
+
+                        if (got) return model;
+
+                        return {
+                            ...model,
+                            blocked: isPaidTier(model.tier)
+                                ? RESPONSE_FAILURE.ALLOWANCE_SPENT
+                                : RESPONSE_FAILURE.FREE_TIER_EXHAUSTED,
+                        };
+                    }),
+                );
+
+                if (
+                    !reserved.some((model) => model.available && model.blocked === null)
+                ) {
+                    return {
+                        status: "error",
+                        message: reserved.some((model) => model.available)
+                            ? TURN_ALLOWANCE_SPENT
+                            : TURN_MODELS_GONE,
+                    };
+                }
+
                 const rows = await tx.modelResponse.createManyAndReturn({
-                    data: planned.map((model) => ({
+                    data: reserved.map((model) => ({
                         turnId: turn.id,
                         modelId: model.modelId,
                         modelName: model.modelName,
-                        ...(model.available
+                        tier: model.tier,
+                        ...(model.available && model.blocked === null
                             ? {}
                             : {
                                   status: ResponseStatus.FAILED,
-                                  failure: RESPONSE_FAILURE.MODEL_UNAVAILABLE,
+                                  failure: model.available
+                                      ? (model.blocked ??
+                                        RESPONSE_FAILURE.MODEL_UNAVAILABLE)
+                                      : RESPONSE_FAILURE.MODEL_UNAVAILABLE,
                               }),
                     })),
                     select: { id: true, modelId: true, modelName: true, status: true },
