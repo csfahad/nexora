@@ -7,8 +7,8 @@ import arcjet, {
 import type { ArcjetDecision, ArcjetNodeRequest, ArcjetReason } from "@arcjet/node";
 import { getRequestIP } from "@tanstack/react-start/server";
 import { serverEnv } from "@/infrastructure/env";
-
-const HOURLY_MODEL_CALLS = 30;
+import type { Plan } from "@/generated/prisma/enums";
+import { PLANS } from "@/infrastructure/plans";
 
 const buildBase = () =>
     arcjet({
@@ -26,23 +26,47 @@ export const arcjetClient = (): ReturnType<typeof buildBase> => {
     return base;
 };
 
-const spendRule = tokenBucket({
-    mode: "LIVE",
-    characteristics: ["userId"],
-    capacity: HOURLY_MODEL_CALLS,
-    refillRate: HOURLY_MODEL_CALLS,
-    interval: "1h",
-});
+const spendRuleFor = (plan: Plan) =>
+    tokenBucket({
+        mode: "LIVE",
+        characteristics: ["userId"],
+        capacity: PLANS[plan].hourlyCalls,
+        refillRate: PLANS[plan].hourlyCalls,
+        interval: "1h",
+    });
 
 const injectionRule = detectPromptInjection({ mode: "LIVE" });
 
-const buildPromptClient = () =>
-    arcjetClient().withRule(spendRule).withRule(injectionRule);
-const buildSpendClient = () => arcjetClient().withRule(spendRule);
+const buildPromptClient = (plan: Plan) =>
+    arcjetClient().withRule(spendRuleFor(plan)).withRule(injectionRule);
+
+const buildSpendClient = (plan: Plan) => arcjetClient().withRule(spendRuleFor(plan));
+
+const promptClients = new Map<Plan, ReturnType<typeof buildPromptClient>>();
+const spendClients = new Map<Plan, ReturnType<typeof buildSpendClient>>();
+
+const promptClientFor = (plan: Plan): ReturnType<typeof buildPromptClient> => {
+    const existing = promptClients.get(plan);
+    if (existing) return existing;
+
+    const client = buildPromptClient(plan);
+    promptClients.set(plan, client);
+
+    return client;
+};
+
+const spendClientFor = (plan: Plan): ReturnType<typeof buildSpendClient> => {
+    const existing = spendClients.get(plan);
+    if (existing) return existing;
+
+    const client = buildSpendClient(plan);
+    spendClients.set(plan, client);
+
+    return client;
+};
+
 const buildInjectionClient = () => arcjetClient().withRule(injectionRule);
 
-let promptClient: ReturnType<typeof buildPromptClient> | undefined;
-let spendClient: ReturnType<typeof buildSpendClient> | undefined;
 let injectionClient: ReturnType<typeof buildInjectionClient> | undefined;
 
 const toNodeRequest = (request: Request): ArcjetNodeRequest => ({
@@ -147,11 +171,9 @@ const rescreenInjection = async (
 
 export const screenPrompt = async (
     request: Request,
-    input: Readonly<{ userId: string; prompt: string; models: number }>,
+    input: Readonly<{ userId: string; plan: Plan; prompt: string; models: number }>,
 ): Promise<RequestVerdict> => {
-    if (!promptClient) promptClient = buildPromptClient();
-
-    const decision = await promptClient.protect(toNodeRequest(request), {
+    const decision = await promptClientFor(input.plan).protect(toNodeRequest(request), {
         userId: input.userId,
         requested: input.models,
         detectPromptInjectionMessage: input.prompt,
@@ -169,11 +191,9 @@ export const screenPrompt = async (
 
 export const screenRetry = async (
     request: Request,
-    input: Readonly<{ userId: string }>,
+    input: Readonly<{ userId: string; plan: Plan }>,
 ): Promise<RequestVerdict> => {
-    if (!spendClient) spendClient = buildSpendClient();
-
-    const decision = await spendClient.protect(toNodeRequest(request), {
+    const decision = await spendClientFor(input.plan).protect(toNodeRequest(request), {
         userId: input.userId,
         requested: 1,
         ipSrc: trustedIp(),
