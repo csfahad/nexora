@@ -1,7 +1,7 @@
 import { generateText } from "ai";
 import { ResponseStatus } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
-import { freeModelCatalog } from "@/infrastructure/model-catalog";
+import { freeCatalog } from "@/infrastructure/model-catalog";
 import { openRouterClient } from "@/infrastructure/openrouter";
 import { readSessionState } from "@/infrastructure/session.server";
 import {
@@ -83,7 +83,7 @@ const uniqueTitle = async (
 };
 
 const generateTitle = async (brief: string): Promise<string | null> => {
-    const catalog = await freeModelCatalog().catch((error: unknown) => {
+    const catalog = await freeCatalog().catch((error: unknown) => {
         console.error("[chat] catalog unavailable while titling a thread:", error);
         return null;
     });
