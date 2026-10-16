@@ -1,10 +1,20 @@
-import { ResponseStatus } from "@/generated/prisma/enums";
+import { ResponseStatus, ModelTier, UsageScope } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
 import { screenRetry } from "@/infrastructure/arcjet";
 import { readSessionState } from "@/infrastructure/session.server";
-import { CATALOG_UNAVAILABLE, freeModelCatalog } from "@/infrastructure/model-catalog";
+import { readEntitlement } from "@/infrastructure/entitlement.server";
+import { chargeFor, limitFor, reserveOne } from "@/infrastructure/allowance.server";
+import { dailyWindow } from "@/infrastructure/billing-window";
+import { isPaidTier } from "@/infrastructure/plans";
+import { CATALOG_UNAVAILABLE, arenaCatalog } from "@/infrastructure/model-catalog";
 import { RESPONSE_FAILURE } from "@/infrastructure/response-failure";
-import { RETRY_ALREADY_DONE, RETRY_FAILED, RETRY_MODEL_GONE } from "./retry-response";
+import {
+    RETRY_ALLOWANCE_SPENT,
+    RETRY_ALREADY_DONE,
+    RETRY_FAILED,
+    RETRY_FREE_SPENT,
+    RETRY_MODEL_GONE,
+} from "./retry-response";
 import type { RetryResponseInput, RetryResponseResult } from "./retry-response";
 
 export const runRetryResponse = async (
@@ -18,13 +28,17 @@ export const runRetryResponse = async (
         return { status: "error", message: RETRY_FAILED };
     }
 
-    const verdict = await screenRetry(request, { userId: session.user.id });
+    const userId = session.user.id;
+    const now = new Date();
+    const entitlement = await readEntitlement(userId, now);
+
+    const verdict = await screenRetry(request, { userId, plan: entitlement.plan });
 
     if (verdict.status === "blocked") {
         return { status: "error", message: verdict.message };
     }
 
-    const catalog = await freeModelCatalog().catch((error: unknown) => {
+    const catalog = await arenaCatalog().catch((error: unknown) => {
         console.error("[chat] catalog unavailable while retrying:", error);
 
         return null;
@@ -54,6 +68,33 @@ export const runRetryResponse = async (
                 return { status: "error", message: RETRY_MODEL_GONE };
             }
 
+            const tier = listed.tier ?? ModelTier.FREE;
+            const charge = chargeFor(tier, entitlement.window, now);
+            const window =
+                charge === null
+                    ? null
+                    : charge.scope === UsageScope.BILLING
+                      ? entitlement.window
+                      : dailyWindow(now);
+
+            if (charge === null || window === null) {
+                return { status: "error", message: RETRY_ALLOWANCE_SPENT };
+            }
+
+            const reserved = await reserveOne(tx, {
+                userId,
+                charge,
+                window,
+                limit: limitFor(tier, entitlement.allowance),
+            });
+
+            if (!reserved) {
+                return {
+                    status: "error",
+                    message: isPaidTier(tier) ? RETRY_ALLOWANCE_SPENT : RETRY_FREE_SPENT,
+                };
+            }
+
             if (previous.status === ResponseStatus.STREAMING) {
                 await tx.modelResponse.update({
                     where: { id: previous.id },
@@ -69,6 +110,7 @@ export const runRetryResponse = async (
                     turnId: previous.turnId,
                     modelId: previous.modelId,
                     modelName: listed.name,
+                    tier,
                 },
                 select: { id: true, modelId: true, modelName: true },
             });
