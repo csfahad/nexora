@@ -20,9 +20,14 @@ export type RetryResponseResult =
 export const RETRY_FAILED = "We couldn't retry that just now. Try again.";
 export const RETRY_SIGNED_OUT = "Your session ended. Sign in again to retry this answer.";
 export const RETRY_MODEL_GONE =
-    "This model isn't on the free list anymore, so it can't be retried.";
+    "This model isn't in the arena anymore, so it can't be retried.";
 
 export const RETRY_ALREADY_DONE = "That answer finished, so there's nothing to retry.";
+
+export const RETRY_ALLOWANCE_SPENT =
+    "You've used this month's answers at this model's tier, so it can't be retried.";
+export const RETRY_FREE_SPENT =
+    "You've used today's free answers, so this can't be retried until they reset at midnight UTC.";
 
 export const retryResponse = createServerFn({ method: "POST" })
     .validator(retryResponseInputSchema)
