@@ -24,6 +24,7 @@ export const THREAD_TURNS_SELECT = {
                 totalTokens: true,
                 tokensPerSecond: true,
                 costUsd: true,
+                costEstimated: true,
             },
         },
     },
@@ -37,6 +38,7 @@ type MetricColumns = Readonly<{
     totalTokens: number | null;
     tokensPerSecond: unknown;
     costUsd: unknown;
+    costEstimated: boolean;
 }>;
 
 type ResponseRow = MetricColumns &
@@ -68,6 +70,7 @@ const metricsOf = (row: MetricColumns): ModelResponseMetrics | null =>
               tokensPerSecond:
                   row.tokensPerSecond === null ? null : Number(row.tokensPerSecond),
               costUsd: Number(row.costUsd),
+              costEstimated: row.costEstimated,
           };
 
 export const toThreadTurns = (rows: readonly TurnRow[]): readonly ThreadTurn[] =>
