@@ -11,6 +11,16 @@ export const CATALOG_STALE_TIME_MS = 5 * 60 * 1000;
 
 export const MAX_ARENA_MODELS = 3;
 
+export const REFERENCE_PROMPT_TOKENS = 400;
+export const REFERENCE_COMPLETION_TOKENS = 1_000;
+
+const STANDARD_MAX_USD = 0.0025;
+const ADVANCED_MAX_USD = 0.015;
+
+export const ARENA_PRICE_CEILING_USD = 0.05;
+
+export type ModelTier = "FREE" | "STANDARD" | "ADVANCED" | "FRONTIER";
+
 export type CatalogModel = Readonly<{
     id: string;
     name: string;
@@ -18,7 +28,13 @@ export type CatalogModel = Readonly<{
     contextLength: number;
     contextLabel: string;
     inputsLabel: string;
-    pricePerMTokens: string;
+    tier: ModelTier | null;
+    promptPriceUsd: number;
+    completionPriceUsd: number;
+    promptPricePerMTokens: string;
+    completionPricePerMTokens: string;
+    referenceAnswerCostUsd: number;
+    referenceAnswerCostLabel: string;
 }>;
 
 const catalogRowSchema = z.object({
@@ -32,7 +48,6 @@ const catalogRowSchema = z.object({
             tokenizer: z.string().nullish(),
         })
         .nullish(),
-    // Required: a row whose price cannot be read must not become a free model.
     pricing: z.object({ prompt: z.string(), completion: z.string() }),
 });
 
@@ -40,17 +55,15 @@ type CatalogRow = z.infer<typeof catalogRowSchema>;
 
 const payloadSchema = z.object({ data: z.array(z.unknown()) });
 
-/** `Number("")` is 0, which would read as free. Reject empty explicitly. */
 const parsePrice = (raw: string): number | null => {
     if (raw.trim().length === 0) return null;
     const value = Number(raw);
     return Number.isFinite(value) ? value : null;
 };
 
-const isFree = (pricing: CatalogRow["pricing"]): boolean =>
-    parsePrice(pricing.prompt) === 0 && parsePrice(pricing.completion) === 0;
+const isBatchVariant = (id: string): boolean => id.endsWith(":batch");
 
-const isArenaEligible = (architecture: CatalogRow["architecture"]): boolean => {
+const isComparable = (architecture: CatalogRow["architecture"]): boolean => {
     if (!architecture) return true;
 
     const outputs = architecture.output_modalities ?? [];
@@ -60,6 +73,17 @@ const isArenaEligible = (architecture: CatalogRow["architecture"]): boolean => {
 
     return emitsOnlyText && architecture.tokenizer?.trim().toLowerCase() !== "router";
 };
+
+const tierFor = (referenceCostUsd: number): ModelTier | null => {
+    if (referenceCostUsd === 0) return "FREE";
+    if (referenceCostUsd <= STANDARD_MAX_USD) return "STANDARD";
+    if (referenceCostUsd <= ADVANCED_MAX_USD) return "ADVANCED";
+    if (referenceCostUsd <= ARENA_PRICE_CEILING_USD) return "FRONTIER";
+
+    return null;
+};
+
+const usd = (value: number): string => `$${value.toFixed(4)}`;
 
 export const formatContextLabel = (tokens: number): string => {
     if (tokens <= 0) return "—";
@@ -115,10 +139,19 @@ const formatInputs = (modalities: readonly string[] | null | undefined): string 
 };
 
 const toCatalogModel = (row: CatalogRow): CatalogModel | null => {
-    if (!isFree(row.pricing)) return null;
-    if (!isArenaEligible(row.architecture)) return null;
+    if (isBatchVariant(row.id)) return null;
+    if (!isComparable(row.architecture)) return null;
 
-    const promptPrice = parsePrice(row.pricing.prompt) ?? 0;
+    const promptPrice = parsePrice(row.pricing.prompt);
+    const completionPrice = parsePrice(row.pricing.completion);
+
+    if (promptPrice === null || completionPrice === null) return null;
+    if (promptPrice < 0 || completionPrice < 0) return null;
+
+    const referenceAnswerCostUsd =
+        promptPrice * REFERENCE_PROMPT_TOKENS +
+        completionPrice * REFERENCE_COMPLETION_TOKENS;
+
     const contextLength = row.context_length ?? 0;
     const { name, provider } = parseIdentity(row.name, row.id);
 
@@ -129,7 +162,13 @@ const toCatalogModel = (row: CatalogRow): CatalogModel | null => {
         contextLength,
         contextLabel: formatContextLabel(contextLength),
         inputsLabel: formatInputs(row.architecture?.input_modalities),
-        pricePerMTokens: `$${(promptPrice * 1_000_000).toFixed(4)}`,
+        tier: tierFor(referenceAnswerCostUsd),
+        promptPriceUsd: promptPrice,
+        completionPriceUsd: completionPrice,
+        promptPricePerMTokens: usd(promptPrice * 1_000_000),
+        completionPricePerMTokens: usd(completionPrice * 1_000_000),
+        referenceAnswerCostUsd,
+        referenceAnswerCostLabel: usd(referenceAnswerCostUsd),
     };
 };
 
@@ -163,7 +202,7 @@ const fetchCatalog = async (): Promise<readonly CatalogModel[]> => {
         .sort(byContextThenId);
 
     if (models.length === 0) {
-        throw new Error("OpenRouter returned no eligible free models.");
+        throw new Error("OpenRouter returned no eligible models.");
     }
 
     return models;
@@ -173,8 +212,7 @@ type Snapshot = Readonly<{ at: number; models: readonly CatalogModel[] }>;
 
 let snapshot: Snapshot | undefined;
 
-/** Memoised for an hour; serves stale on a failed refresh, throws only with nothing to serve. */
-export const freeModelCatalog = async (): Promise<readonly CatalogModel[]> => {
+export const modelCatalog = async (): Promise<readonly CatalogModel[]> => {
     const now = Date.now();
 
     if (snapshot && now - snapshot.at < REFRESH_AFTER_MS) return snapshot.models;
@@ -192,6 +230,17 @@ export const freeModelCatalog = async (): Promise<readonly CatalogModel[]> => {
     }
 };
 
+export const isFreeModel = (model: CatalogModel): boolean => model.tier === "FREE";
+
+export const arenaModels = (catalog: readonly CatalogModel[]): readonly CatalogModel[] =>
+    catalog.filter((model) => model.tier !== null);
+
+export const arenaCatalog = async (): Promise<readonly CatalogModel[]> =>
+    arenaModels(await modelCatalog());
+
+export const freeCatalog = async (): Promise<readonly CatalogModel[]> =>
+    (await modelCatalog()).filter(isFreeModel);
+
 export const getModelCatalog = createServerFn({ method: "GET" }).handler(() =>
-    freeModelCatalog(),
+    modelCatalog(),
 );
