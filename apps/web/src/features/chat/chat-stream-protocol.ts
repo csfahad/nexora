@@ -27,6 +27,7 @@ const streamEventSchema = z.discriminatedUnion("type", [
             totalTokens: z.number().nullable(),
             tokensPerSecond: z.number().nullable(),
             costUsd: z.number(),
+            costEstimated: z.boolean(),
         }),
     }),
     z.object({ type: z.literal("error"), message: z.string() }),
