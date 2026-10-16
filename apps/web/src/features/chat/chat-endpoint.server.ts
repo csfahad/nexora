@@ -3,9 +3,11 @@ import { database } from "@/infrastructure/database";
 import { screenStream } from "@/infrastructure/arcjet";
 import { SESSION_UNAVAILABLE } from "@/infrastructure/session";
 import { readSessionState } from "@/infrastructure/session.server";
-import { CATALOG_UNAVAILABLE, freeModelCatalog } from "@/infrastructure/model-catalog";
+import { CATALOG_UNAVAILABLE, arenaCatalog } from "@/infrastructure/model-catalog";
 import { chatRequestSchema } from "./chat-stream-protocol";
 import { RESPONSE_FAILURE, failureSentence } from "@/infrastructure/response-failure";
+import { chargeForReservation, settleCharge } from "@/infrastructure/allowance.server";
+import type { Charge } from "@/infrastructure/allowance.server";
 import { failureStream, streamModelResponse } from "./stream-model-response.server";
 import { conversationFor } from "./thread-conversation";
 
@@ -18,14 +20,28 @@ const LOOKUP_FAILED = "We couldn't start that answer just now. Retry it on its o
 const problem = (message: string, status: number): Response =>
     Response.json({ message }, { status });
 
-const recordUnavailable = async (responseId: string): Promise<void> => {
+const recordUnavailable = async (
+    responseId: string,
+    settle: Readonly<{ userId: string; charge: Charge | null }>,
+): Promise<void> => {
     try {
-        await database().modelResponse.update({
-            where: { id: responseId },
-            data: {
-                status: ResponseStatus.FAILED,
-                failure: RESPONSE_FAILURE.MODEL_UNAVAILABLE,
-            },
+        await database().$transaction(async (tx) => {
+            await tx.modelResponse.update({
+                where: { id: responseId },
+                data: {
+                    status: ResponseStatus.FAILED,
+                    failure: RESPONSE_FAILURE.MODEL_UNAVAILABLE,
+                },
+            });
+
+            if (settle.charge === null) return;
+
+            await settleCharge(tx, {
+                userId: settle.userId,
+                charge: settle.charge,
+                refund: true,
+                costUsd: 0,
+            });
         });
     } catch (error) {
         console.error(`[api/chat] could not mark ${responseId} unavailable:`, error);
@@ -59,6 +75,8 @@ export const respondToChatRequest = async (request: Request): Promise<Response> 
                 modelId: true,
                 status: true,
                 turnId: true,
+                tier: true,
+                createdAt: true,
                 turn: { select: { threadId: true } },
             },
         });
@@ -67,15 +85,24 @@ export const respondToChatRequest = async (request: Request): Promise<Response> 
 
         if (row.status !== ResponseStatus.STREAMING) return problem(ANSWER_SETTLED, 409);
 
-        const catalog = await freeModelCatalog().catch((error: unknown) => {
-            console.error("[api/chat] catalog unavailable:", error);
-            return null;
-        });
+        const [catalog, charge] = await Promise.all([
+            arenaCatalog().catch((error: unknown) => {
+                console.error("[api/chat] catalog unavailable:", error);
+                return null;
+            }),
+            chargeForReservation({
+                userId,
+                tier: row.tier,
+                reservedAt: row.createdAt,
+            }),
+        ]);
 
         if (catalog === null) return problem(CATALOG_UNAVAILABLE, 503);
 
-        if (!catalog.some((model) => model.id === row.modelId)) {
-            await recordUnavailable(row.id);
+        const listed = catalog.find((model) => model.id === row.modelId);
+
+        if (listed === undefined) {
+            await recordUnavailable(row.id, { userId, charge });
             return failureStream(failureSentence(RESPONSE_FAILURE.MODEL_UNAVAILABLE));
         }
 
@@ -109,6 +136,11 @@ export const respondToChatRequest = async (request: Request): Promise<Response> 
             threadId: row.turn.threadId,
             turnId: row.turnId,
             prompt: turns[position]?.prompt ?? "",
+            prices: {
+                prompt: listed.promptPriceUsd,
+                completion: listed.completionPriceUsd,
+            },
+            charge,
         });
     } catch (error) {
         console.error("[api/chat] could not read the row to stream:", error);
