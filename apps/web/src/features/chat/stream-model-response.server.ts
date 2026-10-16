@@ -7,9 +7,11 @@ import { captureAnswerFinished, captureGeneration } from "@/infrastructure/posth
 import { encodeStreamEvent } from "./chat-stream-protocol";
 import type { ChatStreamEvent } from "./chat-stream-protocol";
 import { computeMetrics } from "./model-response-metrics";
-import type { ModelResponseMetrics } from "./model-response-metrics";
+import type { ModelPrices, ModelResponseMetrics } from "./model-response-metrics";
 import { RESPONSE_FAILURE, failureSentence } from "@/infrastructure/response-failure";
 import type { ResponseFailure } from "@/infrastructure/response-failure";
+import { earnsRefund, settleCharge } from "@/infrastructure/allowance.server";
+import type { Charge } from "@/infrastructure/allowance.server";
 
 const NDJSON_HEADERS: Readonly<Record<string, string>> = {
     "Content-Type": "application/x-ndjson; charset=utf-8",
@@ -18,6 +20,20 @@ const NDJSON_HEADERS: Readonly<Record<string, string>> = {
 };
 
 const encoder = new TextEncoder();
+
+const reportedCost = (metadata: unknown): number | null => {
+    if (typeof metadata !== "object" || metadata === null) return null;
+
+    const openrouter = (metadata as Record<string, unknown>).openrouter;
+    if (typeof openrouter !== "object" || openrouter === null) return null;
+
+    const usage = (openrouter as Record<string, unknown>).usage;
+    if (typeof usage !== "object" || usage === null) return null;
+
+    const cost = (usage as Record<string, unknown>).cost;
+
+    return typeof cost === "number" && Number.isFinite(cost) && cost >= 0 ? cost : null;
+};
 
 export const failureStream = (message: string): Response =>
     new Response(encodeStreamEvent({ type: "error", message }), {
@@ -46,25 +62,42 @@ type Outcome = Readonly<{
     metrics: ModelResponseMetrics;
 }>;
 
-const recordOutcome = async (responseId: string, outcome: Outcome): Promise<void> => {
+const recordOutcome = async (
+    input: StreamModelResponseInput,
+    outcome: Outcome,
+): Promise<void> => {
     try {
-        await database().modelResponse.update({
-            where: { id: responseId },
-            data: {
-                status: outcome.status,
-                content: outcome.content,
-                ...(outcome.failure === undefined ? {} : { failure: outcome.failure }),
-                ttftMs: outcome.metrics.ttftMs,
-                durationMs: outcome.metrics.durationMs,
-                promptTokens: outcome.metrics.promptTokens,
-                completionTokens: outcome.metrics.completionTokens,
-                totalTokens: outcome.metrics.totalTokens,
-                tokensPerSecond: outcome.metrics.tokensPerSecond,
+        await database().$transaction(async (tx) => {
+            await tx.modelResponse.update({
+                where: { id: input.responseId },
+                data: {
+                    status: outcome.status,
+                    content: outcome.content,
+                    ...(outcome.failure === undefined
+                        ? {}
+                        : { failure: outcome.failure }),
+                    ttftMs: outcome.metrics.ttftMs,
+                    durationMs: outcome.metrics.durationMs,
+                    promptTokens: outcome.metrics.promptTokens,
+                    completionTokens: outcome.metrics.completionTokens,
+                    totalTokens: outcome.metrics.totalTokens,
+                    tokensPerSecond: outcome.metrics.tokensPerSecond,
+                    costUsd: outcome.metrics.costUsd,
+                    costEstimated: outcome.metrics.costEstimated,
+                },
+            });
+
+            if (input.charge === null) return;
+
+            await settleCharge(tx, {
+                userId: input.userId,
+                charge: input.charge,
+                refund: earnsRefund(outcome.failure ?? null),
                 costUsd: outcome.metrics.costUsd,
-            },
+            });
         });
     } catch (error) {
-        console.error(`[chat] could not record response ${responseId}:`, error);
+        console.error(`[chat] could not record response ${input.responseId}:`, error);
     }
 };
 
@@ -77,6 +110,8 @@ export type StreamModelResponseInput = Readonly<{
     threadId: string;
     turnId: string;
     prompt: string;
+    prices: ModelPrices | null;
+    charge: Charge | null;
 }>;
 
 const reportFinished = (
@@ -141,6 +176,7 @@ export const streamModelResponse = (input: StreamModelResponseInput): Response =
             const measured = (
                 promptTokens: number | null,
                 completionTokens: number | null,
+                reportedCostUsd: number | null = null,
             ): ModelResponseMetrics =>
                 computeMetrics({
                     startedAt,
@@ -148,6 +184,8 @@ export const streamModelResponse = (input: StreamModelResponseInput): Response =
                     finishedAt: Date.now(),
                     promptTokens,
                     completionTokens,
+                    reportedCostUsd,
+                    prices: input.prices,
                 });
 
             try {
@@ -169,13 +207,18 @@ export const streamModelResponse = (input: StreamModelResponseInput): Response =
                     if (part.type === "error") throw part.error;
                 }
 
-                const usage = await result.usage;
+                const [usage, providerMetadata] = await Promise.all([
+                    result.usage,
+                    result.providerMetadata,
+                ]);
+
                 const metrics = measured(
                     usage.inputTokens ?? null,
                     usage.outputTokens ?? null,
+                    reportedCost(providerMetadata),
                 );
 
-                await recordOutcome(input.responseId, {
+                await recordOutcome(input, {
                     status: ResponseStatus.COMPLETE,
                     content: text,
                     metrics,
@@ -201,7 +244,7 @@ export const streamModelResponse = (input: StreamModelResponseInput): Response =
                     );
                 }
 
-                await recordOutcome(input.responseId, {
+                await recordOutcome(input, {
                     status: ResponseStatus.FAILED,
                     content: text,
                     failure,
