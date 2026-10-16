@@ -32,7 +32,9 @@ export type StartTurnResult =
 export const TURN_SAVE_FAILED = "We couldn't start that turn just now. Send it again.";
 export const TURN_SIGNED_OUT = "Your session ended. Sign in again to send this prompt.";
 export const TURN_MODELS_GONE =
-    "None of those models are on the free list anymore. Pick another and try again.";
+    "None of those models are in the arena anymore. Pick another and try again.";
+export const TURN_ALLOWANCE_SPENT =
+    "You've used your answers for every tier in this turn. Pick a model from a tier you have left, or see your plan.";
 export const THREAD_NOT_FOUND = "We couldn't find that thread.";
 
 export const startTurn = createServerFn({ method: "POST" })
