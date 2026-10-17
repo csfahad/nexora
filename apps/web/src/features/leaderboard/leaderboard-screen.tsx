@@ -1,22 +1,45 @@
-import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { buttonClasses } from "@/components/ui/button";
 import { ModelAvatar } from "@/components/ui/model-avatar";
+import { TierChip } from "@/components/ui/tier-chip";
+import { ViewToggle } from "@/components/ui/view-toggle";
+import type { ViewOption } from "@/components/ui/view-toggle";
 import { winRateOf } from "./standings";
-import type { RankedRow, Standings, StandingsView } from "./standings";
-import { ViewToggle } from "./view-toggle";
-import type { ViewOption } from "./view-toggle";
+import type {
+    PricingTab,
+    RankedRow,
+    ScopeStandings,
+    Standings,
+    StandingsView,
+} from "./standings";
 import { VoteVolumeNotice } from "./vote-volume-notice";
 
-type View = "global" | "personal";
+type Scope = "global" | "personal";
 
-const VIEWS: readonly ViewOption<View>[] = [
+const SCOPES: readonly ViewOption<Scope>[] = [
     { value: "global", label: "Global", panelId: "leaderboard-global" },
     { value: "personal", label: "Personal", panelId: "leaderboard-personal" },
 ];
 
-export const LeaderboardScreen = ({ standings }: { readonly standings: Standings }) => {
-    const [view, setView] = useState<View>("global");
+const PRICING: readonly ViewOption<PricingTab>[] = [
+    { value: "free", label: "Free" },
+    { value: "paid", label: "Paid" },
+];
+
+export type LeaderboardSearch = Readonly<{ scope: Scope; pricing: PricingTab }>;
+
+export const LeaderboardScreen = ({
+    standings,
+    scope,
+    pricing,
+    onChange,
+}: {
+    readonly standings: Standings;
+    readonly scope: Scope;
+    readonly pricing: PricingTab;
+    readonly onChange: (next: LeaderboardSearch) => void;
+}) => {
+    const panelId = `leaderboard-${scope}`;
 
     return (
         <div className="screen screen-scroll">
@@ -28,86 +51,133 @@ export const LeaderboardScreen = ({ standings }: { readonly standings: Standings
                     </p>
                 </header>
 
-                <div className="mt-6">
+                <div className="mt-6 flex flex-wrap items-center gap-3">
                     <ViewToggle
                         label="Leaderboard scope"
-                        options={VIEWS}
-                        value={view}
-                        onChange={setView}
+                        options={SCOPES}
+                        value={scope}
+                        onChange={(next) => onChange({ scope: next, pricing })}
+                    />
+                    <ViewToggle
+                        label="Model pricing"
+                        mode="radio"
+                        options={PRICING}
+                        value={pricing}
+                        onChange={(next) => onChange({ scope, pricing: next })}
                     />
                 </div>
 
-                {view === "global" ? (
-                    <section
-                        id="leaderboard-global"
-                        role="tabpanel"
-                        aria-labelledby="leaderboard-global-tab"
-                        className="mt-6"
-                    >
-                        <div className="flex flex-col gap-1">
-                            <h2 className="font-heading text-lg font-semibold">
-                                Global ranking
-                            </h2>
-                            <p className="text-muted-foreground text-sm">
-                                Every vote, every user, ranked by real wins.
-                            </p>
-                        </div>
-
-                        <Scope view={standings.global} scope="global" />
-                    </section>
-                ) : (
-                    <section
-                        id="leaderboard-personal"
-                        role="tabpanel"
-                        aria-labelledby="leaderboard-personal-tab"
-                        className="mt-6"
-                    >
-                        {standings.personal === null ? (
-                            <SignedOutPersonal />
-                        ) : standings.personal.votes === 0 ? (
-                            <EmptyPersonal />
-                        ) : (
-                            <>
-                                <div className="flex flex-col gap-1">
-                                    <h2 className="font-heading text-lg font-semibold">
-                                        Your ranking
-                                    </h2>
-                                    <p className="text-muted-foreground text-sm">
-                                        Built from the votes you cast, and nobody
-                                        else&rsquo;s.
-                                    </p>
-                                </div>
-
-                                <Scope view={standings.personal} scope="personal" />
-                            </>
-                        )}
-                    </section>
-                )}
+                <section
+                    id={panelId}
+                    role="tabpanel"
+                    aria-labelledby={`${panelId}-tab`}
+                    className="mt-6"
+                >
+                    {scope === "global" ? (
+                        <GlobalScope views={standings.global} pricing={pricing} />
+                    ) : (
+                        <PersonalScope views={standings.personal} pricing={pricing} />
+                    )}
+                </section>
             </div>
         </div>
+    );
+};
+
+const GlobalScope = ({
+    views,
+    pricing,
+}: {
+    readonly views: ScopeStandings;
+    readonly pricing: PricingTab;
+}) => (
+    <>
+        <div className="flex flex-col gap-1">
+            <h2 className="font-heading text-lg font-semibold">
+                {pricing === "free" ? "Free models" : "Paid models"}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+                Every vote, every user, ranked by real wins.
+            </p>
+        </div>
+
+        <Scope view={views[pricing]} scope="global" pricing={pricing} />
+    </>
+);
+
+const PersonalScope = ({
+    views,
+    pricing,
+}: {
+    readonly views: ScopeStandings | null;
+    readonly pricing: PricingTab;
+}) => {
+    if (views === null) return <SignedOutPersonal />;
+
+    const view = views[pricing];
+
+    if (view.votes === 0) {
+        return pricing === "paid" ? <EmptyPersonalPaid /> : <EmptyPersonal />;
+    }
+
+    return (
+        <>
+            <div className="flex flex-col gap-1">
+                <h2 className="font-heading text-lg font-semibold">
+                    {pricing === "free"
+                        ? "Your free-model record"
+                        : "Your paid-model record"}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                    Built from the votes you cast, and nobody else&rsquo;s.
+                </p>
+            </div>
+
+            <Scope view={view} scope="personal" pricing={pricing} />
+        </>
     );
 };
 
 const Scope = ({
     view,
     scope,
+    pricing,
 }: {
     readonly view: StandingsView;
-    readonly scope: View;
+    readonly scope: Scope;
+    readonly pricing: PricingTab;
 }) =>
     view.rows.length === 0 ? (
-        <NoModelsYet />
+        <NoModelsYet pricing={pricing} />
     ) : (
         <>
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col gap-3">
                 <VoteVolumeNotice votes={view.votes} scope={scope} />
+                <CrossTabNote pricing={pricing} />
             </div>
 
-            <StandingsTable rows={view.rows} />
+            <StandingsTable rows={view.rows} pricing={pricing} />
         </>
     );
 
-const StandingsTable = ({ rows }: { readonly rows: readonly RankedRow[] }) => (
+const CrossTabNote = ({ pricing }: { readonly pricing: PricingTab }) => (
+    <p className="text-muted-foreground text-2xs leading-relaxed">
+        A prompt can be sent to free and paid models together, so some battles here were
+        decided by a model on the{" "}
+        <strong className="text-foreground font-medium">
+            {pricing === "free" ? "Paid" : "Free"}
+        </strong>{" "}
+        tab.
+    </p>
+);
+
+const StandingsTable = ({
+    rows,
+    pricing,
+}: {
+    readonly rows: readonly RankedRow[];
+    readonly pricing: PricingTab;
+}) => (
     <div className="border-border mt-4 overflow-x-auto rounded-xl border">
         <table className="min-w-184 w-full border-collapse text-left">
             <thead>
@@ -134,6 +204,7 @@ const StandingsTable = ({ rows }: { readonly rows: readonly RankedRow[] }) => (
                                 <span className="text-foreground font-medium">
                                     {row.modelName}
                                 </span>
+                                {pricing === "paid" && <TierChip tier={row.tier} />}
                             </div>
                         </td>
                         <td className="px-3 py-3.5">
@@ -200,12 +271,13 @@ const Absent = ({ label }: { readonly label: string }) => (
     </>
 );
 
-const NoModelsYet = () => (
+const NoModelsYet = ({ pricing }: { readonly pricing: PricingTab }) => (
     <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
         <h3 className="font-heading text-lg font-semibold">Nothing measured yet</h3>
         <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
-            Send a prompt in the arena and the models that answer will appear here with
-            their real numbers.
+            {pricing === "free"
+                ? "Send a prompt in the arena and the models that answer will appear here with their real numbers."
+                : "No paid model has answered a voted prompt yet. Once one does, its real record appears here."}
         </p>
         <Link to="/" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
             Go to the arena
@@ -222,6 +294,24 @@ const EmptyPersonal = () => (
         </p>
         <Link to="/" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
             Go to the arena
+        </Link>
+    </div>
+);
+
+const EmptyPersonalPaid = () => (
+    <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
+        <h2 className="font-heading text-lg font-semibold">
+            No paid-model votes from you yet
+        </h2>
+        <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
+            This fills in once you vote on a turn that included a paid model. Your
+            free-model record is on the Free tab.
+        </p>
+        <Link
+            to="/models"
+            className={buttonClasses({ variant: "outline", class: "mt-5" })}
+        >
+            Browse paid models
         </Link>
     </div>
 );
