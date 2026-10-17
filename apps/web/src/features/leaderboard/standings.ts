@@ -1,10 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { ModelTier } from "@/infrastructure/model-catalog";
 
 export const MEANINGFUL_VOTE_COUNT = 100;
+
+export type PricingTab = "free" | "paid";
+
+export const PRICING_TABS: readonly PricingTab[] = ["free", "paid"];
+
+export const pricingTabLabel = (tab: PricingTab): string =>
+    tab === "free" ? "Free" : "Paid";
 
 export type StandingRow = Readonly<{
     modelId: string;
     modelName: string;
+    tier: ModelTier;
     wins: number;
     battles: number;
     ttftMs: number | null;
@@ -18,9 +27,11 @@ export type StandingsView = Readonly<{
     votes: number;
 }>;
 
+export type ScopeStandings = Readonly<Record<PricingTab, StandingsView>>;
+
 export type Standings = Readonly<{
-    global: StandingsView;
-    personal: StandingsView | null;
+    global: ScopeStandings;
+    personal: ScopeStandings | null;
 }>;
 
 export type GetStandingsResult =
