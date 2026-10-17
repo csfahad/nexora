@@ -1,0 +1,306 @@
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { IconArrowRight, IconCheck, IconSparkles, IconX } from "@tabler/icons-react";
+import { Plan } from "@/generated/prisma/enums";
+import type { BillingInterval } from "@/generated/prisma/enums";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { TierChip } from "@/components/ui/tier-chip";
+import { ViewToggle } from "@/components/ui/view-toggle";
+import { TIER_WORD, useAllowance } from "@/infrastructure/entitlement";
+import {
+    CEILING_LADDER,
+    FREE_ANSWERS_PER_DAY,
+    PAID_PLANS,
+    PAID_TIERS,
+    PLANS,
+    annualSavingUsd,
+    priceFor,
+} from "@/infrastructure/plans";
+import type { PlanSpec } from "@/infrastructure/plans";
+
+const INTERVALS: readonly Readonly<{ value: BillingInterval; label: string }>[] = [
+    { value: "MONTHLY", label: "Monthly" },
+    { value: "ANNUAL", label: "Annual" },
+];
+
+const FEATURED = Plan.PRO;
+
+const TAGLINE: Readonly<Record<Plan, string>> = {
+    [Plan.FREE]: "Try the arena on free models",
+    [Plan.PRO]: "Every model, measured",
+    [Plan.PRO_PLUS]: "For comparison work that runs daily",
+    [Plan.MAX]: "For reading models all month",
+};
+
+const count = (value: number): string => value.toLocaleString("en-US");
+
+const money = (value: number): string =>
+    `$${value.toLocaleString("en-US", {
+        minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+        maximumFractionDigits: 2,
+    })}`;
+
+const perAnswer = (value: number): string =>
+    `$${value.toLocaleString("en-US", {
+        minimumFractionDigits: 4,
+        maximumFractionDigits: 4,
+    })}`;
+
+const roundedTotal = (value: number): string =>
+    (Math.round(value / 100) * 100).toLocaleString("en-US");
+
+const Feature = ({
+    children,
+    absent = false,
+}: {
+    readonly children: React.ReactNode;
+    readonly absent?: boolean;
+}) => (
+    <li className="plan-feature" data-absent={absent || undefined}>
+        {absent ? (
+            <IconX aria-hidden stroke={2} />
+        ) : (
+            <IconCheck aria-hidden stroke={2.25} />
+        )}
+        <span>{children}</span>
+    </li>
+);
+
+const PlanColumn = ({
+    name,
+    price,
+    qualifier,
+    tagline,
+    cta,
+    featured = false,
+    current = false,
+    children,
+}: {
+    readonly name: string;
+    readonly price: string;
+    readonly qualifier: string;
+    readonly tagline: string;
+    readonly cta: string;
+    readonly featured?: boolean;
+    readonly current?: boolean;
+    readonly children: React.ReactNode;
+}) => (
+    <article className="plan-col" data-featured={featured || undefined}>
+        <div className="plan-band plan-band--head">
+            {featured && (
+                <p className="plan-tab">
+                    <IconSparkles aria-hidden stroke={2} />
+                    Most answers per dollar
+                </p>
+            )}
+
+            <h3 className="plan-title">{name}</h3>
+            <p className="plan-figure">
+                {price} <span className="plan-qualifier">{qualifier}</span>
+            </p>
+            <p className="plan-tagline">{tagline}</p>
+        </div>
+
+        <div className="plan-band--cta">
+            <button
+                type="button"
+                className="plan-cta"
+                data-featured={featured || undefined}
+                disabled
+            >
+                {current ? "Your current plan" : cta}
+                <IconArrowRight aria-hidden stroke={2} />
+            </button>
+        </div>
+
+        <div className="plan-band plan-band--included">
+            <p className="label-meta plan-included-label">What&rsquo;s included</p>
+            <ul className="plan-features">{children}</ul>
+        </div>
+    </article>
+);
+
+const PaidColumn = ({
+    spec,
+    interval,
+    current,
+}: {
+    readonly spec: PlanSpec;
+    readonly interval: BillingInterval;
+    readonly current: boolean;
+}) => {
+    const annual = interval === "ANNUAL";
+    const saving = annualSavingUsd(spec);
+    const total = PAID_TIERS.reduce((sum, tier) => sum + spec.allowance[tier], 0);
+
+    return (
+        <PlanColumn
+            name={spec.name}
+            price={money(priceFor(spec, interval))}
+            qualifier={annual ? "/year" : "/month"}
+            tagline={
+                annual && saving > 0
+                    ? `${TAGLINE[spec.plan]} · ${money(saving)} saved`
+                    : TAGLINE[spec.plan]
+            }
+            cta={`Choose ${spec.name}`}
+            featured={spec.plan === FEATURED}
+            current={current}
+        >
+            <Feature>
+                About <span className="numeric">{roundedTotal(total)}</span> answers a
+                month
+            </Feature>
+            {PAID_TIERS.map((tier) => (
+                <Feature key={tier}>
+                    <span className="numeric">{count(spec.allowance[tier])}</span>{" "}
+                    {TIER_WORD[tier]} answers
+                </Feature>
+            ))}
+            <Feature>Every free model in the catalog</Feature>
+            <Feature>
+                <span className="numeric">{count(spec.hourlyCalls)}</span> answers an hour
+            </Feature>
+            <Feature>Real measured cost on every answer</Feature>
+            {annual && <Feature>Billed yearly, allowance refills monthly</Feature>}
+        </PlanColumn>
+    );
+};
+
+const FreeColumn = ({ current }: { readonly current: boolean }) => (
+    <PlanColumn
+        name={PLANS[Plan.FREE].name}
+        price="$0"
+        qualifier="/month"
+        tagline={TAGLINE[Plan.FREE]}
+        cta="Start free"
+        current={current}
+    >
+        <Feature>
+            <span className="numeric">{count(FREE_ANSWERS_PER_DAY)}</span> answers a day
+        </Feature>
+        <Feature>Every free model in the catalog</Feature>
+        <Feature>
+            <span className="numeric">{count(PLANS[Plan.FREE].hourlyCalls)}</span> answers
+            an hour
+        </Feature>
+        <Feature>Real measured cost on every answer</Feature>
+        {PAID_TIERS.map((tier) => (
+            <Feature key={tier} absent>
+                No {TIER_WORD[tier]} answers
+            </Feature>
+        ))}
+    </PlanColumn>
+);
+
+export const PlansScreen = () => {
+    const [interval, setInterval] = useState<BillingInterval>("MONTHLY");
+    const view = useAllowance();
+
+    return (
+        <div className="screen">
+            <header className="border-border flex h-14 shrink-0 items-center gap-3 border-b px-4">
+                <Link
+                    to="/"
+                    aria-label="Nexora — go to arena"
+                    className="font-heading text-foreground shrink-0 rounded-md text-lg font-semibold tracking-tight"
+                >
+                    Nexora
+                </Link>
+
+                <span aria-hidden className="bg-border h-5 w-px shrink-0" />
+
+                <h1 className="text-foreground min-w-0 flex-1 truncate text-sm font-medium">
+                    Plans
+                </h1>
+
+                <ThemeToggle className="hidden shrink-0 sm:inline-flex" />
+            </header>
+
+            <div className="screen-scroll min-h-0 flex-1">
+                <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+                    <div className="flex w-full flex-col items-center gap-4 text-center">
+                        <h2 className="font-heading w-full max-w-[28ch] text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+                            A plan for however hard you compare.
+                        </h2>
+                        <p className="text-muted-foreground w-full max-w-[58ch] text-pretty">
+                            Every plan buys a monthly allowance of answers in each price
+                            tier. No credits, no invented currency — the allowance counts
+                            answers and the cost column counts dollars.
+                        </p>
+
+                        <div className="mt-2 flex flex-col items-center gap-2">
+                            <ViewToggle
+                                mode="radio"
+                                label="Billing interval"
+                                options={INTERVALS}
+                                value={interval}
+                                onChange={setInterval}
+                            />
+                            <p className="text-muted-foreground text-sm">
+                                Annual is two months free on every paid plan.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="plan-panel mt-14">
+                        <FreeColumn current={view.metered && view.plan === Plan.FREE} />
+
+                        {PAID_PLANS.map((spec) => (
+                            <PaidColumn
+                                key={spec.plan}
+                                spec={spec}
+                                interval={interval}
+                                current={view.metered && view.plan === spec.plan}
+                            />
+                        ))}
+                    </div>
+
+                    <p
+                        className="text-muted-foreground mt-6 text-center text-sm"
+                        role="note"
+                    >
+                        Checkout opens when billing goes live. Nothing on this page can
+                        charge you yet.
+                    </p>
+
+                    <section
+                        aria-labelledby="ceiling-heading"
+                        className="mt-16 flex flex-col gap-4"
+                    >
+                        <h2 id="ceiling-heading" className="label-meta">
+                            What one answer costs at each tier&rsquo;s ceiling
+                        </h2>
+
+                        <ul className="grid list-none grid-cols-1 gap-4 sm:grid-cols-3">
+                            {CEILING_LADDER.map(({ tier, usd }) => (
+                                <li
+                                    key={tier}
+                                    className="border-border bg-card flex items-center justify-between gap-3 rounded-xl border px-5 py-4"
+                                >
+                                    <TierChip tier={tier} />
+                                    <span className="text-foreground numeric text-sm">
+                                        {perAnswer(usd)}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div className="mt-1 grid gap-x-10 gap-y-3 lg:grid-cols-2">
+                            <p className="text-muted-foreground text-pretty text-sm">
+                                An allowance is priced against the dearest model its tier
+                                can hold, so these are ceilings rather than averages. Most
+                                models sit well under them.
+                            </p>
+                            <p className="text-muted-foreground text-pretty text-sm">
+                                Every answer in the arena shows what it actually cost, to
+                                four decimal places. A free answer reads $0.0000, because
+                                that is the real measured number.
+                            </p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    );
+};
