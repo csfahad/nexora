@@ -3,6 +3,7 @@ import { IconCheck, IconChevronDown } from "@tabler/icons-react";
 import { buttonClasses } from "@/components/ui/button";
 import { ModelAvatar } from "@/components/ui/model-avatar";
 import { ModelStack } from "@/components/ui/model-stack";
+import { TierChip } from "@/components/ui/tier-chip";
 import {
     Popover,
     PopoverContent,
@@ -14,6 +15,8 @@ import {
 import { cn } from "@/lib/utils";
 import { MAX_ARENA_MODELS } from "@/infrastructure/model-catalog";
 import type { CatalogModel } from "@/infrastructure/model-catalog";
+import { useAllowance } from "@/infrastructure/entitlement";
+import { blockedReason, sendLabel } from "./send-cost";
 
 export const ModelPicker = ({
     models,
@@ -26,6 +29,7 @@ export const ModelPicker = ({
 }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const rowRefs = useRef<Array<HTMLButtonElement | null>>([]);
+    const allowance = useAllowance();
 
     const selected = selectedIds
         .map((id) => models.find((model) => model.id === id))
@@ -97,7 +101,10 @@ export const ModelPicker = ({
                         "group/trigger min-w-0 max-w-full pl-1.5",
                     )}
                 >
-                    <ModelStack models={selected} />
+                    <ModelStack
+                        models={selected}
+                        label={sendLabel(allowance, selected)}
+                    />
                     <IconChevronDown
                         aria-hidden
                         stroke={1.75}
@@ -132,7 +139,9 @@ export const ModelPicker = ({
                     >
                         {models.map((model, index) => {
                             const isSelected = selectedIds.includes(model.id);
-                            const isBlocked = isSelected ? atFloor : atCap;
+                            const blocked = blockedReason(allowance, model);
+                            const capped = isSelected ? atFloor : atCap;
+                            const isBlocked = capped || (!isSelected && blocked !== null);
 
                             return (
                                 <button
@@ -145,7 +154,10 @@ export const ModelPicker = ({
                                     aria-selected={isSelected}
                                     aria-disabled={isBlocked || undefined}
                                     tabIndex={index === activeIndex ? 0 : -1}
-                                    onClick={() => toggle(model.id)}
+                                    onClick={() => {
+                                        if (blocked !== null && !isSelected) return;
+                                        toggle(model.id);
+                                    }}
                                     onKeyDown={(event) => handleKeyDown(event, index)}
                                     className={cn(
                                         cnRow,
@@ -162,13 +174,11 @@ export const ModelPicker = ({
                                             {model.name}
                                         </span>
                                         <span className="text-muted-foreground block truncate text-xs">
-                                            {model.provider}
+                                            {blocked ?? model.provider}
                                         </span>
                                     </span>
 
-                                    <span className="numeric text-muted-foreground shrink-0 text-xs">
-                                        {model.contextLabel}
-                                    </span>
+                                    <TierChip tier={model.tier} />
 
                                     <span className="flex size-4 shrink-0 items-center justify-center">
                                         {isSelected && (
