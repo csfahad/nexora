@@ -3,9 +3,11 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { IconAlertTriangle } from "@tabler/icons-react";
 import type { CatalogModel } from "@/infrastructure/model-catalog";
 import { SESSION_UNAVAILABLE, useSessionState } from "@/infrastructure/session";
+import { useAllowance } from "@/infrastructure/entitlement";
 import { defaultTrio } from "./default-trio";
 import { ModelPicker } from "./model-picker";
 import { PromptComposer } from "./prompt-composer";
+import { canSend } from "./send-cost";
 
 export const ArenaScreen = ({
     models,
@@ -19,12 +21,16 @@ export const ArenaScreen = ({
     ) => Promise<boolean> | boolean;
     readonly notice?: string | null;
 }) => {
+    const session = useSessionState();
+    const allowance = useAllowance();
+    const navigate = useNavigate();
+
     const [selectedIds, setSelectedIds] = useState<readonly string[]>(() =>
-        defaultTrio(models).map((model) => model.id),
+        defaultTrio(models, undefined, (model) => canSend(allowance, model)).map(
+            (model) => model.id,
+        ),
     );
     const [sending, setSending] = useState(false);
-    const session = useSessionState();
-    const navigate = useNavigate();
 
     const submit = async (prompt: string): Promise<boolean> => {
         if (session.status !== "signed-in") {
