@@ -15,6 +15,7 @@ import { AppShell } from "@/features/shell/app-shell";
 import { ShellChromeProvider } from "@/features/shell/shell-chrome";
 import { getThreadHistory } from "@/features/shell/thread-history";
 import { usePostHogViewer } from "@/infrastructure/posthog-browser";
+import { getAllowance } from "@/infrastructure/entitlement";
 import { getSessionState } from "@/infrastructure/session";
 import appCss from "../styles.css?url";
 
@@ -33,12 +34,13 @@ export const Route = createRootRoute({
         links: [{ rel: "stylesheet", href: appCss }],
     }),
     loader: async () => {
-        const [session, threadGroups] = await Promise.all([
+        const [session, threadGroups, allowance] = await Promise.all([
             getSessionState(),
             getThreadHistory(),
+            getAllowance(),
         ]);
 
-        return { session, threadGroups };
+        return { session, threadGroups, allowance };
     },
     staleTime: Number.POSITIVE_INFINITY,
     shellComponent: RootDocument,
@@ -50,7 +52,7 @@ function RootLayout() {
     const { threadGroups } = Route.useLoaderData();
     const pathname = useRouterState({ select: (state) => state.location.pathname });
 
-    if (pathname.startsWith("/share/")) {
+    if (pathname.startsWith("/share/") || pathname === "/plans") {
         return <Outlet />;
     }
 

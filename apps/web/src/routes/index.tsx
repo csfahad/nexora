@@ -5,11 +5,12 @@ import { useStartTurn } from "@/features/chat/use-start-turn";
 import {
     CATALOG_STALE_TIME_MS,
     CATALOG_UNAVAILABLE,
+    arenaModels,
     getModelCatalog,
 } from "@/infrastructure/model-catalog";
 
 export const Route = createFileRoute("/")({
-    loader: () => getModelCatalog(),
+    loader: async () => arenaModels(await getModelCatalog()),
     staleTime: CATALOG_STALE_TIME_MS,
     component: ArenaRoute,
     errorComponent: () => <LoaderErrorNotice message={CATALOG_UNAVAILABLE} />,
