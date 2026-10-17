@@ -2,7 +2,13 @@ import { ModelAvatar } from "@/components/ui/model-avatar";
 
 export type StackedModel = Readonly<{ id: string; name: string }>;
 
-export const ModelStack = ({ models }: { readonly models: readonly StackedModel[] }) => (
+export const ModelStack = ({
+    models,
+    label,
+}: {
+    readonly models: readonly StackedModel[];
+    readonly label?: string;
+}) => (
     <>
         <span aria-hidden className="model-stack">
             {models.map((model) => (
@@ -11,7 +17,7 @@ export const ModelStack = ({ models }: { readonly models: readonly StackedModel[
         </span>
 
         <span className="truncate">
-            {models.length} {models.length === 1 ? "model" : "models"}
+            {label ?? `${models.length} ${models.length === 1 ? "model" : "models"}`}
         </span>
     </>
 );
