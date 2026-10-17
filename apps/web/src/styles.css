@@ -1016,3 +1016,480 @@
     color: var(--foreground);
     font-weight: 600;
 }
+
+/* A model's price tier (feature 10). This is a fact about the model, not a
+ * state of a result and not something you operate, so it takes the same
+ * metadata voice as .share-badge and none of the three meaning colours: rust
+ * means "you operate this", green means won, red means failed.
+ *
+ * The four tiers are told apart by a neutral ladder — quiet, then outlined,
+ * then inverted — rather than by hue. Partly because every usable hue is
+ * already spoken for, and partly because a colour ramp across price would
+ * imply dearer is better, which is the one claim this product exists to test. */
+.tier-chip {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    margin: 0;
+    padding: 0.0625rem 0.4375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    font-size: var(--text-2xs);
+    line-height: 1.45;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Free: the least interesting thing about a free model is its tier. */
+.tier-chip[data-tier="FREE"] {
+    background-color: transparent;
+}
+
+.tier-chip[data-tier="STANDARD"] {
+    color: var(--foreground);
+}
+
+.tier-chip[data-tier="ADVANCED"] {
+    border-color: var(--input);
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.tier-chip[data-tier="FRONTIER"] {
+    border-color: var(--foreground);
+    background-color: var(--foreground);
+    color: var(--background);
+    font-weight: 600;
+}
+
+/* Above the arena price ceiling: in the catalog, not selectable. A dashed edge
+ * is the second signal beyond the words, so the state does not rest on colour
+ * it is not allowed to use anyway. */
+.tier-chip[data-tier="none"] {
+    border-style: dashed;
+    background-color: transparent;
+}
+
+/* The shared text input. The base layer already owns the focus ring, the caret
+ * and the placeholder tier, so this is only the surface and the functional
+ * 3:1 edge that says "this is a control".
+ *
+ * `min-height` rather than taller padding, because this control sits on a row
+ * beside `ViewToggle` and the two have to measure the same. The toggle is 44px
+ * (1px border + 4px pad + a 34px button) and nothing derives that from a token,
+ * so it is stated here as a number with its arithmetic rather than guessed at.
+ * An input centres its own text vertically, so the padding below stays as the
+ * floor for when the text is larger than the box. */
+.field-input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.4375rem 0.75rem;
+    border: 1px solid var(--input);
+    border-radius: var(--radius-md);
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Leaves room for a leading icon. This is a class and not a `pl-8` utility on
+ * the element for the reason `.menu-row` and `.price-value` already document:
+ * Tailwind utilities live in a cascade layer, so `.field-input`'s own `padding`
+ * shorthand outranks any padding utility on the same element. Written as a
+ * utility it silently did nothing and the magnifier sat on top of the first
+ * letter of the placeholder.
+ *
+ * 2.125rem = the icon's 0.625rem offset + its 1rem width + 0.5rem of air. */
+.field-input--icon {
+    padding-left: 2.125rem;
+}
+
+/* Both sides of a price pair on one line. The per-answer figure above it is the
+ * number a reader can actually reason about; these two are the arithmetic
+ * behind it, so they sit in the metadata tier.
+ *
+ * The values own their own colour through a class rather than a bare `span`
+ * selector: Tailwind utilities live in a cascade layer, so `.price-pair span`
+ * would outrank a `text-muted-foreground` utility on the same element and the
+ * tier would quietly stop applying. */
+.price-pair {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3125rem;
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.02em;
+}
+
+.price-value {
+    color: var(--foreground);
+}
+
+/* ---------------------------------------------------------------------------
+ * The allowance meter (feature 11). A readout, not a control, so it borrows the
+ * win-rate bar's exemption for rust-as-fill and nothing else from the accent.
+ *
+ * It cannot be a green/amber/red gauge: green means won and red means failed in
+ * this app and neither is spent anywhere else, so "running low" has no colour
+ * available to it. That is the right constraint rather than a limitation worked
+ * around — the number is the signal, the bar only makes it glanceable, and an
+ * exhausted tier says so in words.
+ *
+ * The bar fills with what is LEFT, not what is spent, so it depletes the way a
+ * fuel gauge does. A bar that grew as the allowance shrank would read backwards.
+ * ------------------------------------------------------------------------- */
+
+.meter-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.meter-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.meter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.meter-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: var(--text-2xs);
+}
+
+.meter-tier {
+    color: var(--foreground);
+    letter-spacing: 0.02em;
+}
+
+.meter-left {
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+
+/* An exhausted counter is stated, not coloured. Weight is the second signal
+ * beside the changed words, since the bar at zero and a bar at one look alike
+ * at this size. */
+.meter-row[data-empty="true"] .meter-left {
+    color: var(--foreground);
+    font-weight: 600;
+}
+
+.meter-track {
+    height: 0.1875rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background-color: var(--input);
+}
+
+.meter-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background-color: var(--primary);
+}
+
+.meter-foot {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.02em;
+    text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------------------
+ * /plans (feature 11). A standalone page with its own frame, not the owner's
+ * app shell — it is a pricing page rather than a tool, so it gets the screen to
+ * itself the way a shared thread does.
+ *
+ * The plans are one joined block rather than four floating cards: a single
+ * bordered panel split by hairlines, with three horizontal bands that line up
+ * across every column — header, call to action, what's included. The alignment
+ * is what makes four plans comparable at a glance, and it is done with CSS
+ * subgrid so the bands track the tallest column instead of being guessed at
+ * with matching min-heights that drift the moment a tagline changes length.
+ *
+ * The featured plan is marked by a tab that sits above the panel, a raised
+ * surface, and the rust fill on its own call to action. Rust on a button is an
+ * allowed use ("you operate this"); the two other meaning colours are not
+ * available here at all, since green means winner and red means error.
+ *
+ * No margin arithmetic lives on this page. An earlier build published our
+ * inference cost and gross margin per plan, which answered a question no buyer
+ * asked and invited a price objection in exchange for nothing. What the
+ * product's honesty rule actually requires is the measured cost of every real
+ * answer in the arena, and the per-answer tier ceilings below — both kept.
+ * ------------------------------------------------------------------------- */
+
+.plan-panel {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* Header, call to action, included — the three bands every column shares. */
+    grid-template-rows: auto auto auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background-color: var(--card);
+}
+
+.plan-col {
+    display: grid;
+    grid-row: 1 / -1;
+    grid-template-rows: subgrid;
+    position: relative;
+}
+
+.plan-col + .plan-col {
+    border-left: 1px solid var(--border);
+}
+
+/* The panel's own corners have to be carried by the end columns, because the
+ * featured tab has to escape the top edge and `overflow: hidden` would cut it. */
+.plan-col:first-child .plan-band--included {
+    border-bottom-left-radius: var(--radius-xl);
+}
+
+.plan-col:last-child .plan-band--included {
+    border-bottom-right-radius: var(--radius-xl);
+}
+
+/* The featured column. A raised surface, not a hue. */
+.plan-col[data-featured="true"] {
+    background-color: var(--muted);
+}
+
+.plan-col[data-featured="true"]:first-child .plan-band--head {
+    border-top-left-radius: var(--radius-xl);
+}
+
+.plan-col[data-featured="true"]:last-child .plan-band--head {
+    border-top-right-radius: var(--radius-xl);
+}
+
+/* Sits above the panel, overlapping its border by a pixel so the two meet. */
+.plan-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3125rem;
+    position: absolute;
+    inset-inline: -1px;
+    bottom: calc(100% + 1px);
+    margin: 0;
+    padding: 0.375rem 0.5rem;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.plan-tab > svg {
+    width: 0.8125rem;
+    height: 0.8125rem;
+}
+
+.plan-band {
+    padding: 1.5rem;
+}
+
+.plan-band--cta {
+    padding: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.plan-title {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.plan-figure {
+    display: block;
+    margin: 0.625rem 0 0;
+    color: var(--foreground);
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+}
+
+.plan-qualifier {
+    color: var(--muted-foreground);
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+.plan-tagline {
+    margin: 0.5rem 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    text-wrap: pretty;
+}
+
+/* The call to action is a full-width row with the label left and the arrow
+ * right, not a pill inside a padded box — the band is the button. */
+.plan-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.9375rem 1.5rem;
+    border: 0;
+    background-color: transparent;
+    color: var(--foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+}
+
+.plan-cta > svg {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    color: var(--muted-foreground);
+}
+
+.plan-cta[data-featured="true"] {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
+.plan-cta[data-featured="true"] > svg {
+    color: var(--primary-foreground);
+}
+
+.plan-cta:disabled {
+    cursor: not-allowed;
+}
+
+.plan-included-label {
+    margin: 0 0 0.875rem;
+}
+
+.plan-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6875rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.plan-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    color: var(--foreground);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    text-wrap: pretty;
+}
+
+.plan-feature > svg {
+    flex-shrink: 0;
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-top: 0.1875rem;
+    color: var(--muted-foreground);
+}
+
+/* A row the plan does not get. The cross is the second signal beside the
+ * dimmed text, so the absence never rests on colour alone. */
+.plan-feature[data-absent="true"] {
+    color: var(--muted-foreground);
+}
+
+/* Below 64rem the panel stops being a table and becomes four stacked cards,
+ * because four columns of this density cannot survive a phone and a horizontal
+ * scroller would hide whole plans behind an edge. */
+@media (max-width: 63.999rem) {
+    .plan-panel {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: none;
+        gap: 1.5rem;
+        border: 0;
+        background-color: transparent;
+    }
+
+    .plan-col {
+        grid-row: auto;
+        grid-template-rows: auto auto auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        background-color: var(--card);
+    }
+
+    .plan-col + .plan-col {
+        border-left: 1px solid var(--border);
+    }
+
+    .plan-col[data-featured="true"] {
+        border-color: var(--input);
+    }
+
+    .plan-col:first-child .plan-band--included,
+    .plan-col:last-child .plan-band--included {
+        border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    }
+
+    /* The tab cannot hang above the card once the cards are separate — it
+     * would collide with the card above it — so it comes inside the head band
+     * as an ordinary badge row. `position: static` drops the insets with it. */
+    .plan-tab {
+        position: static;
+        justify-content: flex-start;
+        width: fit-content;
+        margin-bottom: 0.875rem;
+        border-radius: var(--radius-sm);
+    }
+}
+
+/* Two up. The columns sit side by side again, so the badge goes back to being
+ * absolutely placed inside a slot every head band reserves — otherwise the
+ * featured column's badge adds height only it has, and the three bands stop
+ * lining up with the column beside it. In one column there is nothing to line
+ * up against, so no slot is reserved and the badge stays in flow above. */
+@media (min-width: 40rem) and (max-width: 63.999rem) {
+    .plan-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .plan-band--head {
+        padding-top: 3.375rem;
+    }
+
+    .plan-tab {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.5rem;
+        margin-bottom: 0;
+    }
+}
