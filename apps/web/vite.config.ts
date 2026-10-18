@@ -9,6 +9,12 @@ import { nitro } from "nitro/vite";
 
 const config = defineConfig({
     resolve: { tsconfigPaths: true },
+    optimizeDeps: {
+        include: [
+            "use-sync-external-store/shim/with-selector",
+            "use-sync-external-store/shim",
+        ],
+    },
     plugins: [
         devtools(),
         nitro({ rollupConfig: { external: [/^@sentry\//] } }),
