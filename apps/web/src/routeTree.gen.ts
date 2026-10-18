@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as LeaderboardRouteImport } from "./routes/leaderboard";
 import { Route as ModelsRouteImport } from "./routes/models";
+import { Route as PlansRouteImport } from "./routes/plans";
 import { Route as SignInRouteImport } from "./routes/sign-in";
 import { Route as ApiChatRouteImport } from "./routes/api.chat";
 import { Route as ShareSlugRouteImport } from "./routes/share.$slug";
@@ -31,6 +32,11 @@ const LeaderboardRoute = LeaderboardRouteImport.update({
 const ModelsRoute = ModelsRouteImport.update({
     id: "/models",
     path: "/models",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const PlansRoute = PlansRouteImport.update({
+    id: "/plans",
+    path: "/plans",
     getParentRoute: () => rootRouteImport,
 } as any);
 const SignInRoute = SignInRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
     "/": typeof IndexRoute;
     "/leaderboard": typeof LeaderboardRoute;
     "/models": typeof ModelsRoute;
+    "/plans": typeof PlansRoute;
     "/sign-in": typeof SignInRoute;
     "/api/chat": typeof ApiChatRoute;
     "/share/$slug": typeof ShareSlugRoute;
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
     "/": typeof IndexRoute;
     "/leaderboard": typeof LeaderboardRoute;
     "/models": typeof ModelsRoute;
+    "/plans": typeof PlansRoute;
     "/sign-in": typeof SignInRoute;
     "/api/chat": typeof ApiChatRoute;
     "/share/$slug": typeof ShareSlugRoute;
@@ -84,6 +92,7 @@ export interface FileRoutesById {
     "/": typeof IndexRoute;
     "/leaderboard": typeof LeaderboardRoute;
     "/models": typeof ModelsRoute;
+    "/plans": typeof PlansRoute;
     "/sign-in": typeof SignInRoute;
     "/api/chat": typeof ApiChatRoute;
     "/share/$slug": typeof ShareSlugRoute;
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
         | "/"
         | "/leaderboard"
         | "/models"
+        | "/plans"
         | "/sign-in"
         | "/api/chat"
         | "/share/$slug"
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
         | "/"
         | "/leaderboard"
         | "/models"
+        | "/plans"
         | "/sign-in"
         | "/api/chat"
         | "/share/$slug"
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
         | "/"
         | "/leaderboard"
         | "/models"
+        | "/plans"
         | "/sign-in"
         | "/api/chat"
         | "/share/$slug"
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
     IndexRoute: typeof IndexRoute;
     LeaderboardRoute: typeof LeaderboardRoute;
     ModelsRoute: typeof ModelsRoute;
+    PlansRoute: typeof PlansRoute;
     SignInRoute: typeof SignInRoute;
     ApiChatRoute: typeof ApiChatRoute;
     ShareSlugRoute: typeof ShareSlugRoute;
@@ -155,6 +168,13 @@ declare module "@tanstack/react-router" {
             path: "/models";
             fullPath: "/models";
             preLoaderRoute: typeof ModelsRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/plans": {
+            id: "/plans";
+            path: "/plans";
+            fullPath: "/plans";
+            preLoaderRoute: typeof PlansRouteImport;
             parentRoute: typeof rootRouteImport;
         };
         "/sign-in": {
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
     LeaderboardRoute: LeaderboardRoute,
     ModelsRoute: ModelsRoute,
+    PlansRoute: PlansRoute,
     SignInRoute: SignInRoute,
     ApiChatRoute: ApiChatRoute,
     ShareSlugRoute: ShareSlugRoute,
