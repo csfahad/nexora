@@ -1,6 +1,10 @@
 packages:
     - "apps/*"
 
+overrides:
+    "@tanstack/react-router": "1.170.44"
+    "@tanstack/router-core": "1.171.37"
+
 onlyBuiltDependencies:
     - "@prisma/engines"
     - esbuild
