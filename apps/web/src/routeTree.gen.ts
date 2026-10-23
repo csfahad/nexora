@@ -15,6 +15,7 @@ import { Route as ModelsRouteImport } from "./routes/models";
 import { Route as PlansRouteImport } from "./routes/plans";
 import { Route as SignInRouteImport } from "./routes/sign-in";
 import { Route as ApiChatRouteImport } from "./routes/api.chat";
+import { Route as SettingsBillingRouteImport } from "./routes/settings.billing";
 import { Route as ShareSlugRouteImport } from "./routes/share.$slug";
 import { Route as ThreadThreadIdRouteImport } from "./routes/thread.$threadId";
 import { Route as ApiAuthSplatRouteImport } from "./routes/api.auth.$";
@@ -49,6 +50,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
     path: "/api/chat",
     getParentRoute: () => rootRouteImport,
 } as any);
+const SettingsBillingRoute = SettingsBillingRouteImport.update({
+    id: "/settings/billing",
+    path: "/settings/billing",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const ShareSlugRoute = ShareSlugRouteImport.update({
     id: "/share/$slug",
     path: "/share/$slug",
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
     "/plans": typeof PlansRoute;
     "/sign-in": typeof SignInRoute;
     "/api/chat": typeof ApiChatRoute;
+    "/settings/billing": typeof SettingsBillingRoute;
     "/share/$slug": typeof ShareSlugRoute;
     "/thread/$threadId": typeof ThreadThreadIdRoute;
     "/api/auth/$": typeof ApiAuthSplatRoute;
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
     "/plans": typeof PlansRoute;
     "/sign-in": typeof SignInRoute;
     "/api/chat": typeof ApiChatRoute;
+    "/settings/billing": typeof SettingsBillingRoute;
     "/share/$slug": typeof ShareSlugRoute;
     "/thread/$threadId": typeof ThreadThreadIdRoute;
     "/api/auth/$": typeof ApiAuthSplatRoute;
@@ -95,6 +103,7 @@ export interface FileRoutesById {
     "/plans": typeof PlansRoute;
     "/sign-in": typeof SignInRoute;
     "/api/chat": typeof ApiChatRoute;
+    "/settings/billing": typeof SettingsBillingRoute;
     "/share/$slug": typeof ShareSlugRoute;
     "/thread/$threadId": typeof ThreadThreadIdRoute;
     "/api/auth/$": typeof ApiAuthSplatRoute;
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
         | "/plans"
         | "/sign-in"
         | "/api/chat"
+        | "/settings/billing"
         | "/share/$slug"
         | "/thread/$threadId"
         | "/api/auth/$";
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
         | "/plans"
         | "/sign-in"
         | "/api/chat"
+        | "/settings/billing"
         | "/share/$slug"
         | "/thread/$threadId"
         | "/api/auth/$";
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
         | "/plans"
         | "/sign-in"
         | "/api/chat"
+        | "/settings/billing"
         | "/share/$slug"
         | "/thread/$threadId"
         | "/api/auth/$";
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
     PlansRoute: typeof PlansRoute;
     SignInRoute: typeof SignInRoute;
     ApiChatRoute: typeof ApiChatRoute;
+    SettingsBillingRoute: typeof SettingsBillingRoute;
     ShareSlugRoute: typeof ShareSlugRoute;
     ThreadThreadIdRoute: typeof ThreadThreadIdRoute;
     ApiAuthSplatRoute: typeof ApiAuthSplatRoute;
@@ -191,6 +204,13 @@ declare module "@tanstack/react-router" {
             preLoaderRoute: typeof ApiChatRouteImport;
             parentRoute: typeof rootRouteImport;
         };
+        "/settings/billing": {
+            id: "/settings/billing";
+            path: "/settings/billing";
+            fullPath: "/settings/billing";
+            preLoaderRoute: typeof SettingsBillingRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
         "/share/$slug": {
             id: "/share/$slug";
             path: "/share/$slug";
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
     PlansRoute: PlansRoute,
     SignInRoute: SignInRoute,
     ApiChatRoute: ApiChatRoute,
+    SettingsBillingRoute: SettingsBillingRoute,
     ShareSlugRoute: ShareSlugRoute,
     ThreadThreadIdRoute: ThreadThreadIdRoute,
     ApiAuthSplatRoute: ApiAuthSplatRoute,
