@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import { IconArrowRight, IconCheck, IconSparkles, IconX } from "@tabler/icons-react";
 import { Plan } from "@/generated/prisma/enums";
 import type { BillingInterval } from "@/generated/prisma/enums";
@@ -15,8 +15,12 @@ import {
     PLANS,
     annualSavingUsd,
     priceFor,
+    checkoutSlug,
 } from "@/infrastructure/plans";
 import type { PlanSpec } from "@/infrastructure/plans";
+import { authClient } from "@/infrastructure/auth-client";
+import { useSessionState } from "@/infrastructure/session";
+import { useBillingPortal } from "@/infrastructure/use-billing-portal";
 
 const INTERVALS: readonly Readonly<{ value: BillingInterval; label: string }>[] = [
     { value: "MONTHLY", label: "Monthly" },
@@ -74,6 +78,9 @@ const PlanColumn = ({
     cta,
     featured = false,
     current = false,
+    busy = false,
+    disabled = false,
+    onChoose,
     children,
 }: {
     readonly name: string;
@@ -83,6 +90,9 @@ const PlanColumn = ({
     readonly cta: string;
     readonly featured?: boolean;
     readonly current?: boolean;
+    readonly busy?: boolean;
+    readonly disabled?: boolean;
+    readonly onChoose: () => void;
     readonly children: React.ReactNode;
 }) => (
     <article className="plan-col" data-featured={featured || undefined}>
@@ -106,9 +116,11 @@ const PlanColumn = ({
                 type="button"
                 className="plan-cta"
                 data-featured={featured || undefined}
-                disabled
+                disabled={disabled || busy}
+                aria-busy={busy || undefined}
+                onClick={onChoose}
             >
-                {current ? "Your current plan" : cta}
+                {busy ? "Opening…" : current ? "Manage your plan" : cta}
                 <IconArrowRight aria-hidden stroke={2} />
             </button>
         </div>
@@ -124,10 +136,16 @@ const PaidColumn = ({
     spec,
     interval,
     current,
+    busy,
+    disabled,
+    onChoose,
 }: {
     readonly spec: PlanSpec;
     readonly interval: BillingInterval;
     readonly current: boolean;
+    readonly busy: boolean;
+    readonly disabled: boolean;
+    readonly onChoose: () => void;
 }) => {
     const annual = interval === "ANNUAL";
     const saving = annualSavingUsd(spec);
@@ -146,6 +164,9 @@ const PaidColumn = ({
             cta={`Choose ${spec.name}`}
             featured={spec.plan === FEATURED}
             current={current}
+            busy={busy}
+            disabled={disabled}
+            onChoose={onChoose}
         >
             <Feature>
                 About <span className="numeric">{roundedTotal(total)}</span> answers a
@@ -162,12 +183,18 @@ const PaidColumn = ({
                 <span className="numeric">{count(spec.hourlyCalls)}</span> answers an hour
             </Feature>
             <Feature>Real measured cost on every answer</Feature>
-            {annual && <Feature>Billed yearly, allowance refills monthly</Feature>}
+            <Feature>Allowance refills monthly</Feature>
         </PlanColumn>
     );
 };
 
-const FreeColumn = ({ current }: { readonly current: boolean }) => (
+const FreeColumn = ({
+    current,
+    onChoose,
+}: {
+    readonly current: boolean;
+    readonly onChoose: () => void;
+}) => (
     <PlanColumn
         name={PLANS[Plan.FREE].name}
         price="$0"
@@ -175,6 +202,7 @@ const FreeColumn = ({ current }: { readonly current: boolean }) => (
         tagline={TAGLINE[Plan.FREE]}
         cta="Start free"
         current={current}
+        onChoose={onChoose}
     >
         <Feature>
             <span className="numeric">{count(FREE_ANSWERS_PER_DAY)}</span> answers a day
@@ -196,6 +224,53 @@ const FreeColumn = ({ current }: { readonly current: boolean }) => (
 export const PlansScreen = () => {
     const [interval, setInterval] = useState<BillingInterval>("MONTHLY");
     const view = useAllowance();
+    const session = useSessionState();
+    const router = useRouter();
+    const portal = useBillingPortal();
+    const [choosing, setChoosing] = useState<Plan | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const choose = async (plan: Plan) => {
+        setError(null);
+        if (session.status === "unavailable") {
+            setError(
+                "Your account couldn't be confirmed. Reload the page and try again.",
+            );
+            return;
+        }
+        if (session.status === "signed-out") {
+            await router.navigate({
+                to: "/sign-in",
+                search: { next: plan === Plan.FREE ? "/" : "/plans" },
+            });
+            return;
+        }
+        if (view.plan !== Plan.FREE) {
+            await portal.openPortal();
+            return;
+        }
+        if (plan === Plan.FREE) {
+            await router.navigate({ to: "/" });
+            return;
+        }
+        setChoosing(plan);
+        try {
+            const result = await authClient.dodopayments.checkoutSession({
+                slug: checkoutSlug(plan, interval),
+            });
+            if (result.error || !result.data.url) {
+                setError(
+                    "Checkout couldn't open. Try again, or manage an existing subscription in Billing.",
+                );
+                setChoosing(null);
+                return;
+            }
+            window.location.assign(result.data.url);
+        } catch (cause) {
+            console.error("[billing] checkout failed:", cause);
+            setError("Checkout couldn't open. Try again.");
+            setChoosing(null);
+        }
+    };
 
     return (
         <div className="screen">
@@ -244,7 +319,10 @@ export const PlansScreen = () => {
                     </div>
 
                     <div className="plan-panel mt-14">
-                        <FreeColumn current={view.metered && view.plan === Plan.FREE} />
+                        <FreeColumn
+                            current={view.metered && view.plan === Plan.FREE}
+                            onChoose={() => void choose(Plan.FREE)}
+                        />
 
                         {PAID_PLANS.map((spec) => (
                             <PaidColumn
@@ -252,6 +330,9 @@ export const PlansScreen = () => {
                                 spec={spec}
                                 interval={interval}
                                 current={view.metered && view.plan === spec.plan}
+                                busy={choosing === spec.plan || portal.opening}
+                                disabled={choosing !== null}
+                                onChoose={() => void choose(spec.plan)}
                             />
                         ))}
                     </div>
@@ -260,9 +341,24 @@ export const PlansScreen = () => {
                         className="text-muted-foreground mt-6 text-center text-sm"
                         role="note"
                     >
-                        Checkout opens when billing goes live. Nothing on this page can
-                        charge you yet.
+                        {error || portal.error ? (
+                            <span role="alert">{error || portal.error}</span>
+                        ) : (
+                            "Annual plans bill once a year. Every paid plan refills its answer allowance monthly."
+                        )}
                     </p>
+
+                    {session.status === "signed-in" && (
+                        <p className="mt-3 text-center text-sm">
+                            <Link
+                                to="/settings/billing"
+                                search={{ checkout: undefined }}
+                                className="text-primary underline underline-offset-2"
+                            >
+                                View billing and manage your subscription
+                            </Link>
+                        </p>
+                    )}
 
                     <section
                         aria-labelledby="ceiling-heading"
