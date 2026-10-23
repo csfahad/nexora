@@ -26,9 +26,6 @@ const readEnv = (name) => {
     return value;
 };
 
-const ALLOWANCE = { FREE: 0, PRO: 1200, MAX: 12000, PRO_PLUS: 6000 };
-const DAILY_FREE = 60;
-
 const money = (usd) =>
     `$${Number(usd).toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`;
 const column = {
@@ -63,26 +60,37 @@ const subscriptionByUser = new Map(
 );
 
 const REFUNDABLE = ["PROVIDER", "MODEL_UNAVAILABLE", "FREE_TIER_EXHAUSTED"];
+const NOT_RESERVED = ["ALLOWANCE_SPENT", "FREE_TIER_EXHAUSTED", "MODEL_UNAVAILABLE"];
 const failures = [];
 
 for (const period of periods) {
-    const range = { gte: period.periodStart, lt: period.periodEnd };
-    const createdAt = { gte: period.periodStart, lt: period.periodEnd };
+    const where = {
+        turn: { thread: { userId: period.userId } },
+        OR: [
+            { usagePeriodId: period.id },
+            {
+                usagePeriodId: null,
+                createdAt: { gte: period.periodStart, lt: period.periodEnd },
+                tier: period.scope === "DAILY" ? "FREE" : { not: "FREE" },
+                OR: [{ failure: null }, { failure: { notIn: NOT_RESERVED } }],
+            },
+        ],
+    };
 
     const [spent, reservedRows, refunds] = await Promise.all([
         db.modelResponse.aggregate({
-            where: { createdAt },
+            where,
             _sum: { costUsd: true },
             _count: true,
         }),
         db.modelResponse.groupBy({
             by: ["tier"],
-            where: { createdAt },
+            where,
             _count: { _all: true },
         }),
         db.modelResponse.groupBy({
             by: ["tier"],
-            where: { createdAt, failure: { in: REFUNDABLE } },
+            where: { ...where, failure: { in: REFUNDABLE } },
             _count: { _all: true },
         }),
     ]);
@@ -92,8 +100,6 @@ for (const period of periods) {
     const costMatches = Math.abs(diff) < 0.000001;
 
     const plan = subscriptionByUser.get(period.userId) ?? "FREE";
-    const implied =
-        period.scope === "BILLING" ? (ALLOWANCE[plan] ?? Infinity) : DAILY_FREE;
 
     const parts = [];
     let countersOk = true;
@@ -109,13 +115,6 @@ for (const period of periods) {
             failures.push(
                 `${period.userId} ${period.scope} ${period.periodStart.toISOString()} ` +
                     `${tier}: counter ${actual} vs ${expected} settled (reserved ${reserved}, refunded ${refunded})`,
-            );
-        }
-
-        if (period.scope === "BILLING" && tier !== "FREE" && actual > implied) {
-            failures.push(
-                `${period.userId} BILLING ${period.periodStart.toISOString()} ` +
-                    `${tier}: ${actual} spent exceeds plan ${plan}'s ${implied}`,
             );
         }
 
@@ -135,13 +134,14 @@ for (const period of periods) {
         `${costMatches && countersOk ? "OK " : "MISMATCH"} ` +
             `${period.userId} ${period.scope} since ${period.periodStart.toISOString().slice(0, 10)} ` +
             `· ${money(period.spentUsd)} summed vs ${money(sumCost)} counted, ` +
-            `${spent._count} rows · ${parts.join(", ")} · plan ${plan} (cap ${implied})`,
+            `${spent._count} rows · ${parts.join(", ")} · current plan ${plan}`,
     );
 }
 
 if (failures.length > 0) {
     console.log(`\n${failures.length} finding(s):`);
     for (const line of failures) console.log(`  - ${line}`);
+    process.exitCode = 1;
 } else {
     console.log("\nAll periods reconcile.");
 }
