@@ -101,7 +101,12 @@ export const readEntitlement = async (
             : allowanceWindow(
                   subscription.currentPeriodStart,
                   subscription.currentPeriodEnd,
-                  now,
+                  new Date(
+                      Math.min(
+                          now.getTime(),
+                          subscription.currentPeriodEnd.getTime() - 1,
+                      ),
+                  ),
               );
 
     const [daily, billing] = await Promise.all([
