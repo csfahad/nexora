@@ -10,6 +10,7 @@
         "check:auth-schema": "pnpm --dir apps/web check:auth-schema",
         "db:generate": "pnpm --dir apps/web db:generate",
         "db:migrate": "pnpm --dir apps/web db:migrate",
+        "db:deploy": "pnpm --dir apps/web db:deploy",
         "db:studio": "pnpm --dir apps/web db:studio",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
