@@ -12,6 +12,15 @@ const serverEnvSchema = z.object({
     ARCJET_KEY: z.string().min(1),
     POSTHOG_KEY: z.string().min(1),
     POSTHOG_HOST: z.url(),
+    DODO_PAYMENTS_API_KEY: z.string().min(1),
+    DODO_PAYMENTS_WEBHOOK_KEY: z.string().min(1),
+    DODO_ENVIRONMENT: z.enum(["test_mode", "live_mode"]),
+    DODO_PRODUCT_PRO: z.string().min(1),
+    DODO_PRODUCT_PRO_ANNUAL: z.string().min(1),
+    DODO_PRODUCT_PRO_PLUS: z.string().min(1),
+    DODO_PRODUCT_PRO_PLUS_ANNUAL: z.string().min(1),
+    DODO_PRODUCT_MAX: z.string().min(1),
+    DODO_PRODUCT_MAX_ANNUAL: z.string().min(1),
 });
 
 export type ServerEnv = Readonly<z.infer<typeof serverEnvSchema>>;
@@ -24,12 +33,7 @@ const formatMissing = (error: z.ZodError): string => {
         return `  - ${name}: ${issue.message}`;
     });
 
-    return [
-        "Invalid or missing environment variables:",
-        ...lines,
-        "",
-        "Copy apps/web/.env.example to apps/web/.env and fill these in.",
-    ].join("\n");
+    return ["Invalid or missing environment variables:", ...lines].join("\n");
 };
 
 export const serverEnv = (): ServerEnv => {
