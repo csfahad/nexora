@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { getAuthTables } from "better-auth/db";
+import DodoPayments from "dodopayments";
+import { createAuthPlugins } from "../src/infrastructure/dodo-plugin.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_PATH = join(HERE, "..", "prisma", "schema.prisma");
@@ -24,7 +26,7 @@ const stripComment = (line) => line.replace(/\/\/.*$/, "").trim();
  * only, plus the block-level attributes. Relation fields (a list, or anything carrying
  * `@relation`) are not columns and are deliberately dropped.
  */
-const parseModel = (body) => {
+const parseModel = (body, modelNames) => {
     const fields = new Map();
     const blockAttributes = [];
 
@@ -43,6 +45,7 @@ const parseModel = (body) => {
         const [, name, type, list, optional, attributes] = match;
         if (list !== undefined) continue;
         if (attributes.includes("@relation")) continue;
+        if (modelNames.has(type)) continue;
 
         fields.set(name, {
             type,
@@ -58,10 +61,13 @@ const parseModel = (body) => {
 
 const parseSchema = (source) => {
     const models = new Map();
+    const modelNames = new Set(
+        [...source.matchAll(/^model\s+(\w+)\s*\{/gm)].map((match) => match[1]),
+    );
     const blocks = source.matchAll(/^model\s+(\w+)\s*\{([\s\S]*?)^\}/gm);
 
     for (const [, name, body] of blocks) {
-        const model = parseModel(body);
+        const model = parseModel(body, modelNames);
         const mapped = /@@map\("([^"]+)"\)/.exec(model.blockAttributes.join("\n"));
         models.set(mapped ? mapped[1] : name, { name, body, ...model });
     }
@@ -75,7 +81,18 @@ const problems = [];
 const fail = (message) => problems.push(message);
 
 const models = parseSchema(readFileSync(SCHEMA_PATH, "utf8"));
-const tables = getAuthTables({});
+const tables = getAuthTables({
+    plugins: createAuthPlugins({
+        client: new DodoPayments({
+            bearerToken: "schema-check-only",
+            environment: "test_mode",
+        }),
+        products: [],
+        successUrl: "http://localhost:3000/settings/billing",
+        webhookKey: "schema-check-only",
+        onPayload: async () => {},
+    }),
+});
 let checkedFields = 0;
 
 for (const [key, table] of Object.entries(tables)) {
