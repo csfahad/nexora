@@ -15,6 +15,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
 
 const OFF_NAV_CRUMBS: Readonly<Record<string, string>> = {
     "/sign-in": "Sign in",
+    "/settings/billing": "Billing",
 };
 
 export const breadcrumbFor = (pathname: string): readonly string[] => {

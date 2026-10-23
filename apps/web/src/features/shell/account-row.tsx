@@ -192,6 +192,15 @@ export const AccountRow = ({
                     </span>
                 </PopoverHeader>
 
+                <Link
+                    to="/settings/billing"
+                    search={{ checkout: undefined }}
+                    onClick={onNavigate}
+                    className="text-foreground hover:bg-accent rounded-md px-2 py-1.5 text-sm"
+                >
+                    Billing
+                </Link>
+
                 <Button
                     variant="outline"
                     size="sm"
