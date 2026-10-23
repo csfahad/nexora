@@ -8,13 +8,14 @@ datasource db {
 }
 
 model User {
-  id            String   @id
-  name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false)
-  image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id
+  name           String
+  email          String   @unique
+  emailVerified  Boolean  @default(false)
+  image          String?
+  dodoCustomerId String?  @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   accounts Account[]
   sessions Session[]
@@ -141,25 +142,27 @@ model Subscription {
   pastDueEndsAt      DateTime?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
+  lastEventAt        DateTime?
   user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("subscription")
 }
 
 model UsagePeriod {
-  id          String     @id @default(cuid())
+  id          String          @id @default(cuid())
   userId      String
   scope       UsageScope
   periodStart DateTime
   periodEnd   DateTime
-  freeAnswers Int        @default(0)
-  standard    Int        @default(0)
-  advanced    Int        @default(0)
-  frontier    Int        @default(0)
-  spentUsd    Decimal    @default(0) @db.Decimal(12, 6)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  freeAnswers Int             @default(0)
+  standard    Int             @default(0)
+  advanced    Int             @default(0)
+  frontier    Int             @default(0)
+  spentUsd    Decimal         @default(0) @db.Decimal(12, 6)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses   ModelResponse[]
 
   @@unique([userId, scope, periodStart])
   @@index([userId, scope])
@@ -212,14 +215,27 @@ model ModelResponse {
   costUsd          Decimal        @default(0) @db.Decimal(10, 6)
   costEstimated    Boolean        @default(false)
   tier             ModelTier      @default(FREE)
+  usagePeriodId    String?
+  usagePeriod      UsagePeriod?   @relation(fields: [usagePeriodId], references: [id], onDelete: SetNull)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   turn             Turn           @relation(fields: [turnId], references: [id], onDelete: Cascade)
   wonVotes         Vote[]
 
   @@index([turnId])
+  @@index([usagePeriodId])
   @@index([modelId, status])
   @@map("model_response")
+}
+
+model WebhookEvent {
+  id                 String   @id
+  type               String
+  eventAt            DateTime @map("occurredAt")
+  dodoSubscriptionId String?
+  processedAt        DateTime @default(now())
+
+  @@map("webhook_event")
 }
 
 model Vote {
