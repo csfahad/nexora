@@ -17,6 +17,7 @@ const COLUMN = {
 type Column = (typeof COLUMN)[keyof typeof COLUMN];
 
 export type Charge = Readonly<{
+    usagePeriodId?: string;
     scope: UsageScope;
     periodStart: Date;
     column: Column;
@@ -93,8 +94,8 @@ export const reserveOne = async (
         window: Window;
         limit: number;
     }>,
-): Promise<boolean> => {
-    if (input.limit <= 0) return false;
+): Promise<string | null> => {
+    if (input.limit <= 0) return null;
 
     await ensureRow(tx, input.userId, input.charge, input.window);
 
@@ -108,7 +109,18 @@ export const reserveOne = async (
         data: { [input.charge.column]: { increment: 1 } },
     });
 
-    return count === 1;
+    if (count !== 1) return null;
+    const row = await tx.usagePeriod.findUniqueOrThrow({
+        where: {
+            userId_scope_periodStart: {
+                userId: input.userId,
+                scope: input.charge.scope,
+                periodStart: input.charge.periodStart,
+            },
+        },
+        select: { id: true },
+    });
+    return row.id;
 };
 
 export const settleCharge = async (
@@ -120,11 +132,16 @@ export const settleCharge = async (
         costUsd: number;
     }>,
 ): Promise<void> => {
-    const where = {
-        userId: input.userId,
-        scope: input.charge.scope,
-        periodStart: input.charge.periodStart,
-    };
+    const where = input.charge.usagePeriodId
+        ? {
+              id: input.charge.usagePeriodId,
+              userId: input.userId,
+          }
+        : {
+              userId: input.userId,
+              scope: input.charge.scope,
+              periodStart: input.charge.periodStart,
+          };
 
     if (input.costUsd > 0) {
         await tx.usagePeriod.updateMany({
@@ -147,8 +164,26 @@ export const earnsRefund = (failure: string | null): boolean =>
     failure === RESPONSE_FAILURE.FREE_TIER_EXHAUSTED;
 
 export const chargeForReservation = async (
-    input: Readonly<{ userId: string; tier: ModelTier; reservedAt: Date }>,
+    input: Readonly<{
+        userId: string;
+        tier: ModelTier;
+        reservedAt: Date;
+        usagePeriodId: string | null;
+    }>,
 ): Promise<Charge | null> => {
+    if (input.usagePeriodId !== null) {
+        const period = await database().usagePeriod.findFirst({
+            where: { id: input.usagePeriodId, userId: input.userId },
+            select: { id: true, scope: true, periodStart: true },
+        });
+        if (!period) throw new Error("Reserved allowance period is missing");
+        return {
+            usagePeriodId: period.id,
+            scope: period.scope,
+            periodStart: period.periodStart,
+            column: COLUMN[input.tier],
+        };
+    }
     if (!isPaidTier(input.tier)) return chargeAt(input.tier, null, input.reservedAt);
 
     const subscription = await database().subscription.findUnique({
