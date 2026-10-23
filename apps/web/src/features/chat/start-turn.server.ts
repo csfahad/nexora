@@ -26,6 +26,7 @@ type PlannedModel = Readonly<{
     available: boolean;
     tier: ModelTier;
     blocked: ResponseFailure | null;
+    usagePeriodId: string | null;
 }>;
 
 const planModels = (
@@ -41,6 +42,7 @@ const planModels = (
             available: listed !== undefined,
             tier: listed?.tier ?? ModelTier.FREE,
             blocked: null,
+            usagePeriodId: null,
         };
     });
 
@@ -169,7 +171,7 @@ export const runStartTurn = async (
                             limit: limitFor(model.tier, entitlement.allowance),
                         });
 
-                        if (got) return model;
+                        if (got) return { ...model, usagePeriodId: got };
 
                         return {
                             ...model,
@@ -197,6 +199,7 @@ export const runStartTurn = async (
                         modelId: model.modelId,
                         modelName: model.modelName,
                         tier: model.tier,
+                        usagePeriodId: model.usagePeriodId,
                         ...(model.available && model.blocked === null
                             ? {}
                             : {

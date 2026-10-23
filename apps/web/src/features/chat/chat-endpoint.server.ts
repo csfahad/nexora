@@ -26,15 +26,15 @@ const recordUnavailable = async (
 ): Promise<void> => {
     try {
         await database().$transaction(async (tx) => {
-            await tx.modelResponse.update({
-                where: { id: responseId },
+            const settled = await tx.modelResponse.updateMany({
+                where: { id: responseId, status: ResponseStatus.STREAMING },
                 data: {
                     status: ResponseStatus.FAILED,
                     failure: RESPONSE_FAILURE.MODEL_UNAVAILABLE,
                 },
             });
 
-            if (settle.charge === null) return;
+            if (settled.count === 0 || settle.charge === null) return;
 
             await settleCharge(tx, {
                 userId: settle.userId,
@@ -77,6 +77,7 @@ export const respondToChatRequest = async (request: Request): Promise<Response> 
                 turnId: true,
                 tier: true,
                 createdAt: true,
+                usagePeriodId: true,
                 turn: { select: { threadId: true } },
             },
         });
@@ -94,6 +95,7 @@ export const respondToChatRequest = async (request: Request): Promise<Response> 
                 userId,
                 tier: row.tier,
                 reservedAt: row.createdAt,
+                usagePeriodId: row.usagePeriodId,
             }),
         ]);
 

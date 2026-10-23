@@ -111,6 +111,7 @@ export const runRetryResponse = async (
                     modelId: previous.modelId,
                     modelName: listed.name,
                     tier,
+                    usagePeriodId: reserved,
                 },
                 select: { id: true, modelId: true, modelName: true },
             });

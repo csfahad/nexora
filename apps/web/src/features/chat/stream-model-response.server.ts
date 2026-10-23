@@ -68,8 +68,8 @@ const recordOutcome = async (
 ): Promise<void> => {
     try {
         await database().$transaction(async (tx) => {
-            await tx.modelResponse.update({
-                where: { id: input.responseId },
+            const settled = await tx.modelResponse.updateMany({
+                where: { id: input.responseId, status: ResponseStatus.STREAMING },
                 data: {
                     status: outcome.status,
                     content: outcome.content,
@@ -87,7 +87,7 @@ const recordOutcome = async (
                 },
             });
 
-            if (input.charge === null) return;
+            if (settled.count === 0 || input.charge === null) return;
 
             await settleCharge(tx, {
                 userId: input.userId,
