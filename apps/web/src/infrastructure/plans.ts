@@ -69,6 +69,22 @@ export const PAID_PLANS: readonly PlanSpec[] = [
 
 export const FREE_ANSWERS_PER_DAY = 60;
 
+export type PaidPlan = Exclude<Plan, "FREE">;
+
+export const DODO_PRODUCT_VARIABLES = {
+    PRO: { MONTHLY: "DODO_PRODUCT_PRO", ANNUAL: "DODO_PRODUCT_PRO_ANNUAL" },
+    PRO_PLUS: {
+        MONTHLY: "DODO_PRODUCT_PRO_PLUS",
+        ANNUAL: "DODO_PRODUCT_PRO_PLUS_ANNUAL",
+    },
+    MAX: { MONTHLY: "DODO_PRODUCT_MAX", ANNUAL: "DODO_PRODUCT_MAX_ANNUAL" },
+} as const satisfies Readonly<
+    Record<PaidPlan, Readonly<Record<BillingInterval, string>>>
+>;
+
+export const checkoutSlug = (plan: PaidPlan, interval: BillingInterval): string =>
+    `${plan.toLowerCase()}-${interval.toLowerCase()}`;
+
 export const allowanceFor = (plan: Plan): Allowance => PLANS[plan].allowance;
 
 export const annualSavingUsd = (spec: PlanSpec): number =>
