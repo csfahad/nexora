@@ -3,7 +3,6 @@ import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { IconSearch } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { AccountRow } from "./account-row";
-import { AllowanceMeter } from "./allowance-meter";
 import { DeleteThreadDialog } from "./delete-thread-dialog";
 import { NAV_ITEMS } from "./nav-items";
 import { useSearchShortcutLabel } from "./search-shortcut";
@@ -219,9 +218,7 @@ export const AppSidebar = ({
                 )}
             </div>
 
-            <AllowanceMeter />
-
-            <div className="border-border mt-3 flex items-center justify-between gap-2 border-t px-3 py-3">
+            <div className="border-border flex items-center justify-between gap-2 border-t px-3 py-3">
                 <AccountRow onNavigate={onNavigate} />
                 <ThemeToggle />
             </div>
