@@ -68,6 +68,10 @@ features it added:
 - **The models page** browses the live catalog on two tabs, Free and Paid: name, context
   window, both per-million prices, and the cost of one reference answer. Paid sorts
   cheapest first, because on a paid list price is the only differentiator that matters.
+- **Billing** groups the current plan, payment-management actions, renewal dates, and
+  exact monthly paid-tier and daily free-answer allowances. It is a standalone page
+  like Plans, reached through the account menu on desktop and mobile. Its Nexora
+  wordmark links to the arena. The composer retains its last-answer warning.
 - Threads persist per signed-in user and are listed by recency, so the tool is usable
   across visits rather than in one sitting.
 - The catalog is OpenRouter's live list and it churns: 337 models / 14 free on one

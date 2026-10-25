@@ -2,10 +2,16 @@
 
 ### Feature 12 — billing management
 
-`/settings/billing` lives in the existing app shell and is reached through the account
-menu. It uses the incumbent fonts, theme tokens, tier chips, buttons and focus treatment.
-Neutral dividers separate current access, three used/total counters and upcoming dates;
-dates explicitly say UTC. Monthly refill and subscription renewal are separate facts,
+`/settings/billing` uses a standalone frame like `/plans` and is reached through the
+account menu. Its full-width header carries the linked Nexora wordmark and the theme
+toggle. Ready, signed-out and unavailable states share that frame and its scrollable
+main region. It uses the incumbent fonts, theme tokens, tier chips, buttons and focus treatment.
+A single raised plan summary groups current access, status, actions and upcoming dates.
+Below it, three unboxed allowance columns show exact remaining and used/total counts
+with neutral, semantic meters; the separate free-daily allowance follows a divider.
+The detailed allowance is on Billing rather than in the sidebar. Columns stack on
+narrow screens, and Free plans show their daily allowance without empty paid counters.
+Dates explicitly say UTC. Monthly refill and subscription renewal are separate facts,
 especially for annual plans. Past-due and suspended states use plain copy and a portal
 action, and portal failures give a retry action without displaying provider errors.
 
@@ -14,8 +20,9 @@ checkout or open the portal for an existing paid subscriber. Billing interval ch
 price and saving, while answer allowances and included features stay identical. The
 checkout return notice waits for authoritative access state and provides refresh; it
 never announces a successful payment from a URL parameter. No new palette or decorative
-motion was introduced. Contrast and source checks passed; a real visual and keyboard
-pass remains outstanding.
+motion was introduced. Contrast and source checks passed. The account menu uses the
+shared Radix dropdown: a separated identity block, matching borderless icon rows,
+arrow-key navigation, Escape / focus restoration and inline sign-out failure feedback.
 
 _The durable visual record, generated from the built system (features 4–6), not ahead of it._
 _Mode: **Operate** — the visitor completes a task; the interface recedes so the answers and
@@ -194,8 +201,9 @@ footer is the same two controls stacked: the theme toggle turned vertical, and t
 its avatar. **The top bar's toggle is the only collapse control.** The sidebar briefly carried its own
 arrow as well, which meant two controls for one job and a header row that read as two competing actions.
 
-**The shell is the owner's app, and one route is outside it.** `/share/$slug` renders its own frame
-instead — see the feature 8 primitives below. The shell wraps every other route.
+**Standalone routes supply their own frame.** `/share/$slug` uses the public frame
+below; `/plans` uses its pricing frame; `/settings/billing` uses the billing frame with
+the linked Nexora wordmark and a theme toggle. The shell wraps the remaining routes.
 
 ### The answer card (built in feature 6)
 
