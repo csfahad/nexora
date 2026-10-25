@@ -52,7 +52,12 @@ function RootLayout() {
     const { threadGroups } = Route.useLoaderData();
     const pathname = useRouterState({ select: (state) => state.location.pathname });
 
-    if (pathname.startsWith("/share/") || pathname === "/plans") {
+    if (
+        pathname.startsWith("/share/") ||
+        pathname === "/plans" ||
+        pathname === "/settings/billing" ||
+        pathname === "/settings/billing/"
+    ) {
         return <Outlet />;
     }
 
