@@ -4,6 +4,16 @@ import { cn } from "@/lib/utils";
 
 export const DropdownMenu = MenuPrimitive.Root;
 export const DropdownMenuTrigger = MenuPrimitive.Trigger;
+export const DropdownMenuLabel = MenuPrimitive.Label;
+export const DropdownMenuSeparator = ({
+    className,
+    ...props
+}: ComponentProps<typeof MenuPrimitive.Separator>) => (
+    <MenuPrimitive.Separator
+        className={cn("bg-border mx-1 my-1 h-px", className)}
+        {...props}
+    />
+);
 
 export const DropdownMenuContent = ({
     className,
