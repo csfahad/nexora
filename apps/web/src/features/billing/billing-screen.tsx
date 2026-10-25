@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
-import { IconExternalLink, IconRefresh } from "@tabler/icons-react";
+import { IconAlertTriangle, IconExternalLink, IconRefresh } from "@tabler/icons-react";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { LoaderErrorNotice } from "@/components/ui/retry-notice";
 import { TierChip } from "@/components/ui/tier-chip";
 import { Plan } from "@/generated/prisma/enums";
 import { FREE_ANSWERS_PER_DAY, PAID_TIERS, PLANS } from "@/infrastructure/plans";
 import { useBillingPortal } from "@/infrastructure/use-billing-portal";
+import { AllowanceMeter } from "./allowance-meter";
+import { BillingFrame } from "./billing-frame";
 import type { BillingResult, BillingView } from "./get-billing";
 
 const date = (value: Date): string =>
@@ -15,7 +17,16 @@ const date = (value: Date): string =>
         timeStyle: "short",
         timeZone: "UTC",
     }).format(value) + " UTC";
-const count = (value: number): string => value.toLocaleString("en-US");
+
+const statusLabel = ({ subscription: sub, entitlement }: BillingView): string => {
+    if (!sub) return "Free";
+    if (sub.status === "PAST_DUE") return "Payment overdue";
+    if (sub.status === "ON_HOLD") return "On hold";
+    if (sub.status === "FAILED") return "Payment failed";
+    if (sub.status === "EXPIRED" || entitlement.plan === Plan.FREE) return "Ended";
+    if (sub.cancelAtPeriodEnd || sub.status === "CANCELLED") return "Cancelled";
+    return "Active";
+};
 
 const statusSentence = ({ subscription: sub, entitlement }: BillingView): string => {
     if (!sub) return "Free models are available. Choose a plan to compare paid models.";
@@ -54,31 +65,45 @@ export const BillingScreen = ({
 
     if (result.status === "unavailable")
         return (
-            <LoaderErrorNotice message="Your billing details couldn't load. Try again." />
+            <BillingFrame>
+                <LoaderErrorNotice message="Your billing details couldn't load. Try again." />
+            </BillingFrame>
         );
     if (result.status === "signed-out")
         return (
-            <div className="billing-content">
-                <h1 className="billing-title">Billing</h1>
-                <p>Sign in to see your plan and manage billing.</p>
-                <Link
-                    to="/sign-in"
-                    search={{ next: "/settings/billing" }}
-                    className={buttonClasses({ variant: "primary" })}
-                >
-                    Sign in
-                </Link>
-            </div>
+            <BillingFrame>
+                <div className="billing-content">
+                    <h1 className="billing-title">Billing</h1>
+                    <p className="billing-description">
+                        Sign in to see your plan and manage billing.
+                    </p>
+                    <Link
+                        to="/sign-in"
+                        search={{ next: "/settings/billing" }}
+                        className={buttonClasses({ variant: "primary" })}
+                    >
+                        Sign in
+                    </Link>
+                </div>
+            </BillingFrame>
         );
     const { billing } = result;
     const { entitlement: access, subscription } = billing;
     const paid = access.plan !== Plan.FREE;
+    const attention =
+        subscription !== null &&
+        ["PAST_DUE", "ON_HOLD", "FAILED"].includes(subscription.status);
     return (
-        <div className="screen screen-scroll">
+        <BillingFrame>
             <div className="billing-content">
-                <h1 className="billing-title">Billing</h1>
+                <header className="billing-header">
+                    <h1 className="billing-title">Billing</h1>
+                    <p className="billing-description">
+                        Manage your plan and keep track of your answer allowance.
+                    </p>
+                </header>
                 {returned && (
-                    <div className="billing-section" role="status">
+                    <div className="billing-return" role="status">
                         <p>
                             Back from checkout. Your plan updates when the payment is
                             confirmed.
@@ -93,18 +118,30 @@ export const BillingScreen = ({
                         </Button>
                     </div>
                 )}
-                <section
-                    className="billing-section"
-                    aria-labelledby="current-plan-heading"
-                >
-                    <h2 id="current-plan-heading" className="billing-heading">
-                        {PLANS[access.plan].name}
-                        {paid &&
-                            ` · ${access.interval === "ANNUAL" ? "Annual" : "Monthly"}`}
-                    </h2>
-                    <p className="text-muted-foreground text-sm">
-                        {statusSentence(billing)}
-                    </p>
+                <section className="billing-plan" aria-labelledby="current-plan-heading">
+                    <div className="billing-plan-head">
+                        <div>
+                            <h2 id="current-plan-heading" className="billing-plan-name">
+                                {PLANS[access.plan].name} plan
+                            </h2>
+                            <p className="billing-description">
+                                {paid
+                                    ? `Billed ${access.interval === "ANNUAL" ? "annually" : "monthly"}`
+                                    : "No subscription required"}
+                            </p>
+                        </div>
+                        <span className="billing-status" data-attention={attention}>
+                            {attention && (
+                                <IconAlertTriangle
+                                    aria-hidden
+                                    className="size-3.5"
+                                    stroke={1.75}
+                                />
+                            )}
+                            {statusLabel(billing)}
+                        </span>
+                    </div>
+                    <p className="billing-description">{statusSentence(billing)}</p>
                     {subscription && !paid && (
                         <p className="text-muted-foreground text-sm">
                             Subscription: {PLANS[subscription.plan].name} ·{" "}
@@ -114,14 +151,15 @@ export const BillingScreen = ({
                     <div className="billing-actions">
                         <Link
                             to="/plans"
-                            className={buttonClasses({ variant: "outline", size: "sm" })}
+                            className={buttonClasses({
+                                variant: subscription ? "outline" : "primary",
+                            })}
                         >
                             Compare plans
                         </Link>
                         {subscription && (
                             <Button
                                 variant="primary"
-                                size="sm"
                                 loading={portal.opening}
                                 onClick={() => void portal.openPortal()}
                             >
@@ -135,36 +173,9 @@ export const BillingScreen = ({
                             {portal.error}
                         </p>
                     )}
-                </section>
-                <section className="billing-section" aria-labelledby="usage-heading">
-                    <h2 id="usage-heading" className="billing-heading">
-                        Answers this month
-                    </h2>
-                    <dl className="billing-readout">
-                        {PAID_TIERS.map((tier) => (
-                            <div className="billing-row" key={tier}>
-                                <dt>
-                                    <TierChip tier={tier} />
-                                </dt>
-                                <dd className="numeric">
-                                    {count(access.used[tier])} /{" "}
-                                    {count(access.allowance[tier])} used
-                                </dd>
-                            </div>
-                        ))}
-                    </dl>
-                    <p className="text-muted-foreground text-sm">
-                        {count(access.freeAnswersUsed)} / {count(FREE_ANSWERS_PER_DAY)}{" "}
-                        free answers used today. Resets at midnight UTC.
-                    </p>
-                </section>
-                {paid && access.window && subscription && (
-                    <section className="billing-section" aria-labelledby="dates-heading">
-                        <h2 id="dates-heading" className="billing-heading">
-                            Upcoming dates
-                        </h2>
-                        <dl className="billing-readout">
-                            <div className="billing-row">
+                    {paid && access.window && subscription && (
+                        <dl className="billing-dates">
+                            <div>
                                 <dt>
                                     {access.cancelAtPeriodEnd &&
                                     access.window.end.getTime() >=
@@ -172,9 +183,13 @@ export const BillingScreen = ({
                                         ? "Allowance ends"
                                         : "Allowance refills"}
                                 </dt>
-                                <dd>{date(access.window.end)}</dd>
+                                <dd>
+                                    <time dateTime={access.window.end.toISOString()}>
+                                        {date(access.window.end)}
+                                    </time>
+                                </dd>
                             </div>
-                            <div className="billing-row">
+                            <div>
                                 <dt>
                                     {access.cancelAtPeriodEnd
                                         ? "Paid access ends"
@@ -182,12 +197,65 @@ export const BillingScreen = ({
                                           ? "Last renewal due"
                                           : "Subscription renews"}
                                 </dt>
-                                <dd>{date(subscription.currentPeriodEnd)}</dd>
+                                <dd>
+                                    <time
+                                        dateTime={subscription.currentPeriodEnd.toISOString()}
+                                    >
+                                        {date(subscription.currentPeriodEnd)}
+                                    </time>
+                                </dd>
                             </div>
                         </dl>
-                    </section>
-                )}
+                    )}
+                </section>
+                <section className="billing-section" aria-labelledby="usage-heading">
+                    <div className="billing-section-head">
+                        <h2 id="usage-heading" className="billing-heading">
+                            Answer allowance
+                        </h2>
+                        <p className="billing-description">
+                            {paid
+                                ? "Paid answers refill monthly, including on annual plans."
+                                : "Your free answers reset every day."}
+                        </p>
+                    </div>
+                    {paid && (
+                        <div className="billing-allowances">
+                            {PAID_TIERS.map((tier) => (
+                                <AllowanceMeter
+                                    key={tier}
+                                    label={<TierChip tier={tier} />}
+                                    name={tier.charAt(0) + tier.slice(1).toLowerCase()}
+                                    remaining={access.remaining[tier]}
+                                    total={access.allowance[tier]}
+                                    used={access.used[tier]}
+                                />
+                            ))}
+                        </div>
+                    )}
+                    <div className="billing-daily" data-paid={paid}>
+                        <div>
+                            <h3 className="billing-heading">Free answers today</h3>
+                            <p className="billing-description">Resets at midnight UTC.</p>
+                            {paid && (
+                                <p className="billing-description">
+                                    Separate from your paid allowance.
+                                </p>
+                            )}
+                        </div>
+                        <AllowanceMeter
+                            label={<span className="sr-only">Free answers today</span>}
+                            name="Free"
+                            remaining={access.freeAnswersRemaining}
+                            total={FREE_ANSWERS_PER_DAY}
+                            used={access.freeAnswersUsed}
+                        />
+                    </div>
+                    <p className="billing-description">
+                        Each model’s answer uses one answer from its tier.
+                    </p>
+                </section>
             </div>
-        </div>
+        </BillingFrame>
     );
 };
