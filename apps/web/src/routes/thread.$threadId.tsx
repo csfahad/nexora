@@ -90,7 +90,7 @@ function LoadedThread({ thread }: { readonly thread: ThreadView }) {
     );
 
     useEnsureThreadTitle(threadId, thread.turns.length);
-    useTopBarCrumbs(["Arena", thread.title]);
+    useTopBarCrumbs(["Thread", thread.title]);
     useTopBarTrailing(trailing);
 
     const locked = thread.turns[0]?.responses ?? [];
