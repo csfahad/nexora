@@ -99,7 +99,9 @@ features it added:
   refresh. They are shown with both real prices and the words "Not in arena" rather than
   hidden, because `/models` exists to say what OpenRouter actually offers.
 - **One prompt minimum, three models maximum.** At three, the add-model control is disabled
-  with a plain sentence saying why rather than vanishing. The last model cannot be removed.
+  with a plain sentence saying why rather than vanishing. The picker may temporarily have
+  zero selected models while a person replaces the defaults, but sending stays disabled
+  until at least one model is chosen.
 - **A vote only exists once two or more models have answered**, and exactly one vote exists
   per turn, owned by the thread's owner. It is written through one code path
   (`features/voting/cast-vote.ts`) inside a transaction; nothing else may insert a vote.
