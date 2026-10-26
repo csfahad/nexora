@@ -65,6 +65,7 @@ export const ArenaScreen = ({
                     <PromptComposer
                         onSubmit={submit}
                         busy={sending}
+                        disabled={selectedIds.length === 0}
                         controls={
                             <ModelPicker
                                 models={models}

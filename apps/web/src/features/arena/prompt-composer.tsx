@@ -11,12 +11,14 @@ export const PromptComposer = ({
     onSubmit,
     controls,
     busy = false,
+    disabled = false,
     draftKey = "arena",
     onStop,
 }: {
     readonly onSubmit: (prompt: string) => boolean | Promise<boolean>;
     readonly controls?: ReactNode;
     readonly busy?: boolean;
+    readonly disabled?: boolean;
     readonly draftKey?: string;
     readonly onStop?: () => void;
 }) => {
@@ -59,7 +61,7 @@ export const PromptComposer = ({
     }, [draft]);
 
     const trimmed = draft.trim();
-    const canSubmit = trimmed.length > 0 && !busy;
+    const canSubmit = trimmed.length > 0 && !busy && !disabled;
 
     const submit = async () => {
         if (!canSubmit) return;
