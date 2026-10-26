@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { IconCheck, IconChevronDown } from "@tabler/icons-react";
+import { useMemo, useRef, useState } from "react";
+import { IconCheck, IconChevronDown, IconSearch } from "@tabler/icons-react";
 import { buttonClasses } from "@/components/ui/button";
 import { ModelAvatar } from "@/components/ui/model-avatar";
 import { ModelStack } from "@/components/ui/model-stack";
@@ -18,6 +18,20 @@ import type { CatalogModel } from "@/infrastructure/model-catalog";
 import { useAllowance } from "@/infrastructure/entitlement";
 import { blockedReason, sendLabel } from "./send-cost";
 
+const MODEL_QUERY_MAX_LENGTH = 200;
+
+const matchesModel = (model: CatalogModel, query: string): boolean => {
+    const needle = query.trim().toLocaleLowerCase();
+
+    if (needle.length === 0) return true;
+
+    return (
+        model.name.toLocaleLowerCase().includes(needle) ||
+        model.provider.toLocaleLowerCase().includes(needle) ||
+        model.id.toLocaleLowerCase().includes(needle)
+    );
+};
+
 export const ModelPicker = ({
     models,
     selectedIds,
@@ -28,19 +42,38 @@ export const ModelPicker = ({
     readonly onChange: (ids: readonly string[]) => void;
 }) => {
     const [activeIndex, setActiveIndex] = useState(0);
+    const [query, setQuery] = useState("");
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const rowRefs = useRef<Array<HTMLButtonElement | null>>([]);
     const allowance = useAllowance();
 
-    const selected = selectedIds
-        .map((id) => models.find((model) => model.id === id))
-        .filter((model): model is CatalogModel => model !== undefined);
+    const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+    const selected = useMemo(
+        () =>
+            selectedIds
+                .map((id) => models.find((model) => model.id === id))
+                .filter((model): model is CatalogModel => model !== undefined),
+        [models, selectedIds],
+    );
+
+    const available = useMemo(
+        () =>
+            models.filter(
+                (model) => !selectedSet.has(model.id) && matchesModel(model, query),
+            ),
+        [models, query, selectedSet],
+    );
+
+    const visibleModels = useMemo(
+        () => [...selected, ...available],
+        [available, selected],
+    );
 
     const atCap = selectedIds.length >= MAX_ARENA_MODELS;
-    const atFloor = selectedIds.length <= 1;
 
     const toggle = (id: string) => {
         if (selectedIds.includes(id)) {
-            if (atFloor) return;
             onChange(selectedIds.filter((selectedId) => selectedId !== id));
             return;
         }
@@ -50,14 +83,17 @@ export const ModelPicker = ({
     };
 
     const focusRow = (index: number) => {
-        setActiveIndex(index);
-        const row = rowRefs.current[index];
+        if (visibleModels.length === 0) return;
+
+        const nextIndex = Math.max(0, Math.min(index, visibleModels.length - 1));
+        setActiveIndex(nextIndex);
+        const row = rowRefs.current[nextIndex];
         row?.focus();
         row?.scrollIntoView({ block: "nearest" });
     };
 
     const move = (delta: number, from: number) =>
-        focusRow((from + delta + models.length) % models.length);
+        focusRow((from + delta + visibleModels.length) % visibleModels.length);
 
     const handleKeyDown = (
         event: React.KeyboardEvent<HTMLButtonElement>,
@@ -80,7 +116,7 @@ export const ModelPicker = ({
                 break;
             case "End":
                 event.preventDefault();
-                focusRow(models.length - 1);
+                focusRow(visibleModels.length - 1);
                 break;
             default:
                 break;
@@ -89,8 +125,21 @@ export const ModelPicker = ({
 
     const firstSelectedIndex = Math.max(
         0,
-        models.findIndex((model) => selectedIds.includes(model.id)),
+        visibleModels.findIndex((model) => selectedSet.has(model.id)),
     );
+    const firstSearchIndex =
+        query.trim().length > 0 && available.length > 0
+            ? selected.length
+            : firstSelectedIndex;
+    const focusedIndex =
+        visibleModels.length === 0 ? 0 : Math.min(activeIndex, visibleModels.length - 1);
+
+    const description =
+        selectedIds.length === 0
+            ? "Choose at least one model to send."
+            : atCap
+              ? "Three selected. Remove one to swap."
+              : `${selectedIds.length} of ${MAX_ARENA_MODELS} selected.`;
 
     return (
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -103,7 +152,11 @@ export const ModelPicker = ({
                 >
                     <ModelStack
                         models={selected}
-                        label={sendLabel(allowance, selected)}
+                        label={
+                            selected.length === 0
+                                ? "Choose a model"
+                                : sendLabel(allowance, selected)
+                        }
                     />
                     <IconChevronDown
                         aria-hidden
@@ -117,31 +170,95 @@ export const ModelPicker = ({
                     className="w-[min(22rem,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
                     onOpenAutoFocus={(event) => {
                         event.preventDefault();
-                        focusRow(firstSelectedIndex);
+                        searchInputRef.current?.focus();
+                        setActiveIndex(firstSelectedIndex);
+                    }}
+                    onCloseAutoFocus={() => {
+                        setQuery("");
+                        setActiveIndex(0);
                     }}
                 >
                     <PopoverHeader className="border-border border-b px-4 py-3">
                         <PopoverTitle>Models</PopoverTitle>
-                        <PopoverDescription>
-                            {atCap
-                                ? "Three is the maximum. Remove one to swap."
-                                : atFloor
-                                  ? `One of ${MAX_ARENA_MODELS} chosen. At least one stays in the thread.`
-                                  : `${selectedIds.length} of ${MAX_ARENA_MODELS} chosen.`}
-                        </PopoverDescription>
+                        <PopoverDescription>{description}</PopoverDescription>
                     </PopoverHeader>
+
+                    <div className="border-border relative border-b px-3 py-2">
+                        <IconSearch
+                            aria-hidden
+                            className="text-muted-foreground pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2"
+                            stroke={1.75}
+                        />
+                        <label htmlFor="model-picker-search" className="sr-only">
+                            Search models
+                        </label>
+                        <input
+                            id="model-picker-search"
+                            ref={searchInputRef}
+                            type="search"
+                            role="combobox"
+                            aria-expanded="true"
+                            aria-autocomplete="list"
+                            aria-controls="model-picker-results"
+                            aria-activedescendant={
+                                visibleModels.length > 0
+                                    ? modelOptionId(focusedIndex)
+                                    : undefined
+                            }
+                            value={query}
+                            maxLength={MODEL_QUERY_MAX_LENGTH}
+                            onChange={(event) => {
+                                const nextQuery = event.target.value;
+                                const hasResults = models.some(
+                                    (model) =>
+                                        !selectedSet.has(model.id) &&
+                                        matchesModel(model, nextQuery),
+                                );
+
+                                setQuery(nextQuery);
+                                setActiveIndex(
+                                    nextQuery.trim().length > 0 && hasResults
+                                        ? selected.length
+                                        : firstSelectedIndex,
+                                );
+                            }}
+                            onKeyDown={(event) => {
+                                if (visibleModels.length === 0) return;
+
+                                if (event.key === "ArrowDown") {
+                                    event.preventDefault();
+                                    focusRow(firstSearchIndex);
+                                } else if (event.key === "ArrowUp") {
+                                    event.preventDefault();
+                                    focusRow(visibleModels.length - 1);
+                                } else if (event.key === "Enter") {
+                                    event.preventDefault();
+                                    const model = visibleModels.at(focusedIndex);
+                                    if (model !== undefined) toggle(model.id);
+                                }
+                            }}
+                            placeholder="Search by name, provider or ID"
+                            className="field-input field-input--icon min-h-9"
+                        />
+                    </div>
+
+                    {selected.length > 0 && (
+                        <p className="label-meta border-border border-b px-3 pb-1 pt-2">
+                            Selected
+                        </p>
+                    )}
 
                     <div
                         role="listbox"
                         aria-multiselectable
                         aria-label="Models in the arena"
+                        id="model-picker-results"
                         className="max-h-72 overflow-y-auto p-1.5"
                     >
-                        {models.map((model, index) => {
-                            const isSelected = selectedIds.includes(model.id);
+                        {visibleModels.map((model, index) => {
+                            const isSelected = selectedSet.has(model.id);
                             const blocked = blockedReason(allowance, model);
-                            const capped = isSelected ? atFloor : atCap;
-                            const isBlocked = capped || (!isSelected && blocked !== null);
+                            const isBlocked = !isSelected && (atCap || blocked !== null);
 
                             return (
                                 <button
@@ -151,9 +268,10 @@ export const ModelPicker = ({
                                     }}
                                     type="button"
                                     role="option"
+                                    id={modelOptionId(index)}
                                     aria-selected={isSelected}
                                     aria-disabled={isBlocked || undefined}
-                                    tabIndex={index === activeIndex ? 0 : -1}
+                                    tabIndex={index === focusedIndex ? 0 : -1}
                                     onClick={() => {
                                         if (blocked !== null && !isSelected) return;
                                         toggle(model.id);
@@ -192,12 +310,22 @@ export const ModelPicker = ({
                                 </button>
                             );
                         })}
+
+                        {visibleModels.length === selected.length && (
+                            <p className="text-muted-foreground px-2.5 py-5 text-center text-sm">
+                                {query.trim().length > 0
+                                    ? `No models match “${query.trim()}”.`
+                                    : "No other models available."}
+                            </p>
+                        )}
                     </div>
                 </PopoverContent>
             </Popover>
         </div>
     );
 };
+
+const modelOptionId = (index: number): string => `model-picker-option-${index}`;
 
 const cnRow =
     "transition-state flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm";
