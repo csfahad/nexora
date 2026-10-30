@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 export const buttonClasses = cva(
     cn(
-        "transition-state relative inline-flex shrink-0 items-center justify-center gap-2",
-        "rounded-md font-medium whitespace-nowrap select-none",
-        "not-disabled:active:translate-y-px",
+        "ui-button transition-state relative inline-flex shrink-0 items-center justify-center gap-2",
+        "rounded-full font-medium whitespace-nowrap select-none",
+        "not-disabled:active:scale-[0.98]",
         "disabled:cursor-not-allowed disabled:opacity-45",
         "aria-busy:cursor-progress",
         "[&>svg]:shrink-0",
@@ -18,14 +18,14 @@ export const buttonClasses = cva(
         variants: {
             variant: {
                 primary:
-                    "bg-primary text-primary-foreground not-disabled:hover:bg-primary-hover",
+                    "ui-button-primary bg-primary text-primary-foreground not-disabled:hover:bg-primary-hover",
                 secondary: cn(
                     "bg-secondary text-secondary-foreground",
                     "not-disabled:hover:text-foreground",
                     "not-disabled:hover:brightness-110 dark:not-disabled:hover:brightness-125",
                 ),
                 outline: cn(
-                    "border border-input bg-transparent text-foreground",
+                    "border border-border bg-card text-foreground",
                     "not-disabled:hover:bg-accent",
                 ),
                 ghost: cn(
@@ -38,10 +38,10 @@ export const buttonClasses = cva(
                 ),
             },
             size: {
-                sm: "h-8 px-2.5 text-[0.8125rem] [&>svg]:size-4",
-                md: "h-9 px-3.5 text-sm [&>svg]:size-4",
-                lg: "h-11 px-5 text-[0.9375rem] [&>svg]:size-[1.125rem]",
-                icon: "size-9 [&>svg]:size-[1.125rem]",
+                sm: "h-8 px-3 text-[0.8125rem] [&>svg]:size-4",
+                md: "h-10 px-4 text-sm [&>svg]:size-4",
+                lg: "h-12 px-6 text-[0.9375rem] [&>svg]:size-[1.125rem]",
+                icon: "size-10 [&>svg]:size-[1.125rem]",
                 "icon-sm": "size-8 [&>svg]:size-4",
             },
         },
