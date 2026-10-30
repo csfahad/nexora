@@ -1,10 +1,12 @@
 import type { ComponentProps } from "react";
 import { DropdownMenu as MenuPrimitive } from "radix-ui";
+import { IconCheck } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 export const DropdownMenu = MenuPrimitive.Root;
 export const DropdownMenuTrigger = MenuPrimitive.Trigger;
 export const DropdownMenuLabel = MenuPrimitive.Label;
+export const DropdownMenuRadioGroup = MenuPrimitive.RadioGroup;
 export const DropdownMenuSeparator = ({
     className,
     ...props
@@ -27,9 +29,9 @@ export const DropdownMenuContent = ({
             sideOffset={sideOffset}
             className={cn(
                 "origin-(--radix-dropdown-menu-content-transform-origin)",
-                "duration-(--dur-state) bg-popover text-popover-foreground outline-hidden z-50 min-w-40 rounded-lg p-1 shadow-lg",
-                "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
-                "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+                "ui-popover duration-(--dur-state) bg-popover text-popover-foreground outline-hidden z-50 min-w-40 rounded-xl p-1.5",
+                "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+                "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
                 className,
             )}
             {...props}
@@ -50,4 +52,22 @@ export const DropdownMenuItem = ({
         className={cn("menu-row", className)}
         {...props}
     />
+);
+
+export const DropdownMenuRadioItem = ({
+    className,
+    children,
+    ...props
+}: ComponentProps<typeof MenuPrimitive.RadioItem>) => (
+    <MenuPrimitive.RadioItem className={cn("menu-row", className)} {...props}>
+        {children}
+        <span
+            aria-hidden
+            className="ml-auto inline-flex size-4 items-center justify-center"
+        >
+            <MenuPrimitive.ItemIndicator>
+                <IconCheck className="size-4" stroke={1.75} />
+            </MenuPrimitive.ItemIndicator>
+        </span>
+    </MenuPrimitive.RadioItem>
 );
