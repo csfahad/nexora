@@ -54,7 +54,7 @@ export const ThemeToggle = ({
             aria-orientation={orientation}
             onKeyDown={onKeyDown}
             className={cn(
-                "border-border inline-flex items-center gap-0.5 rounded-md border p-0.5",
+                "theme-toggle",
                 orientation === "vertical" && "flex-col",
                 className,
             )}
