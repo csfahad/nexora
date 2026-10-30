@@ -15,7 +15,7 @@ function PopoverTrigger({
 function PopoverContent({
     className,
     align = "center",
-    sideOffset = 4,
+    sideOffset = 8,
     ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
     return (
@@ -25,7 +25,7 @@ function PopoverContent({
                 align={align}
                 sideOffset={sideOffset}
                 className={cn(
-                    "origin-(--radix-popover-content-transform-origin) bg-popover text-popover-foreground ring-foreground/5 outline-hidden data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 z-50 flex w-72 flex-col gap-4 rounded-3xl p-4 text-sm shadow-lg ring-1 duration-100",
+                    "ui-popover origin-(--radix-popover-content-transform-origin) bg-popover text-popover-foreground outline-hidden data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 z-50 flex w-72 flex-col gap-4 rounded-2xl p-4 text-sm duration-200",
                     className,
                 )}
                 {...props}
@@ -52,7 +52,7 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
 
 function PopoverTitle({ className, ...props }: React.ComponentProps<"h2">) {
     return (
-        <div
+        <h2
             data-slot="popover-title"
             className={cn("text-base font-medium", className)}
             {...props}

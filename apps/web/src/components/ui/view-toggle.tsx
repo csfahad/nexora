@@ -64,7 +64,7 @@ export const ViewToggle = <T extends string>({
         <div
             role={tabs ? "tablist" : "radiogroup"}
             aria-label={label}
-            className="border-input bg-muted inline-flex items-center gap-1 rounded-lg border p-1"
+            className="view-toggle"
         >
             {options.map((option, index) => {
                 const selected = option.value === value;
@@ -79,7 +79,9 @@ export const ViewToggle = <T extends string>({
                         role={tabs ? "tab" : "radio"}
                         {...(tabs
                             ? {
-                                  id: `${option.panelId}-tab`,
+                                  id: option.panelId
+                                      ? `${option.panelId}-tab`
+                                      : undefined,
                                   "aria-selected": selected,
                                   "aria-controls": option.panelId,
                               }
@@ -88,10 +90,10 @@ export const ViewToggle = <T extends string>({
                         onClick={() => onChange(option.value)}
                         onKeyDown={(event) => handleKeyDown(event, index)}
                         className={cn(
-                            "transition-state rounded-md px-3 py-1.5 text-sm font-medium",
+                            "view-toggle-option transition-state rounded-lg px-4 py-1.5 text-sm font-medium",
                             selected
-                                ? "border-border bg-card text-foreground border shadow-sm"
-                                : "text-muted-foreground hover:text-foreground border border-transparent",
+                                ? "view-toggle-selected bg-card text-foreground"
+                                : "text-muted-foreground hover:text-foreground",
                         )}
                     >
                         {option.label}
