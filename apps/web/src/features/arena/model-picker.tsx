@@ -78,7 +78,9 @@ export const ModelPicker = ({
             return;
         }
 
-        if (atCap) return;
+        const model = models.find((entry) => entry.id === id);
+        if (atCap || model === undefined || blockedReason(allowance, model) !== null)
+            return;
         onChange([...selectedIds, id]);
     };
 
@@ -179,7 +181,7 @@ export const ModelPicker = ({
                     }}
                 >
                     <PopoverHeader className="border-border border-b px-4 py-3">
-                        <PopoverTitle>Models</PopoverTitle>
+                        <PopoverTitle>Choose your lineup</PopoverTitle>
                         <PopoverDescription>{description}</PopoverDescription>
                     </PopoverHeader>
 
@@ -196,6 +198,8 @@ export const ModelPicker = ({
                             id="model-picker-search"
                             ref={searchInputRef}
                             type="search"
+                            name="model-picker-search"
+                            autoComplete="off"
                             role="combobox"
                             aria-expanded="true"
                             aria-autocomplete="list"
@@ -237,7 +241,7 @@ export const ModelPicker = ({
                                     if (model !== undefined) toggle(model.id);
                                 }
                             }}
-                            placeholder="Search by name, provider or ID"
+                            placeholder="Search name, provider, or ID…"
                             className="field-input field-input--icon min-h-9"
                         />
                     </div>
@@ -253,7 +257,7 @@ export const ModelPicker = ({
                         aria-multiselectable
                         aria-label="Models in the arena"
                         id="model-picker-results"
-                        className="max-h-72 overflow-y-auto p-1.5"
+                        className="model-picker-results"
                     >
                         {visibleModels.map((model, index) => {
                             const isSelected = selectedSet.has(model.id);
@@ -285,7 +289,12 @@ export const ModelPicker = ({
                                             : "hover:bg-accent",
                                     )}
                                 >
-                                    <ModelAvatar name={model.name} size="sm" />
+                                    <ModelAvatar
+                                        modelId={model.id}
+                                        provider={model.provider}
+                                        name={model.name}
+                                        size="sm"
+                                    />
 
                                     <span className="min-w-0 flex-1 text-left">
                                         <span className="text-foreground block truncate">
@@ -327,5 +336,4 @@ export const ModelPicker = ({
 
 const modelOptionId = (index: number): string => `model-picker-option-${index}`;
 
-const cnRow =
-    "transition-state flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm";
+const cnRow = "model-picker-option transition-state";
