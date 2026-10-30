@@ -25,15 +25,15 @@ export const DialogContent = ({
     <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
             className={cn(
-                "duration-(--dur-state) fixed inset-0 z-50 bg-black/50",
-                "data-open:animate-in data-open:fade-in-0",
-                "data-closed:animate-out data-closed:fade-out-0",
+                "ui-overlay duration-(--dur-panel) fixed inset-0 z-50",
+                "data-[state=open]:animate-in data-[state=open]:fade-in-0",
+                "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
             )}
         />
 
         <div
             className={cn(
-                "fixed inset-0 z-50 flex justify-center overflow-y-auto p-4",
+                "fixed inset-0 z-50 flex justify-center overflow-y-auto overscroll-contain p-4",
                 "pointer-events-none",
                 alignClasses[align],
             )}
@@ -41,9 +41,10 @@ export const DialogContent = ({
             <DialogPrimitive.Content
                 className={cn(
                     "duration-(--dur-state) pointer-events-auto",
-                    "bg-popover text-popover-foreground outline-hidden my-auto w-full max-w-md rounded-xl shadow-2xl",
-                    "data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
-                    "data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+                    align === "center" && "my-auto",
+                    "ui-dialog bg-popover text-popover-foreground outline-hidden w-full max-w-md rounded-2xl",
+                    "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
+                    "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
                     className,
                 )}
                 {...props}
