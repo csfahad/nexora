@@ -12,7 +12,12 @@ export const ModelStack = ({
     <>
         <span aria-hidden className="model-stack">
             {models.map((model) => (
-                <ModelAvatar key={model.id} name={model.name} size="sm" />
+                <ModelAvatar
+                    key={model.id}
+                    modelId={model.id}
+                    name={model.name}
+                    size="sm"
+                />
             ))}
         </span>
 
