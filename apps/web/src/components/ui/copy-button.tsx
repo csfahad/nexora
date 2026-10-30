@@ -14,6 +14,7 @@ export const CopyButton = ({
     readonly className?: string;
 }) => {
     const [copied, setCopied] = useState(false);
+    const [failed, setFailed] = useState(false);
 
     useEffect(() => {
         if (!copied) return;
@@ -24,11 +25,13 @@ export const CopyButton = ({
     }, [copied]);
 
     const copy = async () => {
+        setFailed(false);
         try {
             await navigator.clipboard.writeText(text);
             setCopied(true);
         } catch {
             setCopied(false);
+            setFailed(true);
         }
     };
 
@@ -38,18 +41,23 @@ export const CopyButton = ({
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => void copy()}
-                aria-label={copied ? "Copied" : label}
+                aria-label={copied ? "Copied" : failed ? "Copy failed. Try again" : label}
+                title={copied ? "Copied" : failed ? "Copy failed. Try again" : label}
                 className={className}
             >
                 {copied ? (
-                    <IconCheck aria-hidden stroke={2} className="text-win" />
+                    <IconCheck aria-hidden stroke={2} className="text-primary" />
                 ) : (
                     <IconCopy aria-hidden stroke={1.75} />
                 )}
             </Button>
 
             <span aria-live="polite" className="sr-only">
-                {copied ? "Copied to clipboard" : ""}
+                {copied
+                    ? "Copied to clipboard"
+                    : failed
+                      ? "Could not copy. Try again."
+                      : ""}
             </span>
         </>
     );
