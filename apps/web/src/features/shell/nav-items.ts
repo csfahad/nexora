@@ -1,4 +1,4 @@
-import { IconStack2, IconSwords, IconTrophy } from "@tabler/icons-react";
+import { IconSquareRoundedPlus, IconStack2, IconTrophy } from "@tabler/icons-react";
 import type { TablerIcon } from "@tabler/icons-react";
 
 export type NavItem = Readonly<{
@@ -8,7 +8,7 @@ export type NavItem = Readonly<{
 }>;
 
 export const NAV_ITEMS: readonly NavItem[] = [
-    { to: "/", label: "New Chat", icon: IconSwords },
+    { to: "/", label: "New comparison", icon: IconSquareRoundedPlus },
     { to: "/leaderboard", label: "Leaderboard", icon: IconTrophy },
     { to: "/models", label: "Models", icon: IconStack2 },
 ];
