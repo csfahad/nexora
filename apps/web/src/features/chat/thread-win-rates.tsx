@@ -50,8 +50,9 @@ export const ThreadWinRates = ({ thread }: { readonly thread: ThreadView }) => {
                     key={rate.modelId}
                     className="win-pill"
                     data-leading={rate.modelId === leader ? "" : undefined}
+                    title={`${rate.modelName} won ${rate.wins} of ${voted} voted turns`}
                 >
-                    <ModelAvatar name={rate.modelName} size="sm" />
+                    <ModelAvatar modelId={rate.modelId} name={rate.modelName} size="sm" />
 
                     <span aria-hidden>
                         {rate.wins}/{voted}

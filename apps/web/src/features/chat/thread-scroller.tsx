@@ -28,12 +28,7 @@ export const ThreadScroller = ({
     return (
         <div className="relative min-h-0 flex-1">
             <div ref={scrollerRef} className="h-full overflow-y-auto">
-                <div
-                    className={cn(
-                        "mx-auto w-full max-w-6xl px-4 py-6",
-                        !settled && "invisible",
-                    )}
-                >
+                <div className={cn("thread-content", !settled && "invisible")}>
                     {children}
                 </div>
             </div>

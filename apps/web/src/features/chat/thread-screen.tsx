@@ -15,6 +15,6 @@ export const ThreadScreen = ({
             <ThreadTranscript thread={thread} />
         </ThreadScroller>
 
-        <div className="mx-auto w-full max-w-6xl shrink-0 px-4 pb-3 pt-2">{composer}</div>
+        <div className="thread-composer shrink-0">{composer}</div>
     </div>
 );
