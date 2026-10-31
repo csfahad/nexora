@@ -1,3 +1,6 @@
+import { IconArrowRight, IconTrophy, IconUser } from "@tabler/icons-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeading } from "@/components/ui/page-heading";
 import { Link } from "@tanstack/react-router";
 import { buttonClasses } from "@/components/ui/button";
 import { ModelAvatar } from "@/components/ui/model-avatar";
@@ -43,15 +46,21 @@ export const LeaderboardScreen = ({
 
     return (
         <div className="screen screen-scroll">
-            <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-                <header className="flex flex-col gap-2">
-                    <h1 className="text-2xl font-semibold">Leaderboard</h1>
-                    <p className="text-muted-foreground">
-                        Every model&rsquo;s real record, from actual head-to-head votes.
-                    </p>
-                </header>
+            <div className="page-content">
+                <PageHeading
+                    title="Let the answers decide."
+                    description="Real prompts. Head-to-head votes. See how models perform across the community, or build a ranking from your own comparisons."
+                >
+                    <Link
+                        to="/"
+                        className={buttonClasses({ variant: "outline", size: "sm" })}
+                    >
+                        Compare models
+                        <IconArrowRight aria-hidden stroke={1.75} />
+                    </Link>
+                </PageHeading>
 
-                <div className="mt-6 flex flex-wrap items-center gap-3">
+                <div className="page-toolbar leaderboard-toolbar">
                     <ViewToggle
                         label="Leaderboard scope"
                         options={SCOPES}
@@ -164,7 +173,7 @@ const CrossTabNote = ({ pricing }: { readonly pricing: PricingTab }) => (
     <p className="text-muted-foreground text-2xs leading-relaxed">
         A prompt can be sent to free and paid models together, so some battles here were
         decided by a model on the{" "}
-        <strong className="text-foreground font-medium">
+        <strong className="text-foreground standings-model-name font-medium">
             {pricing === "free" ? "Paid" : "Free"}
         </strong>{" "}
         tab.
@@ -178,13 +187,17 @@ const StandingsTable = ({
     readonly rows: readonly RankedRow[];
     readonly pricing: PricingTab;
 }) => (
-    <div className="border-border mt-4 overflow-x-auto rounded-xl border">
+    <div className="standings-table">
         <table className="min-w-184 w-full border-collapse text-left">
+            <caption className="sr-only">
+                {pricing === "free" ? "Free" : "Paid"} model rankings, win rates, and
+                measured response speed
+            </caption>
             <thead>
                 <tr className="border-border border-b">
                     <Th className="w-12 text-right">#</Th>
                     <Th>Model</Th>
-                    <Th className="w-88">Win rate</Th>
+                    <Th className="w-72">Win rate</Th>
                     <Th className="text-right">Avg. to first token</Th>
                     <Th className="text-right">Avg. tokens/sec</Th>
                 </tr>
@@ -200,8 +213,12 @@ const StandingsTable = ({
                         </td>
                         <td className="px-3 py-3.5">
                             <div className="flex items-center gap-2.5">
-                                <ModelAvatar name={row.modelName} size="sm" />
-                                <span className="text-foreground font-medium">
+                                <ModelAvatar
+                                    modelId={row.modelId}
+                                    name={row.modelName}
+                                    size="sm"
+                                />
+                                <span className="text-foreground standings-model-name font-medium">
                                     {row.modelName}
                                 </span>
                                 {pricing === "paid" && <TierChip tier={row.tier} />}
@@ -247,10 +264,7 @@ const WinRateCell = ({ row }: { readonly row: RankedRow }) => {
             <span className="numeric text-foreground w-10 shrink-0 text-sm font-semibold">
                 {pct}%
             </span>
-            <div
-                aria-hidden
-                className="bg-input h-1.5 w-28 shrink-0 overflow-hidden rounded-full"
-            >
+            <div aria-hidden className="win-rate-track">
                 <div
                     className="bg-primary h-full rounded-full"
                     style={{ width: `${pct}%` }}
@@ -272,67 +286,63 @@ const Absent = ({ label }: { readonly label: string }) => (
 );
 
 const NoModelsYet = ({ pricing }: { readonly pricing: PricingTab }) => (
-    <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
-        <h3 className="font-heading text-lg font-semibold">Nothing measured yet</h3>
-        <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
-            {pricing === "free"
-                ? "Send a prompt in the arena and the models that answer will appear here with their real numbers."
-                : "No paid model has answered a voted prompt yet. Once one does, its real record appears here."}
-        </p>
+    <EmptyState
+        icon={IconTrophy}
+        title="Nothing measured yet"
+        description={
+            pricing === "free"
+                ? "Send a prompt in the arena. Models that answer will appear here with their real numbers."
+                : "No paid model has answered a voted prompt yet. Its record will appear after the first comparison."
+        }
+    >
         <Link to="/" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
-            Go to the arena
+            Start a comparison
+            <IconArrowRight aria-hidden stroke={1.75} />
         </Link>
-    </div>
+    </EmptyState>
 );
-
 const EmptyPersonal = () => (
-    <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
-        <h2 className="font-heading text-lg font-semibold">No personal ranking yet</h2>
-        <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
-            Your ranking is built from your own votes. Send a prompt in the arena and pick
-            a winner, and your head-to-head record will appear here.
-        </p>
+    <EmptyState
+        icon={IconTrophy}
+        title="Your ranking starts with a vote."
+        description="Compare answers on a prompt of your own, then choose a winner. Each vote builds your personal record."
+    >
         <Link to="/" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
-            Go to the arena
+            Start a comparison
+            <IconArrowRight aria-hidden stroke={1.75} />
         </Link>
-    </div>
+    </EmptyState>
 );
-
 const EmptyPersonalPaid = () => (
-    <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
-        <h2 className="font-heading text-lg font-semibold">
-            No paid-model votes from you yet
-        </h2>
-        <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
-            This fills in once you vote on a turn that included a paid model. Your
-            free-model record is on the Free tab.
-        </p>
+    <EmptyState
+        icon={IconTrophy}
+        title="No paid-model votes yet"
+        description="Vote on a comparison that includes a paid model to start this record. Your free-model results are on the Free tab."
+    >
         <Link
             to="/models"
             className={buttonClasses({ variant: "outline", class: "mt-5" })}
         >
-            Browse paid models
+            Explore models
+            <IconArrowRight aria-hidden stroke={1.75} />
         </Link>
-    </div>
+    </EmptyState>
 );
-
 const SignedOutPersonal = () => (
-    <div className="border-border bg-card mt-4 rounded-xl border px-6 py-14 text-center">
-        <h2 className="font-heading text-lg font-semibold">
-            Sign in to see your ranking
-        </h2>
-        <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm">
-            A personal ranking is built from the votes you cast. The global one beside it
-            reads the same whether you are signed in or not.
-        </p>
+    <EmptyState
+        icon={IconUser}
+        title="A ranking of your own."
+        description="Sign in to keep your comparisons and build a personal ranking from the votes you cast."
+    >
         <Link
             to="/sign-in"
             search={{ next: "/leaderboard" }}
             className={buttonClasses({ variant: "primary", class: "mt-5" })}
         >
             Sign in
+            <IconArrowRight aria-hidden stroke={1.75} />
         </Link>
-    </div>
+    </EmptyState>
 );
 
 const Th = ({
