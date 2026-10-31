@@ -1449,7 +1449,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     align-items: center;
     justify-content: space-between;
     margin-top: 0.625rem;
-    padding: 0 1.5rem 0.25rem;
+    padding: 0 1.5rem 0.5rem;
     font-size: 0.75rem;
     font-weight: 500;
     color: var(--muted-foreground);
@@ -1464,15 +1464,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 0 0.75rem 0.25rem;
-}
-.sidebar-thread-groups {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-.sidebar-thread-heading {
-    padding: 0 0.5rem 0.125rem;
+    padding: 0 0.875rem 0.25rem;
 }
 .sidebar-thread-list {
     display: flex;
