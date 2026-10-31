@@ -55,6 +55,8 @@ function RootLayout() {
     if (
         pathname.startsWith("/share/") ||
         pathname === "/plans" ||
+        pathname === "/sign-in" ||
+        pathname === "/sign-in/" ||
         pathname === "/settings/billing" ||
         pathname === "/settings/billing/"
     ) {

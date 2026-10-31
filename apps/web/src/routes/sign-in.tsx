@@ -10,6 +10,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/sign-in")({
+    head: () => ({ meta: [{ title: "Sign in — Nexora" }] }),
     validateSearch: (search: Record<string, unknown>) => searchSchema.parse(search),
     component: SignIn,
 });

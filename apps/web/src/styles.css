@@ -2048,25 +2048,48 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     color: var(--muted-foreground);
     margin-bottom: 1.5rem;
 }
+.auth-page {
+    background: var(--background);
+}
 .auth-layout {
     display: grid;
     place-items: center;
     min-height: 100%;
-    padding: 3rem 1.5rem;
-    background: radial-gradient(ellipse at 50% 10%, var(--surface-tint), transparent 70%);
+    padding: max(3rem, env(safe-area-inset-top)) 1.5rem
+        max(3rem, env(safe-area-inset-bottom));
 }
 .auth-panel {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    max-width: 26rem;
-    padding: 2.5rem;
-    border-radius: 1rem;
-    background: var(--card);
-    box-shadow: var(--shadow-card);
+    max-width: 24rem;
+    text-align: center;
+}
+.auth-brand {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    border-radius: var(--radius-md);
+}
+.auth-brand .wordmark {
+    gap: 0.75rem;
+    font-size: 1.375rem;
+}
+.auth-brand .wordmark-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.875rem;
+}
+.auth-brand .nexora-mark {
+    width: 1.875rem;
+    height: 1.875rem;
 }
 .auth-panel h1 {
-    margin-top: 1.5rem;
-    font-size: 1.875rem;
+    margin: 0;
+    font-size: 2.125rem;
+    font-weight: 600;
     letter-spacing: -0.035em;
+    line-height: 1.2;
 }
 .auth-panel p {
     line-height: 1.65;
@@ -2078,9 +2101,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     margin-top: 2rem;
 }
 .auth-footnote {
-    margin-top: 1.75rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--border);
+    margin-top: 1.5rem;
     color: var(--muted-foreground);
     font-size: 0.75rem;
 }
@@ -2351,8 +2372,11 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         line-height: 1.6;
         margin-top: 1.5rem;
     }
-    .auth-panel {
-        padding: 1.75rem;
+    .auth-layout {
+        padding-inline: 1.25rem;
+    }
+    .auth-panel h1 {
+        font-size: 1.875rem;
     }
     .thread-content {
         padding: 1rem;
@@ -2582,13 +2606,15 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     overflow-y: auto;
 }
 .auth-copy {
-    margin-top: 1.75rem;
+    margin-top: 2rem;
 }
 .auth-copy p {
     margin-top: 0.75rem;
+    overflow-wrap: anywhere;
 }
-.auth-panel > a {
-    margin-top: 1.5rem;
+.auth-continue {
+    width: 100%;
+    margin-top: 2rem;
 }
 .auth-panel > [role="alert"] {
     margin-top: 1rem;
