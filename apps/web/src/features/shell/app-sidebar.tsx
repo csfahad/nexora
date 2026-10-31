@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
-import { IconSearch } from "@tabler/icons-react";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { IconMessage, IconSearch } from "@tabler/icons-react";
+import { Wordmark } from "@/components/ui/wordmark";
+import { ThemeMenu } from "@/components/theme/theme-menu";
 import { AccountRow } from "./account-row";
 import { DeleteThreadDialog } from "./delete-thread-dialog";
 import { NAV_ITEMS } from "./nav-items";
@@ -30,7 +31,7 @@ const CompactSidebar = ({
             aria-label="Nexora — go to arena"
             className="font-heading text-foreground grid size-9 place-items-center rounded-md text-base font-semibold"
         >
-            N
+            <Wordmark compact />
         </Link>
 
         <nav aria-label="Primary" className="mt-4 flex flex-col items-center gap-1">
@@ -38,7 +39,7 @@ const CompactSidebar = ({
                 <Link
                     key={to}
                     to={to}
-                    activeOptions={{ exact: true }}
+                    activeOptions={{ exact: true, includeSearch: false }}
                     onClick={onNavigate}
                     aria-label={label}
                     title={label}
@@ -59,8 +60,8 @@ const CompactSidebar = ({
             </button>
         </nav>
 
-        <div className="mt-auto flex flex-col items-center gap-3">
-            <ThemeToggle orientation="vertical" />
+        <div className="mt-auto flex flex-col items-center gap-2">
+            <ThemeMenu />
             <AccountRow compact onNavigate={onNavigate} />
         </div>
     </div>
@@ -123,24 +124,24 @@ export const AppSidebar = ({
 
     return (
         <div className="bg-sidebar text-sidebar-foreground flex h-full flex-col">
-            <div className="flex h-14 items-center px-4">
+            <div className="sidebar-brand flex items-center">
                 <Link
                     to="/"
-                    activeOptions={{ exact: true }}
+                    activeOptions={{ exact: true, includeSearch: false }}
                     onClick={onNavigate}
                     aria-label="Nexora — go to arena"
                     className="font-heading text-foreground rounded-md text-lg font-semibold tracking-tight"
                 >
-                    Nexora
+                    <Wordmark />
                 </Link>
             </div>
 
-            <nav aria-label="Primary" className="flex flex-col gap-0.5 px-3">
+            <nav aria-label="Primary" className="sidebar-nav flex flex-col">
                 {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
                     <Link
                         key={to}
                         to={to}
-                        activeOptions={{ exact: true }}
+                        activeOptions={{ exact: true, includeSearch: false }}
                         onClick={onNavigate}
                         className="side-row"
                     >
@@ -151,22 +152,23 @@ export const AppSidebar = ({
 
                 <button type="button" onClick={onOpenSearch} className="side-row">
                     <IconSearch aria-hidden className="size-4.5" stroke={1.75} />
-                    Search Threads
+                    Search threads
                     {shortcut !== null && <kbd className="kbd ml-auto">{shortcut}</kbd>}
                 </button>
             </nav>
 
-            <div className="border-border mx-4 mt-4 border-t" />
+            <div aria-hidden className="sidebar-history-separator" />
+            <p className="sidebar-section-label">Recent threads</p>
 
-            <p className="label-meta px-4 pb-1 pt-4">Recent Threads</p>
-
-            <div className="flex-1 overflow-y-auto px-3 py-1">
+            <div className="sidebar-history">
                 {threadGroups.length === 0 ? (
-                    <p className="text-muted-foreground text-pretty px-2 py-3 text-sm">
-                        Your threads will appear here once you send a prompt.
-                    </p>
+                    <div className="sidebar-empty">
+                        <IconMessage aria-hidden stroke={1.5} />
+                        <strong>A fresh start.</strong>Your comparisons will appear here,
+                        ready to pick up where you left off.
+                    </div>
                 ) : (
-                    <div className="flex flex-col gap-4">
+                    <div className="sidebar-thread-groups">
                         {threadGroups.map((group) => (
                             <section
                                 key={group.label}
@@ -174,12 +176,12 @@ export const AppSidebar = ({
                             >
                                 <h2
                                     id={groupDomId(group.label)}
-                                    className="label-meta px-2 pb-1"
+                                    className="sidebar-thread-heading label-meta"
                                 >
                                     {group.label}
                                 </h2>
 
-                                <div className="flex flex-col gap-0.5">
+                                <div className="sidebar-thread-list">
                                     {group.threads.map((thread) => (
                                         <ThreadRow
                                             key={thread.id}
@@ -218,9 +220,11 @@ export const AppSidebar = ({
                 )}
             </div>
 
-            <div className="border-border flex items-center justify-between gap-2 border-t px-3 py-3">
-                <AccountRow onNavigate={onNavigate} />
-                <ThemeToggle />
+            <div className="sidebar-bottom">
+                <div className="sidebar-account">
+                    <AccountRow onNavigate={onNavigate} />
+                </div>
+                <ThemeMenu />
             </div>
 
             <ShareThreadDialog
