@@ -1,3 +1,4 @@
+import { CopyButton } from "@/components/ui/copy-button";
 import { IconRefresh } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { ModelAvatar } from "@/components/ui/model-avatar";
@@ -11,7 +12,7 @@ import type { ResolvedResponse } from "./resolve-response";
 
 const STATE_LABEL: Readonly<Record<ResolvedResponse["state"], string>> = {
     streaming: "Streaming",
-    complete: "Done",
+    complete: "Complete",
     failed: "Failed",
 };
 
@@ -47,7 +48,11 @@ export const ResponseColumn = ({
             data-winner={vote.state === "won" ? "" : undefined}
         >
             <header className="answer-head">
-                <ModelAvatar name={response.modelName} size="sm" />
+                <ModelAvatar
+                    modelId={response.modelId}
+                    name={response.modelName}
+                    size="sm"
+                />
 
                 <h3
                     className="text-foreground min-w-0 flex-1 truncate text-sm font-semibold"
@@ -61,6 +66,12 @@ export const ResponseColumn = ({
                     <span className="label-meta">{STATE_LABEL[response.state]}</span>
                 </span>
             </header>
+
+            {Vote !== null && vote.state !== "closed" && (
+                <div className="answer-vote">
+                    <Vote vote={vote} />
+                </div>
+            )}
 
             <div className="answer-body">
                 {streaming && empty && <Thinking verb={verb} />}
@@ -93,13 +104,13 @@ export const ResponseColumn = ({
                 )}
             </div>
 
-            {Vote !== null && vote.state !== "closed" && (
-                <div className="answer-vote">
-                    <Vote vote={vote} />
-                </div>
-            )}
-
             <footer className="answer-foot">
+                {response.state === "complete" && !empty && (
+                    <CopyButton
+                        text={response.text}
+                        label={`Copy ${response.modelName} answer`}
+                    />
+                )}
                 <ResponseMetrics metrics={response.metrics} />
             </footer>
         </article>
