@@ -1,10 +1,137 @@
 # Scope: Nexora
 
+<!-- Current UI direction supersedes historical styling decisions below. -->
+
+## UI redesign — Apple, Vidyst, and Backdoor
+
+Authorized in the exported session and continued on 2026-10-29. Preserve product behavior and real measurements; replace the old warm/rust visual system with cool silver surfaces, graphite text, Geist typography, blue controls, restrained elevation, and a fully supported dark theme. The historical color and typography requirements below are superseded by this request.
+
+- [x] Recover the previous session and inspect the partially applied design system.
+- [x] Finish shared model identities, controls, standalone headers, and accessible empty states.
+- [x] Apply the design across arena, picker, catalog, leaderboard, chat, sharing, sign-in, pricing, and billing.
+- [x] Verify typecheck, lint, production build, and all 90 contrast pairs; responsive captures cover the public screens at 1440px and 390px.
+- [x] Close the independent finish review (ship verdict; all four material fixes resolved) and document the final system in `docs/DESIGN.md`, `docs/PRODUCT.md`, and `.impeccable/design.json`.
+
+Verification artifacts are in `.impeccable/review/`. All final browser assertions pass, including prompt starters, search, model-selection limits, mobile navigation, annual pricing, and leaderboard active state. Authenticated chat, shared threads, and billing-ready screens were reviewed in source; live account/payment verification remains outstanding and the redesign does not mark historical feature 11/12 payment checks complete.
+
 Send one prompt, watch up to three AI models answer it at the same time, and vote for the best one. Over time those votes and the real per-call numbers, speed, tokens, cost, build an honest leaderboard of which model is actually worth using.
 
 Build it in a thin, working slice first, one prompt actually reaching a model and coming back, before making any single part of it fuller. Then thicken it piece by piece. Before building anything, decide what you're doing and why in a few plain sentences, then build it, and if the plan turns out wrong once it's actually built, say so and fix the plan too, not just the code.
 
 Whenever a "build it" style step actually gets underway, break it into its own short list of what's genuinely being done, and check each part off as it's finished, right in this file. That way this file can be opened fresh, in a brand new conversation, and it's obvious what's already done and what's still left, without anyone re-explaining the feature from scratch.
+
+### Approved UI refinements — 2026-10-29
+
+Use official provider assets selected by model namespace across every model surface,
+keep the top-bar plans action as its single shell entry point, remove standalone back
+buttons, and replace heavy input outlines with a thin focus edge in both themes.
+
+- [x] Source and connect provider icons across the catalog, picker, lineup, leaderboard, and chat.
+- [x] Remove the sidebar plans promotion and standalone back buttons.
+- [x] Use thin blue input/composer focus edges while retaining button keyboard outlines.
+- [x] Verify formatting, typecheck, lint, production build, contrast, and focused browser flows.
+
+Verification: 64 local brand/author assets cover all 60 publisher namespaces in the
+2026-10-29 catalog snapshot. Typecheck, ESLint, Prettier, production build, and all
+90 contrast pairs pass. The final 38 browser checks cover logo loading, navigation
+removal, keyboard focus, and desktop/mobile layouts in both themes. Screenshots and
+checks are in `.impeccable/review/refinement-*`. Authenticated chat, shared-thread,
+and payment flows retain the earlier source-review-only boundary.
+
+### Composer avatar containment — 2026-10-29
+
+Keep provider marks inside the model-selector pill in both the arena and thread composer.
+The shared stack uses 24px circular avatars with 1px separators instead of 28px rounded
+squares with 2px separators; the selector keeps its existing size and behavior.
+
+- [x] Apply compact circular avatar sizing to the shared model stack.
+- [x] Verify containment, selector interaction, formatting, typecheck, lint, and build.
+
+Verification: typecheck, lint, Prettier, and production build pass. All 24 browser
+checks pass for the arena and mounted thread composer components at 1440px/390px in
+both themes. Desktop avatars have 4px vertical clearance inside the 32px pill, with
+a 1px separator ring; mobile retains the 44px touch target. Both selectors open
+correctly. Evidence: `.impeccable/review/stack-*`.
+
+### Compact mobile lineup — 2026-10-29
+
+Keep all selected-model pills centered on one row below the mobile composer. Reduce pill padding
+and internal gaps, use 16px provider avatars and 24px removal targets, and allow long
+names to truncate while keeping the full model title and removal label available.
+
+- [x] Apply compact spacing and a single row at mobile widths.
+- [x] Center the compact row and verify alignment with one, two, and three selected models.
+- [x] Verify narrow-screen layout, removal interactions, formatting, typecheck, lint, and build.
+
+Verification: typecheck, lint, Prettier, and production build pass. All 27 final browser
+checks pass at 320/360/390/430px in both themes, including long-name fixtures, no page
+overflow, compact 32px pills, and fresh-page touch removal. Desktop spacing remains
+unchanged. The centering follow-up passes 18 browser checks at 320/390/430px with
+one, two, and three selected models in both themes; typecheck, lint, and build pass.
+Evidence: `.impeccable/review/mobile-lineup-*`.
+
+### Compact thread follow-up composer — 2026-10-29
+
+Use a compact follow-up composer with one initial text row and a controls row, tighter
+padding, and a smaller toolbar gap. Keep the homepage prompt area at its current size.
+Both variants continue to grow with draft text up to the existing 180px text limit.
+
+- [x] Apply one-row sizing and compact spacing to the follow-up variant.
+- [x] Verify empty, one-line, multiline, send/clear, stop, and mobile/desktop behavior in both themes.
+- [x] Complete formatting, typecheck, lint, and production build.
+
+Verification: all 32 browser checks pass using the actual mounted composer and
+thread model-selector components at 1440px/390px in both themes. Empty follow-ups
+measure 98px on desktop and 102px on mobile, versus the homepage’s preserved
+165px/161px. Shift+Enter grows to two text rows, Enter and pointer sending restore
+the compact height, long drafts scroll at 180px, and Stop remains functional.
+These component fixtures do not exercise authenticated chat requests. Typecheck,
+lint, Prettier, and production build pass. Evidence: `.impeccable/review/follow-up-*`.
+
+### Compact sidebar footer and thread list — 2026-10-29
+
+Place the account control and an icon-only theme menu on one footer row. The theme menu
+shows System, Dark, and Light with the current choice marked, persists the selection,
+and keeps mounted theme controls synchronized. Add a full-width separator after Search
+threads, reduce the Recent threads gap, and tighten thread row and group spacing.
+
+- [x] Add the compact radio menu and use it in expanded and collapsed sidebars.
+- [x] Align the footer controls and tighten the thread section around a new separator.
+- [x] Verify theme selection, persistence, keyboard control, sidebar layouts, and thread spacing.
+- [x] Complete formatting, typecheck, lint, and production build.
+
+The user verified and approved the final sidebar. Browser checks covered compact
+desktop/mobile layouts, menu selection, persistence, keyboard focus, and thread spacing.
+Typecheck, lint, formatting, and production build passed. Additional verification
+stopped at the user's request.
+
+### Full-width standalone headers — 2026-10-29
+
+Use the full viewport width for Plans, Billing, and shared-thread navigation, with
+consistent edge padding. Align the wordmark and page title vertically and reuse
+the sidebar's icon theme menu, opening below the header.
+
+- [x] Update the shared standalone header width, alignment, and theme control.
+- [x] Complete formatting, typecheck, lint, and production build.
+
+Formatting, typecheck, lint, and production build passed. Verification stayed
+limited to source review and these checks, following the user's request to avoid
+extended browser testing.
+
+### Visible answer voting and thread tallies — 2026-10-29
+
+Keep the vote action and saved winner directly below each model header, where
+they remain easy to find for long answers. Label the action "Vote for this answer".
+Show saved thread win tallies on mobile as compact provider/count pills and expose
+the model's name and win count in each pill's title.
+
+- [x] Move answer voting above the answer body and clarify the action label.
+- [x] Show compact thread vote tallies on mobile and identify each model.
+- [ ] Complete formatting, typecheck, lint, and production build.
+
+Voting remains available after all responses settle and at least two complete;
+shared pages remain read-only. The reported thread URL is still needed to diagnose
+any missing controls beyond the visibility issues found in source.
 
 ## Stack
 

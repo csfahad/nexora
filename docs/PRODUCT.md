@@ -133,6 +133,38 @@ link permanently; re-sharing mints a different one. Shared threads are never sea
 
 - The product is named **Nexora**. The sketches letter it "LLM Arena"; that is placeholder
   hand-lettering in a structural sketch, not a name.
+- **Current visual authority (2026-10-29): Apple, [Vidyst](https://www.vidyst.com), and
+  [Backdoor](https://backdoorai.app).** The user explicitly replaced the older visual
+  commitments in `docs/scope.md`. The shipped continuation is a familiar comparison
+  workspace: left rail, top bar, prompt-first entry, independent answer cards, and familiar
+  affordances, with cool silver surfaces, graphite type, blue controls, and Geist.
+- The build uses suitable Aceternity patterns sparingly: a catalog pointer spotlight and
+  a finite composer hover/focus border sweep. Motion stays restrained and reduced-motion
+  alternatives remain available. Keyboard operation and readable numeric comparison
+  retain their craft bar.
+- One primary accent, **blue**, carries actions, links, focus, selection, and the branching
+  comparison signature. Large reading surfaces stay neutral; soft blue supports selection
+  and restrained surface emphasis. `docs/DESIGN.md` records the current tokens and forms.
+- **Green marks chosen winners. Red marks errors and destructive actions.** Copy
+  confirmation uses blue. Each meaningful state also has text, an icon, or another visible signal.
+- **Geist is the shared display and body family.** Measured values use tabular figures.
+  Both Light and Dark are supported; **System** is the default appearance choice and follows
+  the OS, while explicit choices persist.
+- Voice: plain and measured. Never sell the numbers, never apologize for them, never hide
+  a zero.
+
+<details>
+<summary>Superseded visual commitments — retained as historical evidence</summary>
+
+The following record describes the pre-redesign visual authority. The current commitments
+above and `docs/DESIGN.md` govern new surfaces; the product purpose and measured evidence
+remain unchanged by this visual revision.
+
+```text
+## Brand Commitments
+
+- The product is named **Nexora**. The sketches letter it "LLM Arena"; that is placeholder
+  hand-lettering in a structural sketch, not a name.
 - **Standing preference: the category standard, played straight.** Offered a choice between
   three metaphor-led visual worlds and the plain, well-built app-shell convention, the user
   chose the convention deliberately. So convention is the commitment on every surface, not
@@ -155,6 +187,16 @@ link permanently; re-sharing mints a different one. Shared threads are never sea
   brighter and more saturated than the ground: a button may never blend into the page.
 - Voice: plain and measured. Never sell the numbers, never apologize for them, never hide
   a zero.
+
+- A 2px rust focus ring with 2px offset, visible on every interactive element in both
+  modes. `outline: none` never appears without a replacement ring in the same rule.
+- **Color is never the sole carrier of meaning.** Rust and error-red sit only ~26–30° of
+  hue apart, and rust and winner-green ~102°, which is squarely in deuteranopia's blind
+  spot. Winner, error and selected states each carry a second signal — text, icon, or
+  shape — beyond their color.
+```
+
+</details>
 
 ## Evidence on Hand
 
@@ -212,10 +254,10 @@ link permanently; re-sharing mints a different one. Shared threads are never sea
 A gate, not an aspiration, on every screen and in both light and dark mode:
 
 - Body text at 4.5:1; borders that identify a component, and large text, at 3:1.
-- A 2px rust focus ring with 2px offset, visible on every interactive element in both
-  modes. `outline: none` never appears without a replacement ring in the same rule.
+- A visible 2px blue focus ring with 2px offset on standard controls in both modes.
+  Text inputs use a thin blue focus edge without an outer outline. Composite text
+  inputs replace the inner outline with a thin wrapper edge or inset bottom line.
+  Buttons inside those composites retain their own visible keyboard outlines.
 - Full keyboard operation of the theme toggle, the model picker, and the vote buttons.
-- **Color is never the sole carrier of meaning.** Rust and error-red sit only ~26–30° of
-  hue apart, and rust and winner-green ~102°, which is squarely in deuteranopia's blind
-  spot. Winner, error and selected states each carry a second signal — text, icon, or
-  shape — beyond their color.
+- **Color is never the sole carrier of meaning.** Winner, error, and selected states
+  each carry a second signal — text, icon, weight, or shape — beyond their color.
