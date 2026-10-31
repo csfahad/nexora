@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { IconAlertTriangle, IconBrandGithub, IconBrandGoogle } from "@tabler/icons-react";
 import { Wordmark } from "@/components/ui/wordmark";
+import { useTheme } from "@/components/theme/use-theme";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { authClient } from "@/infrastructure/auth-client";
 import { useSessionState } from "@/infrastructure/session";
@@ -17,6 +19,7 @@ const START_FAILED =
     "We couldn't reach that sign-in just now. Try it again, or use the other provider.";
 
 export const SignInScreen = ({ next }: { readonly next: string }) => {
+    useTheme();
     const session = useSessionState();
     const [pending, setPending] = useState<ProviderId | null>(null);
     const [failed, setFailed] = useState(false);
@@ -43,16 +46,16 @@ export const SignInScreen = ({ next }: { readonly next: string }) => {
     };
 
     return (
-        <div className="screen screen-scroll">
+        <main id="sign-in-main" className="screen screen-scroll auth-page">
             <div className="auth-layout">
-                <div className="auth-panel">
-                    <Wordmark />
+                <section className="auth-panel" aria-labelledby="sign-in-heading">
+                    <Link to="/" aria-label="Nexora — go to arena" className="auth-brand">
+                        <Wordmark />
+                    </Link>
                     {session.status === "signed-in" ? (
                         <>
                             <div className="auth-copy">
-                                <h1 className="text-2xl font-semibold">
-                                    You&rsquo;re signed in
-                                </h1>
+                                <h1 id="sign-in-heading">You&rsquo;re signed in</h1>
                                 <p className="text-muted-foreground text-pretty text-sm">
                                     Signed in as {session.user.name} ({session.user.email}
                                     ).
@@ -62,7 +65,7 @@ export const SignInScreen = ({ next }: { readonly next: string }) => {
                                 href={next}
                                 className={cn(
                                     buttonClasses({ variant: "outline", size: "lg" }),
-                                    "w-full",
+                                    "auth-continue",
                                 )}
                             >
                                 Continue
@@ -71,10 +74,10 @@ export const SignInScreen = ({ next }: { readonly next: string }) => {
                     ) : (
                         <>
                             <div className="auth-copy">
-                                <h1>Make it your own.</h1>
+                                <h1 id="sign-in-heading">Welcome to Nexora</h1>
                                 <p className="text-muted-foreground text-pretty text-sm">
-                                    Your threads, your votes, and the numbers measured on
-                                    your own prompts are all saved to your account.
+                                    Sign in to save your threads, votes, and model
+                                    comparisons.
                                 </p>
                             </div>
 
@@ -85,6 +88,7 @@ export const SignInScreen = ({ next }: { readonly next: string }) => {
                                         variant="outline"
                                         size="lg"
                                         className="w-full"
+                                        aria-label={label}
                                         loading={pending === id}
                                         disabled={pending !== null && pending !== id}
                                         onClick={() => void start(id)}
@@ -98,7 +102,7 @@ export const SignInScreen = ({ next }: { readonly next: string }) => {
                             {failed && (
                                 <p
                                     role="alert"
-                                    className="text-foreground flex items-start gap-2 text-pretty text-sm"
+                                    className="text-foreground flex items-start gap-2 text-pretty text-left text-sm"
                                 >
                                     <IconAlertTriangle
                                         aria-hidden
@@ -110,12 +114,13 @@ export const SignInScreen = ({ next }: { readonly next: string }) => {
                             )}
                         </>
                     )}
-                    <p className="auth-footnote">
-                        One account for your threads, votes, and model comparisons. Sign
-                        in securely with Google or GitHub.
-                    </p>
-                </div>
+                    {session.status !== "signed-in" && (
+                        <p className="auth-footnote">
+                            Sign in securely with Google or GitHub.
+                        </p>
+                    )}
+                </section>
             </div>
-        </div>
+        </main>
     );
 };
