@@ -256,7 +256,9 @@ Spacing follows a (`4px`) rhythm, with (`16px`) card/grid gaps, (`24px`) card pa
 and (`32px`–`48px`) section breathing room. The catalog steps from three columns to two
 at (`1200px`) and one below (`640px`). Answer comparisons become simultaneous columns
 at (`1024px`) and stack below it. Plans uses four columns, two below (`1024px`), and one
-below (`640px`); its shared bands use subgrid on wide screens. Billing allowances and dates
+below (`640px`); one rounded shell encloses the plans, thin seams separate columns
+and responsive rows, and shared bands use subgrid on wide screens. Monthly/Annual
+price changes use Torph's digit morph with reduced-motion support. Billing allowances and dates
 stack below (`640px`). The leaderboard preserves its real table in a horizontal scroller.
 
 Below (`640px`) headers become (`56px`), page padding contracts to (`16px`), heading/toolbars
@@ -381,7 +383,8 @@ Plans, Billing, and shared threads use a full-width standalone header with consi
 edge padding, a vertically centered linked wordmark and page title, and the sidebar's
 icon-only System/Dark/Light menu opening below the header.
 The wordmark provides the route to the arena; there is no separate back button. Plans keeps interval selection and real price/allowance arithmetic within aligned
-cards; plan names are `h2` beneath the page `h1`, and a featured card uses soft blue and its action. Billing groups current plan/actions,
+columns within one rounded shell; plan names are `h2` beneath the page `h1`, and a
+featured column uses soft blue and its action. Billing groups current plan/actions,
 UTC dates, exact remaining/used allowances, and the separate daily free allowance. Signed-out,
 unavailable, attention, and portal-failure states use plain copy and relevant actions.
 The sign-in panel carries Google/GitHub providers, stable loading buttons, and inline failure

@@ -147,6 +147,24 @@ Formatting, typecheck, lint, and production build passed. Verification was limit
 to source review and code checks, following the user's preference to avoid extended
 browser testing.
 
+### Joined pricing shell and animated prices — 2026-10-31
+
+Join the existing plan cards in one rounded shell with thin internal separators,
+preserving plan content, the Pro highlight, and existing actions. Keep the shell
+joined in four-column, two-column, and stacked layouts. Use Torph's React number
+morph for Monthly/Annual price changes, with reduced-motion support.
+
+- [x] Install Torph 0.1.3 and animate the existing formatted prices.
+- [x] Join the plan cards and adapt separators for desktop, tablet, and mobile.
+- [x] Verify the joined layout, price switching, and reduced motion.
+- [x] Complete formatting, typecheck, lint, and production build.
+
+Verification: all 13 focused Chrome checks pass at 1440px, 768px, and 390px,
+covering joined borders, responsive separators, containment, Monthly/Annual prices,
+actual Torph animations in both directions, and instant reduced-motion updates.
+Desktop and mobile screenshots were visually reviewed. Formatting, typecheck, lint,
+and production build pass. Evidence: `.impeccable/review/pricing-joined-*`.
+
 ## Stack
 
 TanStack Start (React), TypeScript, Tailwind v4, shadcn for components (card, button, popover, loading skeleton, and whatever else the UI actually needs as it gets built), Prisma as ORM, Neon Postgres as the database, Better Auth for auth (only Google and GitHub OAuth, no email-password), Arcjet in front of the endpoint, PostHog for analytics and observability.
