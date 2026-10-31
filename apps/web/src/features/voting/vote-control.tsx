@@ -39,7 +39,7 @@ export const VoteControl = ({ vote }: { readonly vote: ColumnVote }) => {
                 }}
             >
                 <IconTrophy aria-hidden stroke={1.75} />
-                Pick this one
+                Vote for this answer
             </Button>
 
             {message !== null && (
