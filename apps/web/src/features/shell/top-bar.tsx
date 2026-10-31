@@ -1,7 +1,12 @@
 import { Fragment } from "react";
-import { useRouterState } from "@tanstack/react-router";
-import { IconChevronRight, IconLayoutSidebar } from "@tabler/icons-react";
-import { Button } from "@/components/ui/button";
+import { Link, useRouterState } from "@tanstack/react-router";
+import {
+    IconArrowUpRight,
+    IconChevronRight,
+    IconLayoutSidebar,
+    IconColumns3,
+} from "@tabler/icons-react";
+import { Button, buttonClasses } from "@/components/ui/button";
 import { breadcrumbFor } from "./nav-items";
 import { useShellChrome } from "./shell-chrome";
 
@@ -18,7 +23,7 @@ export const TopBar = ({
     const trailing = chrome?.trailing ?? null;
 
     return (
-        <header className="border-border flex h-14 shrink-0 items-center gap-2 border-b px-3">
+        <header className="app-topbar flex shrink-0 items-center gap-3">
             <Button
                 variant="ghost"
                 size="icon"
@@ -57,6 +62,25 @@ export const TopBar = ({
                 </ol>
             </nav>
 
+            {!trailing && (
+                <>
+                    <span className="topbar-status">
+                        <IconColumns3 aria-hidden stroke={1.5} />
+                        Side by side. On your terms.
+                    </span>
+                    <Link
+                        to="/plans"
+                        className={buttonClasses({
+                            variant: "outline",
+                            size: "sm",
+                            class: "ml-2",
+                        })}
+                    >
+                        Explore plans
+                        <IconArrowUpRight aria-hidden stroke={1.75} />
+                    </Link>
+                </>
+            )}
             {trailing && (
                 <div className="flex shrink-0 items-center gap-2">{trailing}</div>
             )}
