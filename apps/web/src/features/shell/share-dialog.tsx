@@ -72,7 +72,7 @@ export const ShareThreadDialog = ({
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent
-                className="max-w-md p-5"
+                className="max-w-md p-6"
                 onEscapeKeyDown={(event) => {
                     if (busy) event.preventDefault();
                 }}
@@ -114,9 +114,11 @@ export const ShareThreadDialog = ({
                         </Button>
                     ) : (
                         <div className="flex flex-col gap-3">
-                            <div className="border-input bg-muted flex items-center gap-1 rounded-md border py-1 pl-3 pr-1">
+                            <div className="share-link-field">
                                 <input
                                     readOnly
+                                    name="share-link"
+                                    type="url"
                                     value={url}
                                     aria-label="Share link"
                                     onFocus={(event) => event.target.select()}
