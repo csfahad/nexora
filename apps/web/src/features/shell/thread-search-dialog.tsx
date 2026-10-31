@@ -144,7 +144,7 @@ export const ThreadSearchDialog = ({
             >
                 <DialogTitle className="sr-only">Search threads</DialogTitle>
 
-                <div className="border-border h-13 flex items-center gap-3 border-b px-4">
+                <div className="palette-search border-border flex items-center gap-3 border-b px-4">
                     <IconSearch
                         aria-hidden
                         className="text-muted-foreground size-4.5 shrink-0"
@@ -152,7 +152,9 @@ export const ThreadSearchDialog = ({
                     />
 
                     <input
-                        autoFocus
+                        name="thread-search"
+                        autoComplete="off"
+                        type="search"
                         role="combobox"
                         aria-expanded
                         aria-autocomplete="list"
@@ -161,7 +163,7 @@ export const ThreadSearchDialog = ({
                             rows.length > 0 ? optionId(cursor) : undefined
                         }
                         aria-label="Search your threads"
-                        placeholder="Search titles, prompts and answers"
+                        placeholder="Search titles, prompts, and answers…"
                         maxLength={QUERY_MAX_LENGTH}
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}
@@ -187,7 +189,7 @@ export const ThreadSearchDialog = ({
                                 }
                             }
                         }}
-                        className="text-foreground min-w-0 flex-1 bg-transparent text-sm outline-none"
+                        className="text-foreground min-w-0 flex-1 bg-transparent text-sm"
                     />
                 </div>
 
