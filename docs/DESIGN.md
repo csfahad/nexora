@@ -387,8 +387,10 @@ columns within one rounded shell; plan names are `h2` beneath the page `h1`, and
 featured column uses soft blue and its action. Billing groups current plan/actions,
 UTC dates, exact remaining/used allowances, and the separate daily free allowance. Signed-out,
 unavailable, attention, and portal-failure states use plain copy and relevant actions.
-The sign-in panel carries Google/GitHub providers, stable loading buttons, and inline failure
-copy. Their visual treatment must not change payment, entitlement, or authentication facts.
+Sign-in occupies a dedicated full-page frame without a header or sidebar. A centered,
+unboxed column carries the linked wordmark, welcome copy, 48px Google/GitHub buttons,
+and inline failure copy. Existing themes, OAuth callbacks, loading states, and the
+signed-in Continue action remain supported. Short screens scroll rather than clip.
 
 ## Do's and Don'ts
 

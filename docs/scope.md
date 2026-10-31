@@ -165,6 +165,26 @@ actual Torph animations in both directions, and instant reduced-motion updates.
 Desktop and mobile screenshots were visually reviewed. Formatting, typecheck, lint,
 and production build pass. Evidence: `.impeccable/review/pricing-joined-*`.
 
+### Dedicated sign-in page — 2026-10-31
+
+Give `/sign-in` its own full-page frame with no app header or sidebar. Center the
+linked Nexora wordmark, a clear welcome message, and Google/GitHub provider buttons
+on the existing themed page surface. Preserve OAuth callbacks, loading and failure
+behavior, and the signed-in Continue state. Support narrow and short viewports.
+
+- [x] Exclude sign-in from the app shell and add its page title.
+- [x] Build the focused sign-in layout in both themes.
+- [x] Verify standalone framing, responsive layout, provider states, and callbacks.
+- [x] Complete formatting, typecheck, lint, and production build.
+
+Desktop (1440px), mobile (390px), and short/narrow (320px) browser checks pass
+with no header, sidebar, or horizontal overflow. Light/dark layouts were visually
+reviewed; System theme follows live OS changes. Keyboard navigation, loading and
+retry states, and signed-in continuation pass. An intercepted Google sign-in
+request preserves the provider and return path; no real OAuth login was performed.
+Formatting, typecheck, lint, and production build pass. Evidence:
+`.impeccable/review/sign-in-standalone-*`.
+
 ## Stack
 
 TanStack Start (React), TypeScript, Tailwind v4, shadcn for components (card, button, popover, loading skeleton, and whatever else the UI actually needs as it gets built), Prisma as ORM, Neon Postgres as the database, Better Auth for auth (only Google and GitHub OAuth, no email-password), Arcjet in front of the endpoint, PostHog for analytics and observability.
