@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TextMorph } from "torph/react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { IconArrowRight, IconCheck, IconX } from "@tabler/icons-react";
 import { Plan } from "@/generated/prisma/enums";
@@ -99,7 +100,10 @@ const PlanColumn = ({
         <div className="plan-band plan-band--head">
             <h2 className="plan-title">{name}</h2>
             <p className="plan-figure">
-                {price} <span className="plan-qualifier">{qualifier}</span>
+                <TextMorph className="plan-price" numbers respectReducedMotion>
+                    {price}
+                </TextMorph>{" "}
+                <span className="plan-qualifier">{qualifier}</span>
             </p>
             <p className="plan-tagline">{tagline}</p>
         </div>

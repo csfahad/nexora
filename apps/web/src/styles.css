@@ -2160,21 +2160,23 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     text-wrap: pretty;
 }
 .plan-panel {
-    gap: 1rem;
+    gap: 0;
     margin-top: 3.5rem;
-    border: 0;
-    background: transparent;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 1.5rem;
+    background: var(--card);
 }
 .plan-col {
-    border: 1px solid var(--border);
-    border-radius: 1rem;
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
     background: var(--card);
 }
 .plan-col + .plan-col {
     border-left: 1px solid var(--border);
 }
 .plan-col[data-featured="true"] {
-    border-color: var(--primary);
     background: var(--surface-tint);
 }
 .plan-band--head {
@@ -2187,6 +2189,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 .plan-figure {
     margin-top: 1rem;
     font-size: 2.5rem;
+}
+.plan-price {
+    white-space: nowrap;
 }
 .plan-band--cta {
     padding: 0 1.5rem 1.5rem;
@@ -2633,7 +2638,19 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         padding-top: 1.5rem;
     }
 }
+@media (min-width: 40rem) and (max-width: 63.999rem) {
+    .plan-col:nth-child(odd) {
+        border-left: 0;
+    }
+    .plan-col:nth-child(n + 3) {
+        border-top: 1px solid var(--border);
+    }
+}
 @media (max-width: 39.999rem) {
+    .plan-col + .plan-col {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+    }
     .search-field {
         width: 100%;
     }
