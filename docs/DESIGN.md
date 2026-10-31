@@ -365,9 +365,10 @@ hover/focus/open and remain available on touch. Portalled menus and dialogs prev
 clipping; keyboard navigation and focus restoration come from the shared Radix wrappers.
 The sidebar footer puts the account control and an icon-only theme menu on one row.
 The menu shows System, Dark, and Light as radio items with a checked selection; choices
-persist and synchronize across mounted controls. Standalone headers retain the segmented
-theme picker. A full-width seam follows Search threads, with a 10px gap above Recent
-threads. Thread rows are 36px with 8px gaps between groups and no added row gap.
+persist and synchronize across mounted controls. A full-width seam follows Search
+threads, with a 10px gap above Recent threads. History is one continuous list in
+recency order, with 36px rows and no date headings or added row gaps. The section
+label aligns with row icons, with 8px padding below the label.
 
 ### Comparison, Standalone, and Account Surfaces
 

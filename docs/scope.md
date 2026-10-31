@@ -133,6 +133,20 @@ Voting remains available after all responses settle and at least two complete;
 shared pages remain read-only. The reported thread URL is still needed to diagnose
 any missing controls beyond the visibility issues found in source.
 
+### Continuous recent-thread list — 2026-10-31
+
+Render sidebar history as one continuous list under Recent threads, without
+Today, This week, or Earlier headings. Preserve recency order and use consistent
+row spacing and aligned section insets in both the desktop sidebar and mobile drawer.
+
+- [x] Flatten the displayed history and remove date headings and group spacing.
+- [x] Align list insets and give the section label consistent spacing above the rows.
+- [x] Complete formatting, typecheck, lint, and production build.
+
+Formatting, typecheck, lint, and production build passed. Verification was limited
+to source review and code checks, following the user's preference to avoid extended
+browser testing.
+
 ## Stack
 
 TanStack Start (React), TypeScript, Tailwind v4, shadcn for components (card, button, popover, loading skeleton, and whatever else the UI actually needs as it gets built), Prisma as ORM, Neon Postgres as the database, Better Auth for auth (only Google and GitHub OAuth, no email-password), Arcjet in front of the endpoint, PostHog for analytics and observability.
