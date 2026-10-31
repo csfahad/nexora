@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
-import { IconArrowRight, IconCheck, IconSparkles, IconX } from "@tabler/icons-react";
+import { IconArrowRight, IconCheck, IconX } from "@tabler/icons-react";
 import { Plan } from "@/generated/prisma/enums";
 import type { BillingInterval } from "@/generated/prisma/enums";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { StandaloneHeader } from "@/components/ui/standalone-header";
 import { TierChip } from "@/components/ui/tier-chip";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { TIER_WORD, useAllowance } from "@/infrastructure/entitlement";
@@ -97,14 +97,7 @@ const PlanColumn = ({
 }) => (
     <article className="plan-col" data-featured={featured || undefined}>
         <div className="plan-band plan-band--head">
-            {featured && (
-                <p className="plan-tab">
-                    <IconSparkles aria-hidden stroke={2} />
-                    Most answers per dollar
-                </p>
-            )}
-
-            <h3 className="plan-title">{name}</h3>
+            <h2 className="plan-title">{name}</h2>
             <p className="plan-figure">
                 {price} <span className="plan-qualifier">{qualifier}</span>
             </p>
@@ -120,7 +113,13 @@ const PlanColumn = ({
                 aria-busy={busy || undefined}
                 onClick={onChoose}
             >
-                {busy ? "Opening…" : current ? "Manage your plan" : cta}
+                {busy
+                    ? "Opening…"
+                    : current
+                      ? price === "$0"
+                          ? "Start comparing"
+                          : "Manage your plan"
+                      : cta}
                 <IconArrowRight aria-hidden stroke={2} />
             </button>
         </div>
@@ -274,34 +273,23 @@ export const PlansScreen = () => {
 
     return (
         <div className="screen">
-            <header className="border-border flex h-14 shrink-0 items-center gap-3 border-b px-4">
-                <Link
-                    to="/"
-                    aria-label="Nexora — go to arena"
-                    className="font-heading text-foreground shrink-0 rounded-md text-lg font-semibold tracking-tight"
-                >
-                    Nexora
-                </Link>
+            <a href="#plans-main" className="skip-link">
+                Skip to content
+            </a>
+            <StandaloneHeader title="Plans" />
 
-                <span aria-hidden className="bg-border h-5 w-px shrink-0" />
-
-                <h1 className="text-foreground min-w-0 flex-1 truncate text-sm font-medium">
-                    Plans
-                </h1>
-
-                <ThemeToggle className="hidden shrink-0 sm:inline-flex" />
-            </header>
-
-            <div className="screen-scroll min-h-0 flex-1">
-                <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-                    <div className="flex w-full flex-col items-center gap-4 text-center">
-                        <h2 className="font-heading w-full max-w-[28ch] text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-                            A plan for however hard you compare.
-                        </h2>
+            <main id="plans-main" tabIndex={-1} className="screen-scroll min-h-0 flex-1">
+                <div className="plans-content">
+                    <div className="plans-intro">
+                        <h1>
+                            More models.
+                            <br />
+                            More perspective.
+                        </h1>
                         <p className="text-muted-foreground w-full max-w-[58ch] text-pretty">
-                            Every plan buys a monthly allowance of answers in each price
-                            tier. No credits, no invented currency — the allowance counts
-                            answers and the cost column counts dollars.
+                            Start with free models. Choose a paid plan for a monthly
+                            allowance across every price tier, with real cost measured on
+                            each answer.
                         </p>
 
                         <div className="mt-2 flex flex-col items-center gap-2">
@@ -318,7 +306,7 @@ export const PlansScreen = () => {
                         </div>
                     </div>
 
-                    <div className="plan-panel mt-14">
+                    <div className="plan-panel">
                         <FreeColumn
                             current={view.metered && view.plan === Plan.FREE}
                             onChoose={() => void choose(Plan.FREE)}
@@ -364,16 +352,13 @@ export const PlansScreen = () => {
                         aria-labelledby="ceiling-heading"
                         className="mt-16 flex flex-col gap-4"
                     >
-                        <h2 id="ceiling-heading" className="label-meta">
+                        <h2 id="ceiling-heading" className="text-lg font-semibold">
                             What one answer costs at each tier&rsquo;s ceiling
                         </h2>
 
-                        <ul className="grid list-none grid-cols-1 gap-4 sm:grid-cols-3">
+                        <ul className="tier-ceilings list-none">
                             {CEILING_LADDER.map(({ tier, usd }) => (
-                                <li
-                                    key={tier}
-                                    className="border-border bg-card flex items-center justify-between gap-3 rounded-xl border px-5 py-4"
-                                >
+                                <li key={tier}>
                                     <TierChip tier={tier} />
                                     <span className="text-foreground numeric text-sm">
                                         {perAnswer(usd)}
@@ -396,7 +381,7 @@ export const PlansScreen = () => {
                         </div>
                     </section>
                 </div>
-            </div>
+            </main>
         </div>
     );
 };
