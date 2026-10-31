@@ -1,34 +1,36 @@
-import { useMemo, useState } from "react";
-import { IconSearch } from "@tabler/icons-react";
+import { useDeferredValue, useMemo, useState } from "react";
+import { IconSearch, IconStack2 } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
+import { CardSpotlight } from "@/components/ui/card-spotlight";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ModelAvatar } from "@/components/ui/model-avatar";
+import { PageHeading } from "@/components/ui/page-heading";
 import { TierChip } from "@/components/ui/tier-chip";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import type { ViewOption } from "@/components/ui/view-toggle";
-import { isFreeModel } from "@/infrastructure/model-catalog";
+import {
+    isFreeModel,
+    REFERENCE_PROMPT_TOKENS,
+    REFERENCE_COMPLETION_TOKENS,
+} from "@/infrastructure/model-catalog";
 import type { CatalogModel } from "@/infrastructure/model-catalog";
 
 type Tab = "free" | "paid";
-
 const TABS: readonly ViewOption<Tab>[] = [
-    { value: "free", label: "Free", panelId: "models-free" },
-    { value: "paid", label: "Paid", panelId: "models-paid" },
+    { value: "free", label: "Free models", panelId: "models-free" },
+    { value: "paid", label: "Paid models", panelId: "models-paid" },
 ];
-
 const byContext = (a: CatalogModel, b: CatalogModel): number =>
     b.contextLength - a.contextLength || a.name.localeCompare(b.name);
-
 const byCost = (a: CatalogModel, b: CatalogModel): number =>
     a.referenceAnswerCostUsd - b.referenceAnswerCostUsd || a.name.localeCompare(b.name);
-
 const matches = (model: CatalogModel, query: string): boolean => {
     const needle = query.trim().toLowerCase();
-
-    if (needle.length === 0) return true;
-
     return (
-        model.name.toLowerCase().includes(needle) ||
-        model.provider.toLowerCase().includes(needle) ||
-        model.id.toLowerCase().includes(needle)
+        needle.length === 0 ||
+        [model.name, model.provider, model.id].some((value) =>
+            value.toLowerCase().includes(needle),
+        )
     );
 };
 
@@ -39,7 +41,7 @@ export const ModelsScreen = ({
 }) => {
     const [tab, setTab] = useState<Tab>("free");
     const [query, setQuery] = useState("");
-
+    const deferredQuery = useDeferredValue(query);
     const { free, paid } = useMemo(
         () => ({
             free: models.filter(isFreeModel),
@@ -47,58 +49,64 @@ export const ModelsScreen = ({
         }),
         [models],
     );
-
-    const shown = useMemo(() => {
-        const pool = tab === "free" ? free : paid;
-
-        return pool
-            .filter((model) => matches(model, query))
-            .sort(tab === "free" ? byContext : byCost);
-    }, [tab, free, paid, query]);
-
+    const shown = useMemo(
+        () =>
+            (tab === "free" ? free : paid)
+                .filter((model) => matches(model, deferredQuery))
+                .sort(tab === "free" ? byContext : byCost),
+        [tab, free, paid, deferredQuery],
+    );
     const total = tab === "free" ? free.length : paid.length;
-    const filtered = query.trim().length > 0;
-
+    const filtered = deferredQuery.trim().length > 0;
     return (
         <div className="screen screen-scroll">
-            <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-                <header className="flex flex-col gap-2">
-                    <h1 className="text-2xl font-semibold">Models</h1>
-                    <p className="text-muted-foreground">
-                        Every model Nexora can price and measure, free and paid, measured
-                        the same way.
-                    </p>
-                </header>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="page-content">
+                <PageHeading
+                    title="Find your next model."
+                    description="Explore the live catalog. Compare context, capabilities, and price before you choose your lineup."
+                >
+                    <span className="catalog-count">
+                        <IconStack2 aria-hidden stroke={1.75} />
+                        <span className="numeric">{models.length}</span> models in the
+                        catalog
+                    </span>
+                </PageHeading>
+                <div className="page-toolbar">
                     <ViewToggle
                         options={TABS}
                         value={tab}
-                        onChange={(next) => setTab(next)}
+                        onChange={setTab}
                         label="Catalog"
                     />
-
-                    <div className="relative w-full sm:max-w-72">
-                        <IconSearch
-                            className="text-muted-foreground pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2"
-                            aria-hidden
-                        />
+                    <div className="search-field">
+                        <IconSearch aria-hidden stroke={1.75} />
+                        <label htmlFor="catalog-search" className="sr-only">
+                            Search models by name, provider, or ID
+                        </label>
                         <input
+                            id="catalog-search"
+                            name="model-search"
+                            autoComplete="off"
                             type="search"
                             value={query}
+                            maxLength={200}
                             onChange={(event) => setQuery(event.target.value)}
-                            placeholder="Filter by name or provider"
-                            aria-label="Filter models by name or provider"
+                            placeholder="Search models…"
                             className="field-input field-input--icon"
                         />
                     </div>
                 </div>
-
-                <p className="label-meta mt-4" aria-live="polite">
-                    <span className="numeric">{shown.length}</span>
-                    {filtered ? ` of ${total} shown` : " available now"}
-                </p>
-
+                <div className="catalog-summary">
+                    <p className="label-meta" aria-live="polite">
+                        <span className="numeric">{shown.length}</span>
+                        {filtered ? ` of ${total} models shown` : " models available"}
+                    </p>
+                    <span className="label-meta">
+                        {tab === "free"
+                            ? "Largest context first"
+                            : "Lowest reference cost first"}
+                    </span>
+                </div>
                 {TABS.map((option) => (
                     <div
                         key={option.value}
@@ -109,13 +117,31 @@ export const ModelsScreen = ({
                     >
                         {option.value === tab &&
                             (shown.length === 0 ? (
-                                <p className="text-muted-foreground mt-8 text-sm">
-                                    {filtered
-                                        ? "No model here matches that. Try a shorter search."
-                                        : "No models on this tab right now."}
-                                </p>
+                                <EmptyState
+                                    icon={IconSearch}
+                                    title={
+                                        filtered
+                                            ? "No matching models"
+                                            : "No models available"
+                                    }
+                                    description={
+                                        filtered
+                                            ? "Try a shorter name or a different provider."
+                                            : "The live catalog has no models in this group right now."
+                                    }
+                                >
+                                    {filtered && (
+                                        <Button
+                                            variant="outline"
+                                            className="mt-5"
+                                            onClick={() => setQuery("")}
+                                        >
+                                            Clear search
+                                        </Button>
+                                    )}
+                                </EmptyState>
                             ) : (
-                                <ul className="mt-6 grid list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <ul className="model-grid list-none">
                                     {shown.map((model) => (
                                         <li key={model.id}>
                                             <ModelCard model={model} />
@@ -125,27 +151,36 @@ export const ModelsScreen = ({
                             ))}
                     </div>
                 ))}
+                <p className="catalog-footnote">
+                    Reference answer prices use{" "}
+                    {REFERENCE_PROMPT_TOKENS.toLocaleString("en-US")} input and{" "}
+                    {REFERENCE_COMPLETION_TOKENS.toLocaleString("en-US")} output tokens.
+                    Actual cost is measured on each answer. Models marked “Not in arena”
+                    exceed the arena’s price ceiling.
+                </p>
             </div>
         </div>
     );
 };
 
 const ModelCard = ({ model }: { readonly model: CatalogModel }) => (
-    <article className="border-border bg-card flex h-full flex-col rounded-xl border p-5">
-        <div className="flex items-start gap-3">
-            <ModelAvatar name={model.name} size="md" />
-            <div className="min-w-0 flex-1">
-                <h2 className="font-heading text-foreground truncate text-base font-semibold">
-                    {model.name}
-                </h2>
-                <p className="text-muted-foreground truncate text-sm">{model.provider}</p>
+    <CardSpotlight className="model-card">
+        <div className="model-card-head">
+            <ModelAvatar
+                modelId={model.id}
+                provider={model.provider}
+                name={model.name}
+                size="md"
+            />
+            <div className="model-card-info">
+                <h2>{model.name}</h2>
+                <p className="model-provider">{model.provider}</p>
             </div>
             <TierChip tier={model.tier} />
         </div>
-
-        <dl className="border-border mt-4 flex flex-col gap-2.5 border-t pt-4">
+        <dl>
             <DetailRow
-                label="Context"
+                label="Context window"
                 value={
                     model.contextLength > 0
                         ? `${model.contextLabel} tokens`
@@ -153,24 +188,20 @@ const ModelCard = ({ model }: { readonly model: CatalogModel }) => (
                 }
                 numeric={model.contextLength > 0}
             />
-            <DetailRow label="Inputs" value={model.inputsLabel} />
+            <DetailRow label="Accepts" value={model.inputsLabel} />
             <DetailRow
-                label="Per answer"
+                label="Reference answer"
                 value={model.referenceAnswerCostLabel}
                 numeric
             />
         </dl>
-
-        <p className="price-pair mt-2.5">
-            <span className="price-value numeric">{model.promptPricePerMTokens}</span> in
-            <span className="price-value numeric">
-                {model.completionPricePerMTokens}
-            </span>{" "}
-            out / 1M
+        <p className="price-pair">
+            <span className="price-value numeric">{model.promptPricePerMTokens}</span> in{" "}
+            <span className="price-value numeric">{model.completionPricePerMTokens}</span>{" "}
+            out / 1M tokens
         </p>
-    </article>
+    </CardSpotlight>
 );
-
 const DetailRow = ({
     label,
     value,
@@ -180,8 +211,8 @@ const DetailRow = ({
     readonly value: string;
     readonly numeric?: boolean;
 }) => (
-    <div className="flex items-center justify-between gap-3">
+    <div className="model-detail">
         <dt className="label-meta">{label}</dt>
-        <dd className={`text-foreground text-sm ${numeric ? "numeric" : ""}`}>{value}</dd>
+        <dd className={numeric ? "numeric" : undefined}>{value}</dd>
     </div>
 );
