@@ -55,16 +55,19 @@ export const AppShell = ({
     };
 
     return (
-        <div className="flex h-full overflow-hidden">
+        <div className="app-shell flex h-full overflow-hidden">
+            <a href="#main-content" className="skip-link">
+                Skip to content
+            </a>
             <aside
                 inert={!isDesktop}
                 className={cn(
                     "border-sidebar-border hidden shrink-0 overflow-hidden border-r lg:block",
                     "duration-(--dur-panel) ease-(--ease-out-expo) transition-[width]",
-                    collapsed ? "lg:w-16" : "lg:w-68",
+                    collapsed ? "lg:w-16" : "lg:w-64",
                 )}
             >
-                <div className={cn("h-full", collapsed ? "w-16" : "w-68")}>
+                <div className={cn("h-full", collapsed ? "w-16" : "w-64")}>
                     <AppSidebar
                         threadGroups={threadGroups}
                         collapsed={collapsed}
@@ -73,9 +76,13 @@ export const AppShell = ({
                 </div>
             </aside>
 
-            <div className="flex min-w-0 flex-1 flex-col">
+            <div className="workspace-main flex min-w-0 flex-1 flex-col">
                 <TopBar onToggleSidebar={toggleSidebar} sidebarShown={sidebarShown} />
-                <main className="relative min-h-0 flex-1 overflow-hidden">
+                <main
+                    id="main-content"
+                    tabIndex={-1}
+                    className="relative min-h-0 flex-1 overflow-hidden"
+                >
                     {children}
                 </main>
             </div>
@@ -84,7 +91,7 @@ export const AppShell = ({
                 <Dialog.Portal>
                     <Dialog.Overlay
                         className={cn(
-                            "fixed inset-0 z-40 bg-black/50 lg:hidden",
+                            "ui-overlay fixed inset-0 z-40 lg:hidden",
                             "data-[state=open]:animate-in data-[state=open]:fade-in",
                             "data-[state=closed]:animate-out data-[state=closed]:fade-out",
                         )}
