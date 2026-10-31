@@ -1,8 +1,15 @@
 import { useEffect } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
-import { IconAlertTriangle, IconExternalLink, IconRefresh } from "@tabler/icons-react";
+import {
+    IconAlertTriangle,
+    IconExternalLink,
+    IconRefresh,
+    IconUser,
+} from "@tabler/icons-react";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { LoaderErrorNotice } from "@/components/ui/retry-notice";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeading } from "@/components/ui/page-heading";
 import { TierChip } from "@/components/ui/tier-chip";
 import { Plan } from "@/generated/prisma/enums";
 import { FREE_ANSWERS_PER_DAY, PAID_TIERS, PLANS } from "@/infrastructure/plans";
@@ -73,17 +80,26 @@ export const BillingScreen = ({
         return (
             <BillingFrame>
                 <div className="billing-content">
-                    <h1 className="billing-title">Billing</h1>
-                    <p className="billing-description">
-                        Sign in to see your plan and manage billing.
-                    </p>
-                    <Link
-                        to="/sign-in"
-                        search={{ next: "/settings/billing" }}
-                        className={buttonClasses({ variant: "primary" })}
+                    <PageHeading
+                        title="Your plan, at a glance."
+                        description="Track your answer allowance and manage your subscription."
+                    />
+                    <EmptyState
+                        icon={IconUser}
+                        title="Sign in to manage billing"
+                        description="Your plan, payment details, and answer allowance are linked to your account."
                     >
-                        Sign in
-                    </Link>
+                        <Link
+                            to="/sign-in"
+                            search={{ next: "/settings/billing" }}
+                            className={buttonClasses({
+                                variant: "primary",
+                                class: "mt-5",
+                            })}
+                        >
+                            Sign in
+                        </Link>
+                    </EmptyState>
                 </div>
             </BillingFrame>
         );
@@ -96,12 +112,10 @@ export const BillingScreen = ({
     return (
         <BillingFrame>
             <div className="billing-content">
-                <header className="billing-header">
-                    <h1 className="billing-title">Billing</h1>
-                    <p className="billing-description">
-                        Manage your plan and keep track of your answer allowance.
-                    </p>
-                </header>
+                <PageHeading
+                    title="Your plan, at a glance."
+                    description="Manage your subscription and see exactly how many answers you have left."
+                />
                 {returned && (
                     <div className="billing-return" role="status">
                         <p>
