@@ -9,7 +9,6 @@ import { NAV_ITEMS } from "./nav-items";
 import { useSearchShortcutLabel } from "./search-shortcut";
 import { ShareThreadDialog } from "./share-dialog";
 import { deleteThread, renameThread, threadMutationNotice } from "./thread-actions";
-import { groupDomId } from "./thread-history";
 import { ThreadRow } from "./thread-row";
 import type { ThreadHistoryGroup, ThreadHistoryItem } from "./thread-history";
 
@@ -76,6 +75,7 @@ export const AppSidebar = ({
     const router = useRouter();
     const { pathname } = useLocation();
     const shortcut = useSearchShortcutLabel();
+    const threads = threadGroups.flatMap((group) => group.threads);
 
     const [editingId, setEditingId] = useState<string | null>(null);
     const [pendingDelete, setPendingDelete] = useState<ThreadHistoryItem | null>(null);
@@ -161,53 +161,35 @@ export const AppSidebar = ({
             <p className="sidebar-section-label">Recent threads</p>
 
             <div className="sidebar-history">
-                {threadGroups.length === 0 ? (
+                {threads.length === 0 ? (
                     <div className="sidebar-empty">
                         <IconMessage aria-hidden stroke={1.5} />
                         <strong>A fresh start.</strong>Your comparisons will appear here,
                         ready to pick up where you left off.
                     </div>
                 ) : (
-                    <div className="sidebar-thread-groups">
-                        {threadGroups.map((group) => (
-                            <section
-                                key={group.label}
-                                aria-labelledby={groupDomId(group.label)}
-                            >
-                                <h2
-                                    id={groupDomId(group.label)}
-                                    className="sidebar-thread-heading label-meta"
-                                >
-                                    {group.label}
-                                </h2>
-
-                                <div className="sidebar-thread-list">
-                                    {group.threads.map((thread) => (
-                                        <ThreadRow
-                                            key={thread.id}
-                                            thread={thread}
-                                            renaming={editingId === thread.id}
-                                            busy={busyId === thread.id}
-                                            onNavigate={onNavigate}
-                                            onStartRename={() => {
-                                                setNotice(null);
-                                                setEditingId(thread.id);
-                                            }}
-                                            onCancelRename={() => setEditingId(null)}
-                                            onRename={(title) =>
-                                                void rename(thread.id, title)
-                                            }
-                                            onShare={() => {
-                                                setNotice(null);
-                                                setSharing(thread);
-                                            }}
-                                            onDelete={() => setPendingDelete(thread)}
-                                        />
-                                    ))}
-                                </div>
-                            </section>
+                    <nav aria-label="Recent threads" className="sidebar-thread-list">
+                        {threads.map((thread) => (
+                            <ThreadRow
+                                key={thread.id}
+                                thread={thread}
+                                renaming={editingId === thread.id}
+                                busy={busyId === thread.id}
+                                onNavigate={onNavigate}
+                                onStartRename={() => {
+                                    setNotice(null);
+                                    setEditingId(thread.id);
+                                }}
+                                onCancelRename={() => setEditingId(null)}
+                                onRename={(title) => void rename(thread.id, title)}
+                                onShare={() => {
+                                    setNotice(null);
+                                    setSharing(thread);
+                                }}
+                                onDelete={() => setPendingDelete(thread)}
+                            />
                         ))}
-                    </div>
+                    </nav>
                 )}
 
                 {notice !== null && (
