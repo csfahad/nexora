@@ -82,6 +82,9 @@ const parseTokens = (body, label) => {
  */
 const PAIRS = [
     ["foreground", "background", 4.5, "body text on the page"],
+    ["foreground", "surface-tint", 4.5, "text in the prompt bubble"],
+    ["primary", "primary-soft", 4.5, "selected navigation and billing status"],
+    ["muted-foreground", "surface-tint", 4.5, "supporting text on a tinted surface"],
     ["foreground", "card", 4.5, "body text inside a response column"],
     ["card-foreground", "card", 4.5, "card text"],
     ["popover-foreground", "popover", 4.5, "popover text"],
@@ -91,11 +94,11 @@ const PAIRS = [
     ["muted-foreground", "accent", 4.5, "placeholder / label on a hovered row"],
     ["secondary-foreground", "secondary", 4.5, "secondary button label"],
     ["accent-foreground", "accent", 4.5, "hovered nav row label"],
-    ["primary", "background", 4.5, "rust as a link on the page"],
-    ["primary", "card", 4.5, "rust as a link in a column"],
-    ["primary", "muted", 4.5, "rust as a link on a raised chip"],
-    ["primary-foreground", "primary", 4.5, "label on a filled rust button"],
-    ["primary-foreground", "primary-hover", 4.5, "label on a hovered rust button"],
+    ["primary", "background", 4.5, "primary as a link on the page"],
+    ["primary", "card", 4.5, "primary as a link in a column"],
+    ["primary", "muted", 4.5, "primary as a link on a raised chip"],
+    ["primary-foreground", "primary", 4.5, "label on a filled primary button"],
+    ["primary-foreground", "primary-hover", 4.5, "label on a hovered primary button"],
     ["win", "card", 4.5, "winner marker in a column"],
     ["win", "background", 4.5, "winner marker on the page"],
     ["win", "muted", 4.5, "leading model's win pill in the top bar"],
@@ -132,8 +135,8 @@ const PAIRS = [
 /* Colour can never be the only signal, so the app also has to know how close
  * these hues really are. Reported, not gated. */
 const HAZARDS = [
-    ["primary", "destructive", "rust vs error-red"],
-    ["primary", "win", "rust vs winner-green"],
+    ["primary", "destructive", "primary vs error-red"],
+    ["primary", "win", "primary vs winner-green"],
 ];
 
 /* ------------------------------------------------------------------ the check */
