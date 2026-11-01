@@ -31,7 +31,7 @@ export const SharedThreadScreen = ({ thread }: { readonly thread: SharedThreadVi
                         own prompt against three models and see what they do with it.
                     </p>
 
-                    <Link to="/" className={buttonClasses({ variant: "outline" })}>
+                    <Link to="/app" className={buttonClasses({ variant: "outline" })}>
                         Try your own prompt
                     </Link>
                 </div>

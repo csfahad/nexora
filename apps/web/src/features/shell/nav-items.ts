@@ -8,7 +8,7 @@ export type NavItem = Readonly<{
 }>;
 
 export const NAV_ITEMS: readonly NavItem[] = [
-    { to: "/", label: "New comparison", icon: IconSquareRoundedPlus },
+    { to: "/app", label: "New comparison", icon: IconSquareRoundedPlus },
     { to: "/leaderboard", label: "Leaderboard", icon: IconTrophy },
     { to: "/models", label: "Models", icon: IconStack2 },
 ];

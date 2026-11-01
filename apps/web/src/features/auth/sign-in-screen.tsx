@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { IconAlertTriangle, IconBrandGithub, IconBrandGoogle } from "@tabler/icons-react";
 import { Wordmark } from "@/components/ui/wordmark";
+import { LegalLinks } from "@/components/ui/legal-links";
 import { useTheme } from "@/components/theme/use-theme";
 import { Button, buttonClasses } from "@/components/ui/button";
 import { authClient } from "@/infrastructure/auth-client";
@@ -49,7 +50,7 @@ export const SignInScreen = ({ next }: { readonly next: string }) => {
         <main id="sign-in-main" className="screen screen-scroll auth-page">
             <div className="auth-layout">
                 <section className="auth-panel" aria-labelledby="sign-in-heading">
-                    <Link to="/" aria-label="Nexora — go to arena" className="auth-brand">
+                    <Link to="/" aria-label="Nexora — Home" className="auth-brand">
                         <Wordmark />
                     </Link>
                     {session.status === "signed-in" ? (
@@ -116,9 +117,12 @@ export const SignInScreen = ({ next }: { readonly next: string }) => {
                     )}
                     {session.status !== "signed-in" && (
                         <p className="auth-footnote">
-                            Sign in securely with Google or GitHub.
+                            By continuing, you agree to our{" "}
+                            <Link to="/terms">Terms of Service</Link> and acknowledge our{" "}
+                            <Link to="/privacy">Privacy Policy</Link>.
                         </p>
                     )}
+                    {session.status === "signed-in" && <LegalLinks />}
                 </section>
             </div>
         </main>

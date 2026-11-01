@@ -5,6 +5,7 @@ import { IconArrowRight, IconCheck, IconX } from "@tabler/icons-react";
 import { Plan } from "@/generated/prisma/enums";
 import type { BillingInterval } from "@/generated/prisma/enums";
 import { StandaloneHeader } from "@/components/ui/standalone-header";
+import { LegalLinks } from "@/components/ui/legal-links";
 import { TierChip } from "@/components/ui/tier-chip";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { TIER_WORD, useAllowance } from "@/infrastructure/entitlement";
@@ -243,7 +244,7 @@ export const PlansScreen = () => {
         if (session.status === "signed-out") {
             await router.navigate({
                 to: "/sign-in",
-                search: { next: plan === Plan.FREE ? "/" : "/plans" },
+                search: { next: plan === Plan.FREE ? "/app" : "/plans" },
             });
             return;
         }
@@ -252,7 +253,7 @@ export const PlansScreen = () => {
             return;
         }
         if (plan === Plan.FREE) {
-            await router.navigate({ to: "/" });
+            await router.navigate({ to: "/app" });
             return;
         }
         setChoosing(plan);
@@ -384,6 +385,9 @@ export const PlansScreen = () => {
                             </p>
                         </div>
                     </section>
+                </div>
+                <div className="standalone-legal-footer">
+                    <LegalLinks />
                 </div>
             </main>
         </div>

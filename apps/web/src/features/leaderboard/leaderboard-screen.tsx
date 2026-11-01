@@ -52,7 +52,7 @@ export const LeaderboardScreen = ({
                     description="Real prompts. Head-to-head votes. See how models perform across the community, or build a ranking from your own comparisons."
                 >
                     <Link
-                        to="/"
+                        to="/app"
                         className={buttonClasses({ variant: "outline", size: "sm" })}
                     >
                         Compare models
@@ -295,7 +295,7 @@ const NoModelsYet = ({ pricing }: { readonly pricing: PricingTab }) => (
                 : "No paid model has answered a voted prompt yet. Its record will appear after the first comparison."
         }
     >
-        <Link to="/" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
+        <Link to="/app" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
             Start a comparison
             <IconArrowRight aria-hidden stroke={1.75} />
         </Link>
@@ -307,7 +307,7 @@ const EmptyPersonal = () => (
         title="Your ranking starts with a vote."
         description="Compare answers on a prompt of your own, then choose a winner. Each vote builds your personal record."
     >
-        <Link to="/" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
+        <Link to="/app" className={buttonClasses({ variant: "outline", class: "mt-5" })}>
             Start a comparison
             <IconArrowRight aria-hidden stroke={1.75} />
         </Link>

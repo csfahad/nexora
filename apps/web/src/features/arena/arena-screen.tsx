@@ -65,7 +65,7 @@ export const ArenaScreen = ({
     });
     const submit = async (prompt: string): Promise<boolean> => {
         if (session.status !== "signed-in") {
-            void navigate({ to: "/sign-in", search: { next: "/" } });
+            void navigate({ to: "/sign-in", search: { next: "/app" } });
             return false;
         }
         setSending(true);
@@ -176,7 +176,7 @@ export const ArenaScreen = ({
                         <>
                             <Link
                                 to="/sign-in"
-                                search={{ next: "/" }}
+                                search={{ next: "/app" }}
                                 className="inline-flex items-center gap-1 font-medium"
                             >
                                 Sign in to compare{" "}

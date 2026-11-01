@@ -103,7 +103,7 @@ export const AccountRow = ({
             return (
                 <Link
                     to="/sign-in"
-                    search={{ next: "/" }}
+                    search={{ next: "/app" }}
                     onClick={onNavigate}
                     aria-label="Sign in"
                     title="Sign in"
@@ -117,7 +117,7 @@ export const AccountRow = ({
         return (
             <Link
                 to="/sign-in"
-                search={{ next: "/" }}
+                search={{ next: "/app" }}
                 onClick={onNavigate}
                 className={cnRowInteractive}
             >
@@ -151,7 +151,7 @@ export const AccountRow = ({
             return;
         }
 
-        await router.navigate({ to: "/" });
+        await router.navigate({ to: "/app" });
         await router.invalidate();
     };
 

@@ -27,7 +27,7 @@ const CompactSidebar = ({
         <Link
             to="/"
             onClick={onNavigate}
-            aria-label="Nexora — go to arena"
+            aria-label="Nexora — Home"
             className="font-heading text-foreground grid size-9 place-items-center rounded-md text-base font-semibold"
         >
             <Wordmark compact />
@@ -119,7 +119,7 @@ export const AppSidebar = ({
         await router.invalidate();
 
         // The open thread just stopped existing, so nothing is left to read.
-        if (pathname === `/thread/${thread.id}`) await router.navigate({ to: "/" });
+        if (pathname === `/thread/${thread.id}`) await router.navigate({ to: "/app" });
     };
 
     return (
@@ -129,7 +129,7 @@ export const AppSidebar = ({
                     to="/"
                     activeOptions={{ exact: true, includeSearch: false }}
                     onClick={onNavigate}
-                    aria-label="Nexora — go to arena"
+                    aria-label="Nexora — Home"
                     className="font-heading text-foreground rounded-md text-lg font-semibold tracking-tight"
                 >
                     <Wordmark />
