@@ -58,6 +58,17 @@ features it added:
 
 ## Operating Context
 
+- **The public homepage (`/`)** introduces the actual comparison workflow before
+  sign-in. Its interactive prompt/answer/vote illustration is explicitly authored
+  example data, makes no provider calls, and writes no real votes. Supporting
+  scenes explain measurements, independent follow-ups, revocable sharing, and
+  personal/global rankings. The real comparison workspace is at **`/app`**, as
+  explicitly chosen by the user in the prior session.
+- **Terms (`/terms`) and Privacy (`/privacy`)** are public reading surfaces linked
+  from the homepage footer, sign-in, Plans, and Billing. Confirmed operator:
+  Nexora; support/privacy contact: `support@nexora.csfahad.in`; country: India.
+  Privacy discloses model-provider processing, PostHog AI content traces and browser
+  recording, Arcjet screening, Vercel analytics, Dodo billing, and secret-link access.
 - **The arena** is the working surface: a composer, up to three answers streaming in
   parallel, per-answer metrics, and a vote. Follow-ups continue each model's own separate
   conversation inside the same thread.

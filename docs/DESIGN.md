@@ -43,6 +43,12 @@ colors:
     destructive-light: "oklch(0.5230109 0.1821467 22.03945)"
     destructive-foreground-light: "oklch(1 0 89.87556)"
 typography:
+    public-display:
+        fontFamily: '"Geist Variable", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
+        fontSize: "clamp(2.75rem, 5.5vw, 4.5rem)"
+        fontWeight: 600
+        lineHeight: 1.06
+        letterSpacing: "-0.04em"
     display:
         fontFamily: '"Geist Variable", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
         fontSize: "clamp(2.5rem, 4.4vw, 3.5rem)"
@@ -225,6 +231,10 @@ balance wrapping; descriptive copy uses comfortable line heights and restrained 
 
 ### Hierarchy
 
+- **Public display:** the homepage's two-line prompt/perspectives thesis uses the
+  `public-display` role, with solid primary emphasis on the second line. Below
+  `640px`, it contracts to `clamp(2rem, 8.7vw, 2.75rem)` so both lines fit. Legal
+  document titles use `clamp(2.5rem, 5vw, 4rem)`. These extend the same Geist family.
 - **Display:** the arena's two-line heading; its second line uses quiet ink. Plans uses
   the same size range with its own wider viewport scaling (`5vw`).
 - **Headline:** Models, Leaderboard, and Billing page titles, paired with descriptive copy.
@@ -266,6 +276,16 @@ stack, and the arena lineup wraps from the left. Composer hint and visible send 
 away while the accessible send label remains. Touch controls receive minimum (`44px`)
 targets where specified, including model removal and plan actions. Bottom composer padding
 respects the safe-area inset.
+
+The public homepage and legal pages share a `1160px` container with responsive
+`20px`–`48px` gutters and a full-height page-owned scroll region. Their public header
+is sticky and uses a two-row mobile layout, preserving product links without a drawer.
+The comparison illustration uses three answer columns, with stacked answers below
+`640px`; measurements use two columns at intermediate widths and four on mobile.
+Supporting bento scenes use a `3/2` then `2/3` five-column grid, two equal columns below
+`1024px`, and one below `640px`. Legal reading pairs a sticky contents rail with a
+bounded text column; mobile replaces the rail with a native disclosure. Anchors clear
+the sticky header. The shared public footer closes each reading/landing surface.
 
 ## Elevation & Depth
 
@@ -391,6 +411,60 @@ Sign-in occupies a dedicated full-page frame without a header or sidebar. A cent
 unboxed column carries the linked wordmark, welcome copy, 48px Google/GitHub buttons,
 and inline failure copy. Existing themes, OAuth callbacks, loading states, and the
 signed-in Continue action remain supported. Short screens scroll rather than clip.
+
+### Public Landing and Legal Reading
+
+`PublicLayout` owns the linked wordmark, public navigation, shared appearance menu,
+sign-in/open-app action, skip link, content region, and footer. Primary comparison
+actions explicitly use the blue primary button variant. The public header spans the
+viewport independently of the content container, with responsive edge padding.
+`LegalLinks` supplies the
+same Terms/Privacy pair to the public footer, Plans, Billing, and signed-in auth;
+signed-out auth includes contextual agreement and acknowledgment links.
+
+The landing's memorable device is one prompt branching into three independently
+readable answers. Example selection is a labeled group of native pressed buttons;
+each answer exposes a pressed vote button, with green plus a check and “Your pick”
+for the chosen response. The status states that example votes are not saved. Authored
+answers and measurements carry explicit example labels. The real workspace remains
+an honest prompt-first empty state at `/app`.
+
+Distinct bento scenes explain per-answer measurements, independent follow-ups,
+revocable read-only links, and leaderboard fields without inventing standings. They
+use semantic figures/labels and crisp geometry rather than decorative icon tiles.
+The FAQ uses native disclosure controls. Motion is limited to existing control
+transitions and a faded horizontal hero backdrop, with reduced-motion support.
+
+`HeroShowcase` places decorative fragments of code, model comparisons, answers, and
+follow-ups behind the comparison window. Upright tiles of varying sizes move
+continuously from left to right, matching the user's Devin recording. A masked
+scene fades at the edges; smaller, blurred fragments establish distance. Two
+identical scene copies form a seamless, linear CSS loop with no per-frame React
+updates. The foreground window stays still. The backdrop cannot intercept controls
+and is hidden from assistive technology. Intersection and document visibility
+pause it offscreen or in a hidden tab. Reduced motion shows a static scene. Mobile
+uses a smaller scene with the same direction and softer opacity.
+
+The animated stage contains only the comparison window. The hero heading, actions,
+free-model note, and explanatory steps sit outside it in normal document flow;
+the backdrop starts at the window rather than a fixed offset from the heading.
+Its own clip and masks keep decorative tiles out of the intro and steps while
+leaving the foreground's existing floating shadow unobstructed. Near tiles use
+28% opacity and a 1px blur. The four smaller lower tiles use 30% opacity and a
+1.5px blur (22% on mobile), spaced at quarter-scene intervals so they can appear in the side gutters instead
+of all being hidden behind the window. The window remains opaque. The user
+requested removal of the play/pause button and its reserved space. The bottom
+mask fades over 24px to preserve the lower tiles' visibility.
+
+The comparison illustration has a macOS-style title bar: decorative traffic lights,
+the Nexora/New comparison title, and quiet window-view icons. These are inert window
+chrome rather than product actions, and no device bezel is added. The existing
+prompt selection, measurements, and votes remain inside the framed illustration.
+
+`LegalScreen` pairs a descriptive document title and effective/operator metadata
+with three concise summaries, a contents list, and numbered sections. Reading copy
+has a generous line height and restrained measure. Policy tables use captions and
+row/column headers; all policy and support links remain discoverable on mobile.
 
 ## Do's and Don'ts
 

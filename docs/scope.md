@@ -2860,6 +2860,124 @@ It surfaced now because the local `.output` was stale (built Oct 10) while Verce
 
 One note for later: `react-router-devtools` is now resolving `router-devtools-core` a few minor versions behind core. If devtools misbehave again, check that pair first.
 
+## Landing and legal pages — November 1, 2026
+
+The prior session explicitly chose a public homepage at `/` for everyone and the comparison
+workspace at `/app`. Preserve the existing Geist, silver/graphite, blue, light/dark/system
+design. Build a code-led product demonstration inspired by Vidyst, Backdoor and Devin:
+one prompt branches into three answers; an interactive, clearly illustrative vote makes
+the mechanism understandable before sign-in. Supporting bento scenes each explain a
+different existing capability: per-call measurements, independent follow-ups, revocable
+sharing, and personal/global rankings. Avoid invented model availability, user counts,
+testimonials, and benchmark claims. Landing prices and limits derive from `plans.ts`.
+
+Terms and Privacy use the user-confirmed operator Nexora, contact
+`support@nexora.csfahad.in`, and governing country India. Privacy must disclose stored
+prompts/answers, OpenRouter and downstream providers, PostHog AI traces and browser
+recording, Vercel analytics, Arcjet prompt screening, Dodo billing, and secret-link sharing.
+Do not promise controls or deletion/retention guarantees the product does not implement.
+
+- [x] Recover the full previous-session conversation into the requested Markdown file.
+- [x] Move the arena to `/app` and update workspace, sign-in and plan navigation.
+- [x] Build responsive public landing with interactive comparison and product illustrations.
+- [x] Build matching Terms and Privacy pages with readable anchored navigation.
+- [x] Link legal pages from landing/footer, sign-in, pricing, and billing.
+- [x] Verify formatting, typecheck, lint, build, contrast, routes, and browser layouts;
+      finish the skill review and record the shipped design.
+
+Verification: final typecheck, lint, production build, formatting, and all 90 token
+contrast pairs pass. A temporary installed-Chrome/CDP helper (no added test framework)
+verified 28 assertions against the production build: both themes at 1440px/390px,
+320px/768px overflow, example switching and unsaved votes, FAQ expansion, legal anchors,
+workspace routing, and sign-in/pricing policy access. The design detector ran once
+and returned no findings. Screenshots and `public-checks.json` live under
+`.impeccable/review/`; public route strategy is persisted in
+`apps/web/.impeccable/surfaces/apps-web-src-routes-index-tsx.md`.
+
+Finish disposition: **ship**, recorded in `.impeccable/review/public-verdict.md`.
+The independent finish reviewer failed twice with a service token-rate limit;
+the documenter also could not start for that reason. Both passes were completed
+locally, and the existing DESIGN.md was extended rather than replaced. Live signed-in
+model calls, real vote writes, shared-thread mutations, and payment purchases were not
+repeated; existing behavior was preserved and navigation was checked in source and
+the signed-out production workspace.
+
+### Hero motion and window styling — November 1 refinement
+
+The user requested Devin-inspired interactive background motion, macOS-style header
+chrome on the existing comparison illustration, and viewport-wide public navigation.
+Preserve the existing landing composition, examples, vote controls, and color system.
+The final motion scene follows the supplied November 1 Devin recording: upright,
+faded task fragments travel continuously from left to right behind the still
+comparison window. Two identical CSS scene copies loop seamlessly; masks fade the
+edges and smaller blurred tiles establish depth. No per-frame React state. The loop
+pauses when the scene is offscreen, the tab is hidden, or its labeled pause button
+is activated. Reduced motion retains a static scene. The macOS title bar uses
+decorative traffic lights and the comparison title, with no fake close/minimize
+controls or laptop/device frame.
+The public header's inner row now spans the viewport with consistent edge padding.
+
+- [x] Replace pointer motion with a faded, seamless left-to-right background loop.
+- [x] Add pause/resume, offscreen/tab visibility handling, and static reduced motion.
+- [x] Frame the existing comparison preview with a responsive macOS title bar.
+- [x] Extend public navigation to the viewport edges on landing and legal pages.
+- [x] Verify formatting, typecheck, lint, production build, contrast, responsive
+      browser layouts, direction/loop continuity, pause/reduced motion, and preview controls.
+
+### Separate the hero foreground from its motion scene — November 1 correction
+
+The user's screenshot shows background tiles crossing behind the primary actions
+and free-model note, while their text competes with the comparison window. Fixed
+desktop/mobile backdrop offsets do not follow the intro's actual height. Move the
+intro and explanatory steps outside the animated comparison stage so its clipped
+backdrop follows the window in normal flow. Preserve the left-to-right loop and
+macOS title bar; soften decorative tiles and use the existing floating shadow to
+separate the opaque foreground. Keep the pause control in a clear area below the
+window, with the existing reduced-motion and visibility behavior.
+
+- [x] Confine the backdrop to the comparison stage, outside the intro and steps.
+- [x] Soften decorative tiles and separate the foreground with existing depth tokens.
+- [x] Verify both themes, mobile/desktop and wrapped text, loop/pause/reduced motion,
+      example keyboard controls, formatting, typecheck, lint, build, and contrast.
+
+Verification: typecheck, lint, formatting, production build, all 90 contrast pairs,
+and the layout detector pass. Final Chrome verification passes 32 assertions:
+1440px/390px in both themes, 320px/768px/1920px layout, clearance above and below
+the backdrop, enlarged text, touch target separation, left-to-right direction,
+seam continuity, pause/resume and visibility, reduced motion, example selection,
+voting, and native Enter-key activation. No uncaught browser exceptions. Captures
+and `hero-separation-checks.json` are in `.impeccable/review/`; final disposition
+is recorded in `hero-separation-verdict.md`. The foreground/header composition
+is preserved and the moving scene remains peripheral to the actual example.
+
+### Hero motion control removal and lower fade — November 1 tweak
+
+The user explicitly requested removal of the play/pause button. Remove its state,
+icons, selectors, and reserved space; retain automatic offscreen/hidden-tab pausing
+and static reduced motion. Shorten only the lower fade from 70px to 40px so bottom
+tiles remain slightly more visible without changing their overall opacity.
+
+- [x] Remove the motion control and its reserved space.
+- [x] Slightly reduce the bottom fade.
+- [x] Verify source checks, build, contrast, and the final browser presentation.
+
+The user reported that the lower scene still disappeared. The lower tiles were
+both faint and clustered behind the opaque window. Distribute them across the
+scene and raise only their opacity to 30% (22% mobile), reduce their blur to 1.5px,
+and shorten the final bottom fade to 24px. Lift the code and answer tiles slightly
+to reduce clipping. Preserve the clean intro, foreground window, and absent control.
+
+- [x] Restore lower tile visibility through opacity, blur, and distribution.
+- [x] Verify several animation phases in both themes and the required source checks.
+
+Final verification: formatting, typecheck, lint, production build, all 90 contrast
+pairs, and the design detector pass. Twelve Chrome assertions pass, including
+lower-tile exposure at four evenly spaced phases of the loop in both themes,
+mobile separation, reduced motion, and no reintroduced playback control. Captured
+lower tiles are visible beside the window in light and dark, while the intro
+remains clear. Evidence: `.impeccable/review/hero-lower-checks.json` and
+`hero-lower-{theme}-{phase}.png`.
+
 ## Consider to build onwards
 
 Kept here so the plan stays honest about what's deliberately left out.
