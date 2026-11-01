@@ -16,8 +16,8 @@ export const StandaloneHeader = ({
     return (
         <header className="standalone-topbar flex shrink-0 items-center gap-4">
             <Link
-                to="/app"
-                aria-label="Nexora — go to arena"
+                to="/"
+                aria-label="Nexora — Home"
                 className="inline-flex shrink-0 items-center"
             >
                 <Wordmark />
