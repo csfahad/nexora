@@ -50,7 +50,7 @@ function SharedThreadRoute() {
                         {SHARED_THREAD_GONE}
                     </p>
 
-                    <Link to="/" className={buttonClasses({ variant: "outline" })}>
+                    <Link to="/app" className={buttonClasses({ variant: "outline" })}>
                         Try your own prompt
                     </Link>
                 </div>

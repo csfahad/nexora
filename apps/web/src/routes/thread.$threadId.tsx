@@ -47,7 +47,7 @@ function ThreadRoute() {
                 <p className="text-foreground text-pretty">{THREAD_NOT_FOUND}</p>
 
                 <Link
-                    to="/"
+                    to="/app"
                     className={buttonClasses({ variant: "outline", size: "sm" })}
                 >
                     Start a new thread

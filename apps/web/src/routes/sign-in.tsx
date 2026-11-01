@@ -3,10 +3,10 @@ import { z } from "zod";
 import { SignInScreen } from "@/features/auth/sign-in-screen";
 
 const safePath = (raw: string): string =>
-    raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
+    raw.startsWith("/") && !raw.startsWith("//") ? raw : "/app";
 
 const searchSchema = z.object({
-    next: z.string().catch("/").transform(safePath),
+    next: z.string().catch("/app").transform(safePath),
 });
 
 export const Route = createFileRoute("/sign-in")({
