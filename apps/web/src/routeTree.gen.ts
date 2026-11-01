@@ -10,10 +10,13 @@
 
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as AppRouteImport } from "./routes/app";
 import { Route as LeaderboardRouteImport } from "./routes/leaderboard";
 import { Route as ModelsRouteImport } from "./routes/models";
 import { Route as PlansRouteImport } from "./routes/plans";
+import { Route as PrivacyRouteImport } from "./routes/privacy";
 import { Route as SignInRouteImport } from "./routes/sign-in";
+import { Route as TermsRouteImport } from "./routes/terms";
 import { Route as ApiChatRouteImport } from "./routes/api.chat";
 import { Route as SettingsBillingRouteImport } from "./routes/settings.billing";
 import { Route as ShareSlugRouteImport } from "./routes/share.$slug";
@@ -23,6 +26,11 @@ import { Route as ApiAuthSplatRouteImport } from "./routes/api.auth.$";
 const IndexRoute = IndexRouteImport.update({
     id: "/",
     path: "/",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const AppRoute = AppRouteImport.update({
+    id: "/app",
+    path: "/app",
     getParentRoute: () => rootRouteImport,
 } as any);
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -40,9 +48,19 @@ const PlansRoute = PlansRouteImport.update({
     path: "/plans",
     getParentRoute: () => rootRouteImport,
 } as any);
+const PrivacyRoute = PrivacyRouteImport.update({
+    id: "/privacy",
+    path: "/privacy",
+    getParentRoute: () => rootRouteImport,
+} as any);
 const SignInRoute = SignInRouteImport.update({
     id: "/sign-in",
     path: "/sign-in",
+    getParentRoute: () => rootRouteImport,
+} as any);
+const TermsRoute = TermsRouteImport.update({
+    id: "/terms",
+    path: "/terms",
     getParentRoute: () => rootRouteImport,
 } as any);
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -73,10 +91,13 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
     "/": typeof IndexRoute;
+    "/app": typeof AppRoute;
     "/leaderboard": typeof LeaderboardRoute;
     "/models": typeof ModelsRoute;
     "/plans": typeof PlansRoute;
+    "/privacy": typeof PrivacyRoute;
     "/sign-in": typeof SignInRoute;
+    "/terms": typeof TermsRoute;
     "/api/chat": typeof ApiChatRoute;
     "/settings/billing": typeof SettingsBillingRoute;
     "/share/$slug": typeof ShareSlugRoute;
@@ -85,10 +106,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
     "/": typeof IndexRoute;
+    "/app": typeof AppRoute;
     "/leaderboard": typeof LeaderboardRoute;
     "/models": typeof ModelsRoute;
     "/plans": typeof PlansRoute;
+    "/privacy": typeof PrivacyRoute;
     "/sign-in": typeof SignInRoute;
+    "/terms": typeof TermsRoute;
     "/api/chat": typeof ApiChatRoute;
     "/settings/billing": typeof SettingsBillingRoute;
     "/share/$slug": typeof ShareSlugRoute;
@@ -98,10 +122,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
     __root__: typeof rootRouteImport;
     "/": typeof IndexRoute;
+    "/app": typeof AppRoute;
     "/leaderboard": typeof LeaderboardRoute;
     "/models": typeof ModelsRoute;
     "/plans": typeof PlansRoute;
+    "/privacy": typeof PrivacyRoute;
     "/sign-in": typeof SignInRoute;
+    "/terms": typeof TermsRoute;
     "/api/chat": typeof ApiChatRoute;
     "/settings/billing": typeof SettingsBillingRoute;
     "/share/$slug": typeof ShareSlugRoute;
@@ -112,10 +139,13 @@ export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath;
     fullPaths:
         | "/"
+        | "/app"
         | "/leaderboard"
         | "/models"
         | "/plans"
+        | "/privacy"
         | "/sign-in"
+        | "/terms"
         | "/api/chat"
         | "/settings/billing"
         | "/share/$slug"
@@ -124,10 +154,13 @@ export interface FileRouteTypes {
     fileRoutesByTo: FileRoutesByTo;
     to:
         | "/"
+        | "/app"
         | "/leaderboard"
         | "/models"
         | "/plans"
+        | "/privacy"
         | "/sign-in"
+        | "/terms"
         | "/api/chat"
         | "/settings/billing"
         | "/share/$slug"
@@ -136,10 +169,13 @@ export interface FileRouteTypes {
     id:
         | "__root__"
         | "/"
+        | "/app"
         | "/leaderboard"
         | "/models"
         | "/plans"
+        | "/privacy"
         | "/sign-in"
+        | "/terms"
         | "/api/chat"
         | "/settings/billing"
         | "/share/$slug"
@@ -149,10 +185,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
     IndexRoute: typeof IndexRoute;
+    AppRoute: typeof AppRoute;
     LeaderboardRoute: typeof LeaderboardRoute;
     ModelsRoute: typeof ModelsRoute;
     PlansRoute: typeof PlansRoute;
+    PrivacyRoute: typeof PrivacyRoute;
     SignInRoute: typeof SignInRoute;
+    TermsRoute: typeof TermsRoute;
     ApiChatRoute: typeof ApiChatRoute;
     SettingsBillingRoute: typeof SettingsBillingRoute;
     ShareSlugRoute: typeof ShareSlugRoute;
@@ -167,6 +206,13 @@ declare module "@tanstack/react-router" {
             path: "/";
             fullPath: "/";
             preLoaderRoute: typeof IndexRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/app": {
+            id: "/app";
+            path: "/app";
+            fullPath: "/app";
+            preLoaderRoute: typeof AppRouteImport;
             parentRoute: typeof rootRouteImport;
         };
         "/leaderboard": {
@@ -190,11 +236,25 @@ declare module "@tanstack/react-router" {
             preLoaderRoute: typeof PlansRouteImport;
             parentRoute: typeof rootRouteImport;
         };
+        "/privacy": {
+            id: "/privacy";
+            path: "/privacy";
+            fullPath: "/privacy";
+            preLoaderRoute: typeof PrivacyRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
         "/sign-in": {
             id: "/sign-in";
             path: "/sign-in";
             fullPath: "/sign-in";
             preLoaderRoute: typeof SignInRouteImport;
+            parentRoute: typeof rootRouteImport;
+        };
+        "/terms": {
+            id: "/terms";
+            path: "/terms";
+            fullPath: "/terms";
+            preLoaderRoute: typeof TermsRouteImport;
             parentRoute: typeof rootRouteImport;
         };
         "/api/chat": {
@@ -237,10 +297,13 @@ declare module "@tanstack/react-router" {
 
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
+    AppRoute: AppRoute,
     LeaderboardRoute: LeaderboardRoute,
     ModelsRoute: ModelsRoute,
     PlansRoute: PlansRoute,
+    PrivacyRoute: PrivacyRoute,
     SignInRoute: SignInRoute,
+    TermsRoute: TermsRoute,
     ApiChatRoute: ApiChatRoute,
     SettingsBillingRoute: SettingsBillingRoute,
     ShareSlugRoute: ShareSlugRoute,
