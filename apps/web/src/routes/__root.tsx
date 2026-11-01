@@ -53,6 +53,8 @@ function RootLayout() {
     const pathname = useRouterState({ select: (state) => state.location.pathname });
 
     if (
+        pathname === "/" ||
+        /^\/(terms|privacy)\/?$/.test(pathname) ||
         pathname.startsWith("/share/") ||
         pathname === "/plans" ||
         pathname === "/sign-in" ||
