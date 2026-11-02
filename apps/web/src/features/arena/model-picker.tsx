@@ -43,6 +43,8 @@ export const ModelPicker = ({
 }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [query, setQuery] = useState("");
+    const [collisionBoundary, setCollisionBoundary] = useState<HTMLElement | null>(null);
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
     const rowRefs = useRef<Array<HTMLButtonElement | null>>([]);
     const allowance = useAllowance();
@@ -145,8 +147,15 @@ export const ModelPicker = ({
 
     return (
         <div className="flex min-w-0 flex-1 items-center gap-2">
-            <Popover>
+            <Popover
+                onOpenChange={(open) => {
+                    if (open) {
+                        setCollisionBoundary(triggerRef.current?.closest("main") ?? null);
+                    }
+                }}
+            >
                 <PopoverTrigger
+                    ref={triggerRef}
                     className={cn(
                         buttonClasses({ variant: "outline", size: "sm" }),
                         "group/trigger min-w-0 max-w-full pl-1.5",
@@ -169,7 +178,9 @@ export const ModelPicker = ({
 
                 <PopoverContent
                     align="start"
-                    className="w-[min(22rem,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
+                    collisionBoundary={collisionBoundary}
+                    collisionPadding={12}
+                    className="model-picker-popover w-[min(22rem,calc(100vw-2rem))] gap-0 overflow-hidden p-0"
                     onOpenAutoFocus={(event) => {
                         event.preventDefault();
                         searchInputRef.current?.focus();
