@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import { IconArrowUp, IconPlayerStopFilled } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
+import { ComposerFrame } from "@/components/ui/composer-frame";
 
 const MAX_HEIGHT_PX = 180;
 const draftStorageKey = (key: string): string => `nexora:draft:${key}`;
@@ -16,6 +16,7 @@ export const PromptComposer = ({
     onStop,
     suggestion,
     showSendLabel = false,
+    animateBorder = false,
 }: {
     readonly onSubmit: (prompt: string) => boolean | Promise<boolean>;
     readonly controls?: ReactNode;
@@ -25,6 +26,7 @@ export const PromptComposer = ({
     readonly onStop?: () => void;
     readonly suggestion?: Readonly<{ text: string; id: number }>;
     readonly showSendLabel?: boolean;
+    readonly animateBorder?: boolean;
 }) => {
     const [draft, setDraft] = useState("");
     const [restoredKey, setRestoredKey] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export const PromptComposer = ({
         }
     };
     return (
-        <HoverBorderGradient>
+        <ComposerFrame animated={animateBorder}>
             <div
                 className={
                     showSendLabel
@@ -135,6 +137,6 @@ export const PromptComposer = ({
                     )}
                 </div>
             </div>
-        </HoverBorderGradient>
+        </ComposerFrame>
     );
 };
