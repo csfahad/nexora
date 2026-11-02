@@ -17,6 +17,7 @@ import { defaultTrio } from "./default-trio";
 import { ModelPicker } from "./model-picker";
 import { PromptComposer } from "./prompt-composer";
 import { canSend } from "./send-cost";
+import { ArenaGreeting } from "./arena-greeting";
 
 const STARTERS = [
     {
@@ -80,15 +81,11 @@ export const ArenaScreen = ({
             <div className="arena-layout">
                 <div className="arena-intro">
                     <ComparisonMark />
-                    <h1>
-                        Your prompt.
-                        <br />
-                        <span>Three perspectives.</span>
-                    </h1>
-                    <p>
-                        Compare AI models side by side. See how they think, measure what
-                        matters, and choose your winner.
-                    </p>
+                    <ArenaGreeting
+                        key={session.status === "signed-in" ? session.user.id : "guest"}
+                        name={session.status === "signed-in" ? session.user.name : null}
+                    />
+                    <p>Bring a question. Let’s see how the models approach it.</p>
                 </div>
                 <div className="arena-workbench">
                     <PromptComposer
@@ -97,6 +94,7 @@ export const ArenaScreen = ({
                         disabled={selectedIds.length === 0}
                         suggestion={suggestion}
                         showSendLabel
+                        animateBorder
                         controls={
                             <ModelPicker
                                 models={models}
