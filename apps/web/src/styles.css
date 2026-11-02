@@ -192,7 +192,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         text-wrap: balance;
     }
 
-    :focus-visible {
+    :focus-visible:not(input):not(textarea) {
         outline: 2px solid var(--ring);
         outline-offset: 2px;
         border-radius: var(--radius-sm);
@@ -210,6 +210,10 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
     :where(textarea, input) {
         caret-color: var(--primary);
+    }
+
+    :where(textarea, input):focus {
+        outline: none;
     }
 
     * {
@@ -1145,9 +1149,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     color: var(--foreground);
     font-size: 0.875rem;
     line-height: 1.5;
-    transition:
-        border-color var(--dur-state),
-        box-shadow var(--dur-state);
 }
 
 .field-input--icon {
@@ -1589,13 +1590,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 .view-toggle-selected {
     box-shadow: var(--shadow-sm);
 }
-.field-input:hover {
-    border-color: var(--muted-foreground);
-}
-.field-input:focus-visible {
-    outline: none;
-    border-color: var(--ring);
-}
 .page-content {
     width: 100%;
     max-width: 75rem;
@@ -1778,16 +1772,18 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     padding: 3.5rem 2rem 2rem;
 }
 .arena-intro {
+    width: 100%;
     text-align: center;
 }
 .arena-intro h1 {
-    font-size: clamp(2.5rem, 4.4vw, 3.5rem);
-    line-height: 1.1;
-    font-weight: 600;
-    letter-spacing: -0.04em;
-}
-.arena-intro h1 span {
-    color: var(--muted-foreground);
+    max-width: 24ch;
+    margin-inline: auto;
+    font-size: clamp(2rem, 3.6vw, 3rem);
+    line-height: 1.2;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
 }
 .arena-intro p {
     max-width: 31rem;
@@ -1820,7 +1816,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     margin-top: 2rem;
     width: 100%;
 }
-.hover-border-gradient {
+.composer-frame {
     position: relative;
     isolation: isolate;
     padding: 1px;
@@ -1829,7 +1825,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     background: var(--border);
     box-shadow: var(--shadow-composer);
 }
-.hover-border-light {
+.composer-frame-content {
+    position: relative;
+    background: var(--card);
+    border-radius: inherit;
+}
+.composer-frame-light {
     position: absolute;
     inset: -100%;
     background: conic-gradient(
@@ -1842,8 +1843,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     pointer-events: none;
     transition: opacity var(--dur-state);
 }
-.hover-border-gradient:focus-within .hover-border-light,
-.hover-border-gradient:hover .hover-border-light {
+.composer-frame--animated:hover .composer-frame-light,
+.composer-frame--animated:focus-within .composer-frame-light {
     opacity: 0.75;
     animation: composer-light 1.6s var(--ease-out-expo) both;
 }
@@ -1854,14 +1855,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     to {
         transform: rotate(90deg);
     }
-}
-.hover-border-content {
-    position: relative;
-    background: var(--card);
-    border-radius: inherit;
-}
-.hover-border-gradient:has(textarea:focus-visible) {
-    background: var(--ring);
 }
 .prompt-composer {
     padding: 1.25rem;
@@ -2333,7 +2326,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         padding: 2rem 1rem;
     }
     .arena-intro h1 {
-        font-size: 2.5rem;
+        font-size: clamp(1.75rem, 7vw, 2.5rem);
     }
     .arena-intro p {
         font-size: 0.875rem;
@@ -2418,13 +2411,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     }
 }
 @media (prefers-reduced-motion: reduce) {
+    .composer-frame-light {
+        display: none;
+    }
     .comparison-path {
         animation: none;
         stroke-dasharray: none;
-    }
-    .hover-border-light {
-        animation: none !important;
-        background: var(--primary);
     }
     .card-spotlight-light {
         display: none;
@@ -2488,10 +2480,14 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     margin-left: auto;
 }
 .model-picker-results {
+    min-height: 0;
     max-height: min(22rem, 45dvh);
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 0.375rem;
+}
+.model-picker-popover > :not(.model-picker-results) {
+    flex-shrink: 0;
 }
 .model-picker-option {
     display: flex;
@@ -2583,9 +2579,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 .palette-search {
     min-height: 3.5rem;
 }
-.palette-search:focus-within {
-    box-shadow: inset 0 -1px 0 var(--ring);
-}
 .palette-search input:focus-visible {
     outline: none;
 }
@@ -2597,9 +2590,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     border-radius: 0.75rem;
     padding: 0.375rem 0.375rem 0.375rem 0.875rem;
     background: var(--muted);
-}
-.share-link-field:focus-within {
-    border-color: var(--ring);
 }
 .share-link-field input:focus-visible {
     outline: none;
@@ -2944,10 +2934,11 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     mask-composite: intersect;
 }
 .hero-backdrop-track {
+    --hero-scene-width: max(1280px, 100vw);
     display: flex;
     width: max-content;
     height: 100%;
-    animation: hero-backdrop-drift 72s linear infinite;
+    animation: hero-backdrop-drift 60s linear infinite;
     animation-play-state: paused;
 }
 .hero-showcase[data-active="true"] .hero-backdrop-track {
@@ -2957,15 +2948,15 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 .hero-backdrop-scene {
     position: relative;
     flex: 0 0 auto;
-    width: max(1680px, 100vw);
+    width: var(--hero-scene-width);
     height: 100%;
 }
 @keyframes hero-backdrop-drift {
     from {
-        transform: translateX(-50%);
+        transform: translateX(calc(-2 * var(--hero-scene-width)));
     }
     to {
-        transform: translateX(0);
+        transform: translateX(calc(-1 * var(--hero-scene-width)));
     }
 }
 .hero-backdrop-fragment {
@@ -2977,7 +2968,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     color: var(--muted-foreground);
     font-size: 0.8125rem;
     line-height: 1.65;
-    opacity: 0.28;
+    opacity: 0.32;
     filter: blur(1px);
 }
 .hero-backdrop-fragment[data-fragment="code"] {
@@ -2985,7 +2976,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     top: 52px;
 }
 .hero-backdrop-fragment[data-fragment="models"] {
-    left: 53%;
+    left: 52%;
     top: 60px;
     width: 180px;
 }
@@ -2996,14 +2987,14 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     background: var(--surface-tint);
 }
 .hero-backdrop-fragment[data-fragment="conversation"] {
-    left: 76%;
+    left: 77%;
     top: 120px;
     background: var(--surface-tint);
 }
 .hero-backdrop-fragment[data-fragment$="-far"] {
     width: 170px;
     padding: 16px;
-    opacity: 0.3;
+    opacity: 0.34;
     filter: blur(1.5px);
 }
 .hero-backdrop-fragment[data-fragment="code-far"] {
@@ -4057,22 +4048,20 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         font-size: 0.625rem;
     }
     .hero-backdrop-track {
-        animation-duration: 44s;
-    }
-    .hero-backdrop-scene {
-        width: 960px;
+        --hero-scene-width: 960px;
+        animation-duration: 36s;
     }
     .hero-backdrop-fragment {
         width: 160px;
         padding: 16px;
-        opacity: 0.2;
+        opacity: 0.23;
     }
     .hero-backdrop-fragment[data-fragment="answer"] {
         width: 190px;
     }
     .hero-backdrop-fragment[data-fragment$="-far"] {
         width: 130px;
-        opacity: 0.22;
+        opacity: 0.25;
     }
     .preview-toolbar {
         gap: 10px;
@@ -4291,7 +4280,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 @media (prefers-reduced-motion: reduce) {
     .hero-showcase .hero-backdrop-track {
         animation: none;
-        transform: translateX(-50%);
+        transform: translateX(calc(-1 * var(--hero-scene-width)));
         will-change: auto;
     }
     .public-page {
