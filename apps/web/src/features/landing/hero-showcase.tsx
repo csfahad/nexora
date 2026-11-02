@@ -73,7 +73,6 @@ const FragmentContent = ({ kind }: { readonly kind: Fragment["kind"] }) => {
     );
 };
 
-// Identical scene copies make the CSS loop seamless; React never renders per frame.
 export const HeroShowcase = ({ children }: { readonly children: ReactNode }) => {
     const showcaseRef = useRef<HTMLDivElement>(null);
     const inViewRef = useRef(false);
@@ -101,7 +100,7 @@ export const HeroShowcase = ({ children }: { readonly children: ReactNode }) => 
         <div className="hero-showcase" ref={showcaseRef}>
             <div className="hero-backdrop" aria-hidden="true">
                 <div className="hero-backdrop-track">
-                    {["original", "repeat"].map((copy) => (
+                    {["previous", "current", "next"].map((copy) => (
                         <div className="hero-backdrop-scene" key={copy}>
                             {FRAGMENTS.map((fragment) => (
                                 <div

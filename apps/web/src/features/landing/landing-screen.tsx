@@ -52,7 +52,7 @@ export const LandingScreen = () => (
     <PublicLayout>
         <section className="landing-hero" aria-labelledby="landing-heading">
             <h1 id="landing-heading">
-                One prompt.
+                Your prompt.
                 <br />
                 <span>Three perspectives.</span>
             </h1>
