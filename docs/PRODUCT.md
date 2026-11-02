@@ -150,7 +150,7 @@ link permanently; re-sharing mints a different one. Shared threads are never sea
   workspace: left rail, top bar, prompt-first entry, independent answer cards, and familiar
   affordances, with cool silver surfaces, graphite type, blue controls, and Geist.
 - The build uses suitable Aceternity patterns sparingly: a catalog pointer spotlight and
-  a finite composer hover/focus border sweep. Motion stays restrained and reduced-motion
+  an animated border on the `/app` composer, with static thread composers and input fields elsewhere, as clarified on November 2. Motion stays restrained and reduced-motion
   alternatives remain available. Keyboard operation and readable numeric comparison
   retain their craft bar.
 - One primary accent, **blue**, carries actions, links, focus, selection, and the branching

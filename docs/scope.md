@@ -2978,6 +2978,86 @@ lower tiles are visible beside the window in light and dark, while the intro
 remains clear. Evidence: `.impeccable/review/hero-lower-checks.json` and
 `hero-lower-{theme}-{phase}.png`.
 
+### Continuous backdrop and personalized composer — November 2 refinement
+
+The user reported that the left-to-right backdrop felt like separate passes.
+Use three attached copies with a full scene of buffer on each side, translate
+exactly one scene width per cycle, and keep quarter-scene tile spacing consistent
+through the join. Preserve the lower tile opacity/blur, foreground separation,
+automatic offscreen/hidden-tab pausing, and static reduced motion.
+
+Move the “Your prompt. Three perspectives.” tagline to the homepage. Keep the
+branching illustration on `/app` and replace its marketing headline with varied
+personalized welcomes. Choose once on arrival after hydration using local time;
+include morning, afternoon, evening, a late-night invitation, and three
+conversational options. Use the first display name and a natural nameless fallback.
+The greeting stays stable during composer edits and model selections.
+
+- [x] Attach backdrop copies and preserve motion preferences and foreground clarity.
+- [x] Update the homepage tagline and add varied composer welcomes.
+- [x] Preserve the branching illustration and support long or blank display names.
+- [x] Verify the browser loop boundary, greetings, responsive layouts, and source checks.
+
+Verification: production build, TypeScript, lint, formatting, all 90 contrast pairs,
+and the design detector pass. Chrome passes 81 assertions across both themes at
+320px, 390px, 1440px, and 1920px, including identical tile positions at the cycle
+boundary, continuous movement immediately around it, backdrop separation, and
+static reduced motion. The real signed-out `/app` retains the branching mark;
+temporary component fixtures verify all four greeting choices, local-time
+boundaries, first/blank/long names, and stable welcomes across re-renders. OAuth
+sign-in and model calls were not repeated. Captures and the detailed checks live
+in `.impeccable/review/seamless-welcome-checks.json` and the corresponding
+`seamless-*` and `personalized-*` PNGs.
+
+### Backdrop pace, input states, and picker clearance — November 2 follow-up
+
+The user requested a small speed/visibility increase for the background, removal
+of active outlines from input fields, and clearance between the model picker and
+the shell header. Reduce the desktop loop from 72s to 60s and mobile from 44s to
+36s. Raise tile opacity only three to four percentage points, preserving the
+existing masks and blur.
+
+Replace the composer's animated border component with a static `ComposerFrame`.
+Text fields, thread search, and share-link inputs use subtle surface focus feedback
+without blue edges or outlines. Button/link keyboard focus remains visible.
+The model picker collides against its enclosing `main`, padded by 12px, and
+its results list can shrink and scroll without hiding the title or search field.
+
+- [x] Slightly increase background speed and visibility.
+- [x] Remove active input outlines and the composer border animation.
+- [x] Keep the model picker inside the workspace below the shell header.
+- [x] Verify desktop/mobile, both themes, keyboard operation, and source checks.
+
+Verification: production build, TypeScript, lint, formatting, the design detector,
+and all 90 contrast pairs pass. Chrome passes 70 assertions in both themes:
+picker clearance and scrollability at 1440×900, 1440×600, 390×844, and 320×568;
+neutral composer, picker, catalog-search, and thread-search focus states;
+picker arrow-key navigation and Escape focus restoration; backdrop timing,
+opacity, loop continuity, and reduced motion. A temporary fixture mounts the
+real follow-up composer and verifies generic/share-link input states. No model
+calls or thread mutations were submitted. Evidence and captures are in
+`.impeccable/review/input-picker-checks.json` and the `input-*` PNGs.
+
+### Composer animation scope — November 2 clarification
+
+The user clarified that the animated border should remain on the `/app` composer,
+while input fields elsewhere should have no hover effects. Add an explicit opt-in
+for the finite border sweep, enabled only by `ArenaScreen`; thread follow-ups keep
+the default static frame. Remove surface changes on input focus from plain fields,
+thread search, share links, and composer content. Keep the removed solid input
+outlines removed. Reduced motion hides the decorative sweep.
+
+- [x] Restore the border animation only on the `/app` composer.
+- [x] Remove input hover/focus surface effects everywhere else.
+- [x] Verify the scoped animation and static input states in both themes.
+
+Verification: build, TypeScript, lint, formatting, and the design scan pass.
+Thirty-six Chrome assertions using the real composer components pass at desktop
+and mobile sizes in both themes. They verify animation only on the opted-in
+composer, hover/focus activation without a solid outline or changed input surface,
+static thread/search/share-link inputs, and reduced-motion suppression. Evidence:
+`.impeccable/review/scoped-composer-checks.json` and `scoped-composer-*` PNGs.
+
 ## Consider to build onwards
 
 Kept here so the plan stays honest about what's deliberately left out.

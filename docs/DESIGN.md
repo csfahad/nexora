@@ -235,8 +235,9 @@ balance wrapping; descriptive copy uses comfortable line heights and restrained 
   `public-display` role, with solid primary emphasis on the second line. Below
   `640px`, it contracts to `clamp(2rem, 8.7vw, 2.75rem)` so both lines fit. Legal
   document titles use `clamp(2.5rem, 5vw, 4rem)`. These extend the same Geist family.
-- **Display:** the arena's two-line heading; its second line uses quiet ink. Plans uses
-  the same size range with its own wider viewport scaling (`5vw`).
+- **Display:** the arena's personalized welcome uses Geist at weight `500`,
+  `clamp(2rem, 3.6vw, 3rem)`, with balanced wrapping and space for long names.
+  Plans retains its larger display range and wider viewport scaling (`5vw`).
 - **Headline:** Models, Leaderboard, and Billing page titles, paired with descriptive copy.
 - **Title:** section and plan titles. Catalog model names use a smaller compact title
   (`0.9375rem`, weight `600`, line height `1.5`) and wrap rather than clipping.
@@ -255,8 +256,13 @@ The top-bar toggle owns collapse. Below (`1024px`) navigation becomes a Radix dr
 (`272px`, at most `85vw`) with overlay, focus management, Escape, and dismissal on navigation.
 The primary route remains selected when its search parameters change.
 
-The arena centers a prompt-first workbench within (`58rem`): branching mark, two-line
-heading, explanatory line, composer, visible selected-model pills, and prompt starters.
+The arena centers a prompt-first workbench within (`58rem`): branching mark, personalized
+welcome, explanatory line, composer, visible selected-model pills, and prompt starters.
+The welcome chooses a time-of-day or conversational greeting once per arrival using
+the visitor's local clock. It uses the account's first display name, omits the name
+for guests or blank names, and stays stable while composing. Late-night arrivals
+use a natural invitation instead of a farewell. The public homepage owns the
+“Your prompt. Three perspectives.” tagline.
 Ordinary pages use a centered (`75rem`) content container. Thread and shared content use
 (`76rem`), Plans (`78rem`), and Billing (`64rem`). The body stays viewport-bound;
 each screen owns its scroll region. Answer columns share the transcript scroll rather
@@ -334,11 +340,12 @@ with (`32px`) small, (`48px`) large, and corresponding icon sizes. Hover uses th
 tonal change; active scales to (`0.98`). Disabled opacity is (`45%`), and loading overlays
 a spinner on an invisible label to preserve width while exposing `aria-busy`.
 
-Focus is a visible blue outline (`2px`, offset `2px`); pill buttons preserve their shape
-on focus. Text fields use only a thin (`1px`) blue edge. Composite inputs suppress the
-inner outline and use a thin wrapper edge for the composer and share-link field, or an
-inset bottom line for palette search. A focused button inside a composite retains its
-own keyboard outline; it does not draw a second outline around the whole wrapper.
+Buttons and links use a visible blue keyboard outline (`2px`, offset `2px`);
+pill buttons preserve their shape on focus. At the user's November 2 request,
+text inputs and composers keep their neutral resting seams and surfaces in hover
+and focus states. The blue caret remains, with no added outline or inset line.
+The `/app` composer alone opts into the animated border sweep. A focused button
+inside a composite retains its own keyboard outline.
 
 ### Chips
 
@@ -371,9 +378,11 @@ The homepage composer keeps its generous two-row prompt area. Thread follow-ups 
 with one text row above the controls, 12px vertical padding, and an 8px toolbar gap.
 They grow with the draft up to the same 180px text limit, then scroll.
 
-The adapted Aceternity **HoverBorderGradient** is a finite CSS border sweep triggered by
-hover or focus (`1.6s`), with a thin blue edge on textarea focus. It has no idle timer. The
-branching mark similarly enters once (`1.6s`). Shared state feedback uses (`180ms`) and
+**ComposerFrame** provides the shared neutral composer seam and elevation. The
+`/app` composer explicitly enables its finite hover/focus border sweep (`1.6s`);
+thread follow-ups retain a static frame. Input backgrounds remain unchanged in
+hover and focus states. Reduced motion hides the decorative sweep.
+The branching mark enters once (`1.6s`). Shared state feedback uses (`180ms`) and
 panel travel (`320ms`) on the established exponential ease. Reduced motion suppresses
 these embellishments and collapses normal transitions; loading spinners retain a slower
 functional cycle (`1.6s`). Thread-title reveal remains an overflow-only functional state.
@@ -438,9 +447,13 @@ transitions and a faded horizontal hero backdrop, with reduced-motion support.
 `HeroShowcase` places decorative fragments of code, model comparisons, answers, and
 follow-ups behind the comparison window. Upright tiles of varying sizes move
 continuously from left to right, matching the user's Devin recording. A masked
-scene fades at the edges; smaller, blurred fragments establish distance. Two
-identical scene copies form a seamless, linear CSS loop with no per-frame React
-updates. The foreground window stays still. The backdrop cannot intercept controls
+scene fades at the edges; smaller, blurred fragments establish distance. Three
+identical scene copies provide a full buffer on each side. The linear CSS loop
+moves exactly one scene width, from minus two scene widths to minus one, so a
+successor is already attached when the cycle wraps. Regular quarter-scene spacing
+continues through the join, with a `max(1280px, 100vw)` desktop scene and a `960px`
+mobile scene. There are no per-frame React updates. The foreground window stays
+still. The backdrop cannot intercept controls
 and is hidden from assistive technology. Intersection and document visibility
 pause it offscreen or in a hidden tab. Reduced motion shows a static scene. Mobile
 uses a smaller scene with the same direction and softer opacity.
@@ -450,11 +463,18 @@ free-model note, and explanatory steps sit outside it in normal document flow;
 the backdrop starts at the window rather than a fixed offset from the heading.
 Its own clip and masks keep decorative tiles out of the intro and steps while
 leaving the foreground's existing floating shadow unobstructed. Near tiles use
-28% opacity and a 1px blur. The four smaller lower tiles use 30% opacity and a
-1.5px blur (22% on mobile), spaced at quarter-scene intervals so they can appear in the side gutters instead
+32% opacity and a 1px blur (23% mobile). The four smaller lower tiles use 34% opacity and a
+1.5px blur (25% on mobile), spaced at quarter-scene intervals so they can appear in the side gutters instead
 of all being hidden behind the window. The window remains opaque. The user
 requested removal of the play/pause button and its reserved space. The bottom
 mask fades over 24px to preserve the lower tiles' visibility.
+The loop takes 60 seconds on desktop and 36 seconds on mobile, approximately
+20% faster than the previous pass; opacity rose only three to four percentage points.
+
+The model picker uses its enclosing `main` as the collision boundary, with 12px
+padding. It stays below the shell header and inside the workspace in both initial
+and thread composers. The results list shrinks and scrolls when vertical space is
+limited; the picker heading and search field remain visible.
 
 The comparison illustration has a macOS-style title bar: decorative traffic lights,
 the Nexora/New comparison title, and quiet window-view icons. These are inert window
