@@ -291,7 +291,18 @@ The comparison illustration uses three answer columns, with stacked answers belo
 Supporting bento scenes use a `3/2` then `2/3` five-column grid, two equal columns below
 `1024px`, and one below `640px`. Legal reading pairs a sticky contents rail with a
 bounded text column; mobile replaces the rail with a native disclosure. Anchors clear
-the sticky header. The shared public footer closes each reading/landing surface.
+the sticky header. The shared public footer closes each reading/landing surface
+with the page background and a soft primary-blue glow around the wordmark,
+without divider lines. Its bounded inner grid pairs a short product
+statement with Explore and Support links; catalog and pricing remain in the
+header. A decorative Geist wordmark scales at `20cqw` within the inner container,
+20% smaller than the solid-background revision, and fades at the bottom.
+The footer owns the public theme menu and a back-to-top
+button, both with `44px` targets. Back to top restores focus to the header's home
+link and scrolls immediately when reduced motion is enabled. Below `640px`, the
+description stacks above two compact link groups. All readable copy and controls
+retain the existing foreground, muted-foreground, and focus tokens; the
+decorative wordmark uses reduced contrast.
 
 ## Elevation & Depth
 

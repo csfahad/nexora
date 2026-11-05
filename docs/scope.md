@@ -3058,6 +3058,78 @@ composer, hover/focus activation without a solid outline or changed input surfac
 static thread/search/share-link inputs, and reduced-motion suppression. Evidence:
 `.impeccable/review/scoped-composer-checks.json` and `scoped-composer-*` PNGs.
 
+### Public footer — November 5
+
+The user requested a minimal but descriptive footer following Vidyst and
+Backdoor, with no repeated links added to fill space. Replace the compact
+sitemap with a product statement, two compact link groups, and an oversized
+fading Nexora wordmark. Keep five destinations: the app, leaderboard, contact,
+terms, and privacy. Preserve the real support address and existing visual system.
+
+The follow-up removes both footer divider lines and introduces a full-width
+primary-blue glow behind the wordmark, following Backdoor's colored atmosphere.
+Move the theme menu from the public header into the footer, alongside a
+back-to-top control. Retain keyboard focus, `44px` controls, local theme
+persistence, and reduced-motion-aware scrolling. The shared footer applies to
+the homepage and public legal pages.
+
+- [x] Replace the footer with descriptive copy and five unique destinations.
+- [x] Add a container-scaled decorative wordmark and primary-blue background.
+- [x] Remove footer dividers and move the public theme menu into the footer.
+- [x] Verify both themes, responsive layouts, keyboard controls, and source checks.
+
+Verification: production build, TypeScript, lint, formatting, the design detector,
+and all 90 theme contrast pairs pass. Chrome passes 220 checks across the homepage,
+privacy, and terms at `320px`, `390px`, `768px`, `820px`, `1024px`, and `1440px`.
+Checks cover divider removal, the blue background, unique links, wordmark fit,
+keyboard focus, back-to-top scrolling, reduced motion, theme menu placement,
+all three theme choices, and persisted selection. Both themes were visually
+reviewed, including mobile menu states. Evidence: `.impeccable/review/footer-*.json`,
+the corresponding homepage/legal-page PNGs, and `footer-verdict.md`.
+
+### Footer color correction — November 5 clarification
+
+The user clarified that the entire footer must have a solid `--primary`
+background. Replace the earlier blue atmospheric background with the exact
+primary token in each theme. Localize the glow behind the wordmark and derive
+it from `--muted-foreground`. Reduce the wordmark from `31cqw` to `25cqw`,
+about 20%. Pair copy, links, the small logo, controls, and keyboard focus with
+`--primary-foreground` so they remain readable. Keep the footer theme menu and
+the absence of divider lines.
+
+- [x] Apply the solid primary background and muted-foreground wordmark glow.
+- [x] Reduce the wordmark and adapt foreground/control colors.
+- [x] Verify the exact colors, contrast, both themes, and responsive layouts.
+
+Verification: production build, formatting, the design detector, and 90 theme
+contrast pairs pass. Chrome passes 130 assertions across desktop/mobile in both
+themes and the `320px` layout, including reduced motion. The browser confirms
+the footer's background exactly equals the primary token and fills the page
+width; the glow resolves from muted foreground; and the wordmark measures
+`25cqw`. Readable footer copy clears 5:1 against both the solid background and
+the strongest glow. Keyboard focus, theme selection, and back-to-top controls
+pass. Evidence: `.impeccable/review/solid-footer-*.json`, corresponding PNGs, and
+`solid-footer-verdict.md`.
+
+### Restore the glowing footer — November 5 final preference
+
+The user chose the earlier page-colored footer with a primary-blue glow around
+the wordmark. Restore that appearance, its text/logo/control colors, and the
+standard keyboard focus token. Reduce the wordmark again from `25cqw` to
+`20cqw` (20% smaller). Preserve the theme menu in the footer and omit divider
+lines.
+
+- [x] Restore the page background and blue wordmark glow.
+- [x] Reduce the wordmark to `20cqw`.
+- [x] Verify both themes, mobile sizing, and footer controls.
+
+Verification: production build, formatting, the design scan, and 90 contrast
+pairs pass. Chrome passes 120 assertions across five desktop/mobile states in
+both themes, including `320px` and reduced motion. The base matches the page
+background, the primary-blue glow is restored, and the wordmark measures
+`20cqw`. Link targets, keyboard focus, theme choices/persistence, and back-to-top
+controls pass. Captures and checks use `.impeccable/review/restored-footer-*`.
+
 ## Consider to build onwards
 
 Kept here so the plan stays honest about what's deliberately left out.
