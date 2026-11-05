@@ -1407,13 +1407,12 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     place-items: center;
     width: 1.875rem;
     height: 1.875rem;
+    flex-shrink: 0;
     color: var(--primary);
-    background: var(--primary-soft);
-    border-radius: 0.625rem;
 }
 .nexora-mark {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.875rem;
+    height: 1.875rem;
 }
 .app-shell {
     background: var(--sidebar);
