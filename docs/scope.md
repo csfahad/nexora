@@ -3130,6 +3130,34 @@ background, the primary-blue glow is restored, and the wordmark measures
 `20cqw`. Link targets, keyboard focus, theme choices/persistence, and back-to-top
 controls pass. Captures and checks use `.impeccable/review/restored-footer-*`.
 
+### Nexora logo and favicon — November 5
+
+Replace the generic outlined N with a solid symbol built from three independent
+perspective planes. Keep Nexora's blue palette and Geist name. The shared
+Wordmark updates public headers/footer, the workspace rail/drawer, sign-in,
+plans, and billing. Remove the small background tile from app placements.
+
+Use one canonical set of paths for the component and generated assets. Add
+blue/black/white SVG symbols, a 512px app icon, scalable favicon, 16/32/48px PNG
+and ICO fallbacks, and the 180px Apple touch icon. Register browser icons in
+the shared document head. Record clear space and regeneration in `docs/BRAND.md`.
+
+- [x] Design and integrate the three-plane symbol.
+- [x] Generate matching browser and app assets.
+- [x] Register the favicon and Apple touch icon.
+- [x] Verify small sizes, both themes, app placements, and source checks.
+
+Verification: the asset generator, production build, TypeScript, lint,
+formatting, design scan, and 90 theme contrast pairs pass. Chrome passes 73
+assertions across six public/workspace/sign-in states, including mobile and
+both themes. All ten assets are served, SVG geometry matches the component,
+PNG sizes and ICO entries are correct, and four browser-icon links appear
+once per page. The 30px app mark has no background tile, retains semantic
+labels and visible keyboard focus, and fits the collapsed workspace rail.
+The mark and actual favicon exports were visually reviewed at small sizes.
+Evidence: `.impeccable/review/logo-*.json`, corresponding captures,
+`nexora-brand-board.png`, and `logo-verdict.md`.
+
 ## Consider to build onwards
 
 Kept here so the plan stays honest about what's deliberately left out.

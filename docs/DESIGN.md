@@ -326,6 +326,13 @@ without adding a heavy shadow.
 
 ## Shapes
 
+The Nexora logo is a solid N assembled from three separated perspective planes
+on a `32`-unit grid. It uses the semantic primary color and sits directly on the
+page surface, with a `30px` footprint in the shared Geist lockup. The same
+geometry drives standalone SVGs, a white-on-blue favicon, and raster app icons.
+Its open seams and asymmetric cuts remain intact at small sizes. See
+`docs/BRAND.md` for asset locations and regeneration.
+
 Content cards, answer cards, tables, empty states, auth, plans, and billing panels use the
 shared gentle corner (`16px`). The base token is (`14px`), with derived (`10px`, `12px`,
 `18px`) steps for marks, rows, inputs, and floating content. The composer intentionally has
