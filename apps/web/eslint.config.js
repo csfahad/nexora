@@ -9,6 +9,7 @@ export default [
             "prettier.config.js",
             "src/generated/**",
             ".output/**",
+            ".vercel/**",
             ".nitro/**",
             ".tanstack/**",
         ],
