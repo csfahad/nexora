@@ -3,6 +3,9 @@ import {
     IconArrowUp,
     IconCheck,
     IconColumns3,
+    IconCode,
+    IconPencil,
+    IconBulb,
     IconLayoutSidebar,
     IconThumbUp,
 } from "@tabler/icons-react";
@@ -14,130 +17,182 @@ export const ComparisonPreview = () => {
     const [winner, setWinner] = useState<number | null>(null);
     const example =
         COMPARISON_EXAMPLES.find(({ id }) => id === exampleId) ?? COMPARISON_EXAMPLES[0];
+    const chooseExample = (id: string) => {
+        setExampleId(id);
+        setWinner(null);
+    };
+    const tabs = [
+        { id: "code", label: "Code", icon: IconCode },
+        { id: "write", label: "Writing", icon: IconPencil },
+        { id: "think", label: "Decisions", icon: IconBulb },
+    ] as const;
 
     return (
-        <div className="comparison-preview" id="how-it-works">
-            <div className="preview-window-header">
-                <div className="preview-window-controls" aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                    <IconLayoutSidebar size={16} stroke={1.5} />
-                </div>
-                <span className="preview-window-title">
-                    Nexora <span aria-hidden>/</span> New comparison
-                </span>
-                <IconColumns3
-                    className="preview-window-view"
-                    size={16}
-                    stroke={1.5}
-                    aria-hidden
-                />
-            </div>
-            <div className="preview-window-content">
-                <div className="preview-toolbar">
-                    <div
-                        className="preview-scenarios"
-                        role="group"
-                        aria-label="Choose an example prompt"
+        <div className="comparison-example" id="how-it-works" data-example={example.id}>
+            <div
+                className="preview-scenarios"
+                role="tablist"
+                aria-label="Choose an example prompt"
+            >
+                {tabs.map(({ id, label, icon: Icon }) => (
+                    <button
+                        type="button"
+                        role="tab"
+                        id={`example-tab-${id}`}
+                        aria-selected={exampleId === id}
+                        aria-controls="example-panel"
+                        tabIndex={exampleId === id ? 0 : -1}
+                        key={id}
+                        data-example={id}
+                        onClick={() => chooseExample(id)}
+                        onKeyDown={(event) => {
+                            const index = tabs.findIndex((tab) => tab.id === id);
+                            const next =
+                                event.key === "ArrowRight"
+                                    ? (index + 1) % tabs.length
+                                    : event.key === "ArrowLeft"
+                                      ? (index + tabs.length - 1) % tabs.length
+                                      : event.key === "Home"
+                                        ? 0
+                                        : event.key === "End"
+                                          ? tabs.length - 1
+                                          : null;
+                            if (next === null) return;
+                            event.preventDefault();
+                            chooseExample(tabs[next].id);
+                            document
+                                .getElementById(`example-tab-${tabs[next].id}`)
+                                ?.focus();
+                        }}
                     >
-                        {COMPARISON_EXAMPLES.map(({ id, label }) => (
-                            <button
-                                type="button"
-                                key={id}
-                                aria-pressed={exampleId === id}
-                                onClick={() => {
-                                    setExampleId(id);
-                                    setWinner(null);
-                                }}
-                            >
-                                {label}
-                            </button>
-                        ))}
+                        <span className="preview-tab-icon">
+                            <Icon aria-hidden size={14} />
+                        </span>
+                        {label}
+                    </button>
+                ))}
+            </div>
+            <div
+                className="preview-grid"
+                role="tabpanel"
+                id="example-panel"
+                aria-labelledby={`example-tab-${example.id}`}
+                tabIndex={0}
+            >
+                <div className="comparison-preview">
+                    <div className="preview-window-header">
+                        <div className="preview-window-controls" aria-hidden="true">
+                            <span />
+                            <span />
+                            <span />
+                            <IconLayoutSidebar size={16} stroke={1.5} />
+                        </div>
+                        <span className="preview-window-title">
+                            Nexora <span aria-hidden>/</span> New comparison
+                        </span>
+                        <IconColumns3
+                            className="preview-window-view"
+                            size={16}
+                            stroke={1.5}
+                            aria-hidden
+                        />
                     </div>
-                    <span className="preview-example-label">Interactive example</span>
-                </div>
-                <div className="preview-prompt">
-                    <span className="preview-you">You</span>
-                    <p>{example.prompt}</p>
-                    <span className="preview-send" aria-hidden>
-                        <IconArrowUp size={19} />
-                    </span>
-                </div>
-                <div className="preview-branches" aria-hidden>
-                    <svg viewBox="0 0 900 48" preserveAspectRatio="none">
-                        <path d="M450 0V10 Q450 22 438 22H162 Q150 22 150 34V48 M450 0V48 M450 0V10 Q450 22 462 22H738 Q750 22 750 34V48" />
-                    </svg>
-                </div>
-                <div className="preview-answers">
-                    {example.answers.map((answer, index) => {
-                        const provider = EXAMPLE_PROVIDERS[index];
-                        const chosen = winner === index;
-                        return (
-                            <article
-                                className="preview-answer"
-                                data-chosen={chosen}
-                                key={`${example.id}-${provider.name}`}
-                            >
-                                <div className="preview-model">
-                                    <ModelAvatar
-                                        modelId={provider.modelId}
-                                        name={provider.name}
-                                        size="sm"
-                                    />
-                                    <span>{provider.name}</span>
-                                    <span className="preview-model-label">Example</span>
-                                </div>
-                                <div className="preview-answer-copy">
-                                    <h3>{answer.title}</h3>
-                                    <p>{answer.text}</p>
-                                    <p className="preview-answer-detail">
-                                        {answer.detail}
-                                    </p>
-                                </div>
-                                <dl className="preview-metrics numeric">
-                                    <div>
-                                        <dt>First token</dt>
-                                        <dd>{answer.ttft}</dd>
-                                    </div>
-                                    <div>
-                                        <dt>Speed</dt>
-                                        <dd>{answer.speed}</dd>
-                                    </div>
-                                    <div>
-                                        <dt>Tokens</dt>
-                                        <dd>{answer.tokens}</dd>
-                                    </div>
-                                    <div>
-                                        <dt>Cost</dt>
-                                        <dd>{answer.cost}</dd>
-                                    </div>
-                                </dl>
-                                <button
-                                    type="button"
-                                    className="preview-vote"
-                                    aria-pressed={chosen}
-                                    aria-label={`Choose the ${provider.name} example answer`}
-                                    onClick={() => setWinner(chosen ? null : index)}
-                                >
-                                    {chosen ? (
-                                        <IconCheck aria-hidden size={16} />
-                                    ) : (
-                                        <IconThumbUp aria-hidden size={16} />
-                                    )}
-                                    {chosen ? "Your pick" : "Choose this answer"}
-                                </button>
-                            </article>
-                        );
-                    })}
-                </div>
-                <div className="preview-caption">
-                    <p>Illustrative answers and metrics, not live model results.</p>
-                    <p role="status" aria-live="polite">
-                        {winner === null
-                            ? "Read the answers. Pick the one you’d use."
-                            : `${EXAMPLE_PROVIDERS[winner].name} is your pick. This example vote isn’t saved.`}
-                    </p>
+                    <div className="preview-window-content">
+                        <div className="preview-toolbar">
+                            <span className="preview-demo-title">{example.label}</span>
+                            <span className="preview-example-label">
+                                Interactive example
+                            </span>
+                        </div>
+                        <div className="preview-prompt">
+                            <span className="preview-you">You</span>
+                            <p>{example.prompt}</p>
+                            <span className="preview-send" aria-hidden>
+                                <IconArrowUp size={19} />
+                            </span>
+                        </div>
+                        <div className="preview-branches" aria-hidden>
+                            <svg viewBox="0 0 900 48" preserveAspectRatio="none">
+                                <path d="M450 0V10 Q450 22 438 22H162 Q150 22 150 34V48 M450 0V48 M450 0V10 Q450 22 462 22H738 Q750 22 750 34V48" />
+                            </svg>
+                        </div>
+                        <div className="preview-answers">
+                            {example.answers.map((answer, index) => {
+                                const provider = EXAMPLE_PROVIDERS[index];
+                                const chosen = winner === index;
+                                return (
+                                    <article
+                                        className="preview-answer"
+                                        data-chosen={chosen}
+                                        key={`${example.id}-${provider.name}`}
+                                    >
+                                        <div className="preview-model">
+                                            <ModelAvatar
+                                                modelId={provider.modelId}
+                                                name={provider.name}
+                                                size="sm"
+                                            />
+                                            <span>{provider.name}</span>
+                                            <span className="preview-model-label">
+                                                Example
+                                            </span>
+                                        </div>
+                                        <div className="preview-answer-copy">
+                                            <h3>{answer.title}</h3>
+                                            <p>{answer.text}</p>
+                                            <p className="preview-answer-detail">
+                                                {answer.detail}
+                                            </p>
+                                        </div>
+                                        <dl className="preview-metrics numeric">
+                                            <div>
+                                                <dt>First token</dt>
+                                                <dd>{answer.ttft}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>Speed</dt>
+                                                <dd>{answer.speed}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>Tokens</dt>
+                                                <dd>{answer.tokens}</dd>
+                                            </div>
+                                            <div>
+                                                <dt>Cost</dt>
+                                                <dd>{answer.cost}</dd>
+                                            </div>
+                                        </dl>
+                                        <button
+                                            type="button"
+                                            className="preview-vote"
+                                            aria-pressed={chosen}
+                                            aria-label={`Choose the ${provider.name} example answer`}
+                                            onClick={() =>
+                                                setWinner(chosen ? null : index)
+                                            }
+                                        >
+                                            {chosen ? (
+                                                <IconCheck aria-hidden size={16} />
+                                            ) : (
+                                                <IconThumbUp aria-hidden size={16} />
+                                            )}
+                                            {chosen ? "Your pick" : "Choose this answer"}
+                                        </button>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                        <div className="preview-caption">
+                            <p>
+                                Illustrative answers and metrics, not live model results.
+                            </p>
+                            <p role="status" aria-live="polite">
+                                {winner === null
+                                    ? "Read the answers. Pick the one you’d use."
+                                    : `${EXAMPLE_PROVIDERS[winner].name} is your pick. This example vote isn’t saved.`}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
