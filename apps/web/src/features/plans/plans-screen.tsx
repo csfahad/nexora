@@ -4,8 +4,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { IconArrowRight, IconCheck, IconX } from "@tabler/icons-react";
 import { Plan } from "@/generated/prisma/enums";
 import type { BillingInterval } from "@/generated/prisma/enums";
-import { StandaloneHeader } from "@/components/ui/standalone-header";
-import { LegalLinks } from "@/components/ui/legal-links";
+import { PublicLayout } from "@/components/ui/public-layout";
 import { TierChip } from "@/components/ui/tier-chip";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { TIER_WORD, useAllowance } from "@/infrastructure/entitlement";
@@ -277,119 +276,105 @@ export const PlansScreen = () => {
     };
 
     return (
-        <div className="screen">
-            <a href="#plans-main" className="skip-link">
-                Skip to content
-            </a>
-            <StandaloneHeader title="Plans" />
-
-            <main id="plans-main" tabIndex={-1} className="screen-scroll min-h-0 flex-1">
-                <div className="plans-content">
-                    <div className="plans-intro">
-                        <h1>
-                            More models.
-                            <br />
-                            More perspective.
-                        </h1>
-                        <p className="text-muted-foreground w-full max-w-[58ch] text-pretty">
-                            Start with free models. Choose a paid plan for a monthly
-                            allowance across every price tier, with real cost measured on
-                            each answer.
-                        </p>
-
-                        <div className="mt-2 flex flex-col items-center gap-2">
-                            <ViewToggle
-                                mode="radio"
-                                label="Billing interval"
-                                options={INTERVALS}
-                                value={interval}
-                                onChange={setInterval}
-                            />
-                            <p className="text-muted-foreground text-sm">
-                                Annual is two months free on every paid plan.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="plan-panel">
-                        <FreeColumn
-                            current={view.metered && view.plan === Plan.FREE}
-                            onChoose={() => void choose(Plan.FREE)}
-                        />
-
-                        {PAID_PLANS.map((spec) => (
-                            <PaidColumn
-                                key={spec.plan}
-                                spec={spec}
-                                interval={interval}
-                                current={view.metered && view.plan === spec.plan}
-                                busy={choosing === spec.plan || portal.opening}
-                                disabled={choosing !== null}
-                                onChoose={() => void choose(spec.plan)}
-                            />
-                        ))}
-                    </div>
-
-                    <p
-                        className="text-muted-foreground mt-6 text-center text-sm"
-                        role="note"
-                    >
-                        {error || portal.error ? (
-                            <span role="alert">{error || portal.error}</span>
-                        ) : (
-                            "Annual plans bill once a year. Every paid plan refills its answer allowance monthly."
-                        )}
+        <PublicLayout mainId="plans-main">
+            <div className="plans-content">
+                <div className="plans-intro">
+                    <h1>
+                        More models.
+                        <br />
+                        More perspective.
+                    </h1>
+                    <p className="text-muted-foreground w-full max-w-[58ch] text-pretty">
+                        Start with free models. Choose a paid plan for a monthly allowance
+                        across every price tier, with real cost measured on each answer.
                     </p>
 
-                    {session.status === "signed-in" && (
-                        <p className="mt-3 text-center text-sm">
-                            <Link
-                                to="/settings/billing"
-                                search={{ checkout: undefined }}
-                                className="text-primary underline underline-offset-2"
-                            >
-                                View billing and manage your subscription
-                            </Link>
+                    <div className="mt-2 flex flex-col items-center gap-2">
+                        <ViewToggle
+                            mode="radio"
+                            label="Billing interval"
+                            options={INTERVALS}
+                            value={interval}
+                            onChange={setInterval}
+                        />
+                        <p className="text-muted-foreground text-sm">
+                            Annual is two months free on every paid plan.
                         </p>
+                    </div>
+                </div>
+
+                <div className="plan-panel">
+                    <FreeColumn
+                        current={view.metered && view.plan === Plan.FREE}
+                        onChoose={() => void choose(Plan.FREE)}
+                    />
+
+                    {PAID_PLANS.map((spec) => (
+                        <PaidColumn
+                            key={spec.plan}
+                            spec={spec}
+                            interval={interval}
+                            current={view.metered && view.plan === spec.plan}
+                            busy={choosing === spec.plan || portal.opening}
+                            disabled={choosing !== null}
+                            onChoose={() => void choose(spec.plan)}
+                        />
+                    ))}
+                </div>
+
+                <p className="text-muted-foreground mt-6 text-center text-sm" role="note">
+                    {error || portal.error ? (
+                        <span role="alert">{error || portal.error}</span>
+                    ) : (
+                        "Annual plans bill once a year. Every paid plan refills its answer allowance monthly."
                     )}
+                </p>
 
-                    <section
-                        aria-labelledby="ceiling-heading"
-                        className="mt-16 flex flex-col gap-4"
-                    >
-                        <h2 id="ceiling-heading" className="text-lg font-semibold">
-                            What one answer costs at each tier&rsquo;s ceiling
-                        </h2>
+                {session.status === "signed-in" && (
+                    <p className="mt-3 text-center text-sm">
+                        <Link
+                            to="/settings/billing"
+                            search={{ checkout: undefined }}
+                            className="text-primary underline underline-offset-2"
+                        >
+                            View billing and manage your subscription
+                        </Link>
+                    </p>
+                )}
 
-                        <ul className="tier-ceilings list-none">
-                            {CEILING_LADDER.map(({ tier, usd }) => (
-                                <li key={tier}>
-                                    <TierChip tier={tier} />
-                                    <span className="text-foreground numeric text-sm">
-                                        {perAnswer(usd)}
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
+                <section
+                    aria-labelledby="ceiling-heading"
+                    className="mt-16 flex flex-col gap-4"
+                >
+                    <h2 id="ceiling-heading" className="text-lg font-semibold">
+                        What one answer costs at each tier&rsquo;s ceiling
+                    </h2>
 
-                        <div className="mt-1 grid gap-x-10 gap-y-3 lg:grid-cols-2">
-                            <p className="text-muted-foreground text-pretty text-sm">
-                                An allowance is priced against the dearest model its tier
-                                can hold, so these are ceilings rather than averages. Most
-                                models sit well under them.
-                            </p>
-                            <p className="text-muted-foreground text-pretty text-sm">
-                                Every answer in the arena shows what it actually cost, to
-                                four decimal places. A free answer reads $0.0000, because
-                                that is the real measured number.
-                            </p>
-                        </div>
-                    </section>
-                </div>
-                <div className="standalone-legal-footer">
-                    <LegalLinks />
-                </div>
-            </main>
-        </div>
+                    <ul className="tier-ceilings list-none">
+                        {CEILING_LADDER.map(({ tier, usd }) => (
+                            <li key={tier}>
+                                <TierChip tier={tier} />
+                                <span className="text-foreground numeric text-sm">
+                                    {perAnswer(usd)}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <div className="mt-1 grid gap-x-10 gap-y-3 lg:grid-cols-2">
+                        <p className="text-muted-foreground text-pretty text-sm">
+                            An allowance is priced against the dearest model its tier can
+                            hold, so these are ceilings rather than averages. Most models
+                            sit well under them.
+                        </p>
+                        <p className="text-muted-foreground text-pretty text-sm">
+                            Every answer in the arena shows what it actually cost, to four
+                            decimal places. A free answer reads $0.0000, because that is
+                            the real measured number.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </PublicLayout>
     );
 };
