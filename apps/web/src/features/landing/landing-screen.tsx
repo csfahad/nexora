@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import {
-    IconArrowDown,
     IconArrowRight,
     IconArrowUpRight,
     IconCheck,
@@ -14,7 +13,6 @@ import { ModelAvatar } from "@/components/ui/model-avatar";
 import { PublicLayout } from "@/components/ui/public-layout";
 import { FREE_ANSWERS_PER_DAY, PAID_PLANS } from "@/infrastructure/plans";
 import { ComparisonPreview } from "./comparison-preview";
-import { HeroShowcase } from "./hero-showcase";
 
 const PROVIDERS = [
     { id: "openai", name: "OpenAI" },
@@ -51,6 +49,10 @@ const FAQS = [
 export const LandingScreen = () => (
     <PublicLayout>
         <section className="landing-hero" aria-labelledby="landing-heading">
+            <Link to="/models" className="landing-eyebrow">
+                Independent answers. One clear comparison.
+                <IconArrowRight aria-hidden size={14} />
+            </Link>
             <h1 id="landing-heading">
                 Your prompt.
                 <br />
@@ -68,8 +70,12 @@ export const LandingScreen = () => (
                 >
                     Start comparing <IconArrowRight aria-hidden size={18} />
                 </Link>
-                <Link to="/" hash="how-it-works" className="landing-text-link">
-                    Try the example <IconArrowDown aria-hidden size={16} />
+                <Link
+                    to="/"
+                    hash="how-it-works"
+                    className={buttonClasses({ variant: "secondary", size: "lg" })}
+                >
+                    Try the example
                 </Link>
             </div>
             <p className="landing-start-note">
@@ -77,15 +83,13 @@ export const LandingScreen = () => (
             </p>
         </section>
 
-        <HeroShowcase>
-            <section
-                className="landing-demo-section"
-                aria-label="Try a three-model comparison"
-            >
-                <ComparisonPreview />
-            </section>
-        </HeroShowcase>
-        <div className="landing-demo-section">
+        <section
+            className="landing-product-demo"
+            aria-label="Try a three-model comparison"
+        >
+            <ComparisonPreview />
+        </section>
+        <div className="landing-workflow">
             <ol className="landing-steps">
                 <li>
                     <span>1</span>
@@ -125,12 +129,30 @@ export const LandingScreen = () => (
             </Link>
         </section>
 
+        <section className="landing-problem" aria-labelledby="problem-heading">
+            <div>
+                <span className="section-eyebrow">YOUR PROMPT. YOUR CALL.</span>
+                <h2 id="problem-heading">You’re asking better questions.</h2>
+                <p>Why settle for the first answer?</p>
+            </div>
+            <div className="landing-problem-copy">
+                <p>
+                    Models think differently. Put their answers next to each other and see
+                    which one works for your code, your writing, and your next decision.
+                </p>
+                <Link to="/app" className={buttonClasses({ variant: "primary" })}>
+                    Find your perspective <IconArrowRight aria-hidden size={16} />
+                </Link>
+            </div>
+        </section>
+
         <section className="landing-features" aria-labelledby="features-heading">
             <div className="landing-section-intro">
+                <span className="section-eyebrow">THE FULL PICTURE</span>
                 <h2 id="features-heading">
-                    An answer is only
+                    Everything you need to
                     <br />
-                    part of the picture.
+                    find the AI that works for you.
                 </h2>
                 <p>
                     The useful differences show up in the details.
@@ -294,6 +316,7 @@ export const LandingScreen = () => (
 
         <section className="landing-plans" aria-labelledby="landing-plans-heading">
             <div>
+                <span className="section-eyebrow">ROOM TO EXPLORE</span>
                 <h2 id="landing-plans-heading">
                     Start free.
                     <br />
@@ -326,7 +349,10 @@ export const LandingScreen = () => (
         </section>
 
         <section className="landing-faq" aria-labelledby="faq-heading">
-            <h2 id="faq-heading">A few things to know.</h2>
+            <div>
+                <span className="section-eyebrow">GOOD QUESTIONS</span>
+                <h2 id="faq-heading">A few things to know.</h2>
+            </div>
             <div>
                 {FAQS.map(({ question, answer }) => (
                     <details key={question}>
