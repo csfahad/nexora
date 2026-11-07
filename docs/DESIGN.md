@@ -2,6 +2,8 @@
 name: Nexora
 description: A precise workspace for independently measured model comparisons.
 colors:
+    action: "{colors.primary-dark}"
+    action-foreground: "{colors.primary-foreground-dark}"
     background-dark: "oklch(0.1864945 0.0043594 264.46262)"
     foreground-dark: "oklch(0.9707138 0.0026505 286.35036)"
     card-dark: "oklch(0.2309377 0.005954 271.15289)"
@@ -44,45 +46,45 @@ colors:
     destructive-foreground-light: "oklch(1 0 89.87556)"
 typography:
     public-display:
-        fontFamily: '"Geist Variable", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
-        fontSize: "clamp(2.75rem, 5.5vw, 4.5rem)"
-        fontWeight: 600
-        lineHeight: 1.06
+        fontFamily: '"Apfel Grotezk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
+        fontSize: "clamp(2.75rem, 4.3vw, 3.75rem)"
+        fontWeight: 500
+        lineHeight: 1.18
         letterSpacing: "-0.04em"
     display:
-        fontFamily: '"Geist Variable", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
+        fontFamily: '"Apfel Grotezk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
         fontSize: "clamp(2.5rem, 4.4vw, 3.5rem)"
-        fontWeight: 600
+        fontWeight: 500
         lineHeight: 1.1
         letterSpacing: "-0.04em"
     headline:
-        fontFamily: '"Geist Variable", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
+        fontFamily: '"Apfel Grotezk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
         fontSize: "clamp(2rem, 3.4vw, 2.75rem)"
-        fontWeight: 600
+        fontWeight: 500
         lineHeight: 1.12
         letterSpacing: "-0.035em"
     title:
-        fontFamily: '"Geist Variable", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
+        fontFamily: '"Apfel Grotezk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
         fontSize: "1.125rem"
-        fontWeight: 600
+        fontWeight: 500
         lineHeight: 1.5
     body:
-        fontFamily: '"Geist Variable", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
+        fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
         fontSize: "0.875rem"
         fontWeight: 400
         lineHeight: 1.7
     label:
-        fontFamily: '"Geist Variable", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
+        fontFamily: '"Apfel Grotezk", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif'
         fontSize: "0.75rem"
         lineHeight: "1.25rem"
         letterSpacing: "0.015em"
 rounded:
-    sm: "10px"
-    md: "12px"
-    lg: "14px"
-    content: "16px"
-    xl: "18px"
-    composer: "24px"
+    sm: "8px"
+    md: "8px"
+    lg: "10px"
+    content: "12px"
+    xl: "14px"
+    composer: "12px"
     pill: "999px"
 spacing:
     xs: "4px"
@@ -95,9 +97,9 @@ spacing:
     page: "48px"
 components:
     button-primary:
-        backgroundColor: "{colors.primary-dark}"
-        textColor: "{colors.primary-foreground-dark}"
-        rounded: "{rounded.pill}"
+        backgroundColor: "{colors.action}"
+        textColor: "{colors.action-foreground}"
+        rounded: "{rounded.md}"
         padding: "0 16px"
         height: "40px"
     button-primary-hover:
@@ -105,25 +107,25 @@ components:
     button-secondary:
         backgroundColor: "{colors.secondary-dark}"
         textColor: "{colors.foreground-dark}"
-        rounded: "{rounded.pill}"
+        rounded: "{rounded.md}"
         padding: "0 16px"
         height: "40px"
     button-outline:
         backgroundColor: "{colors.card-dark}"
         textColor: "{colors.foreground-dark}"
-        rounded: "{rounded.pill}"
+        rounded: "{rounded.md}"
         padding: "0 16px"
         height: "40px"
     button-ghost:
         backgroundColor: "transparent"
         textColor: "{colors.muted-foreground-dark}"
-        rounded: "{rounded.pill}"
+        rounded: "{rounded.md}"
         height: "40px"
         width: "40px"
     button-destructive:
         backgroundColor: "{colors.destructive-dark}"
         textColor: "{colors.destructive-foreground-dark}"
-        rounded: "{rounded.pill}"
+        rounded: "{rounded.md}"
         padding: "0 16px"
         height: "40px"
     field-input:
@@ -144,7 +146,7 @@ components:
     lineup-chip:
         backgroundColor: "{colors.muted-dark}"
         textColor: "{colors.foreground-dark}"
-        rounded: "{rounded.pill}"
+        rounded: "{rounded.md}"
         padding: "6px 6px 6px 8px"
     prompt-composer:
         backgroundColor: "{colors.card-dark}"
@@ -155,372 +157,136 @@ components:
 
 # Design System: Nexora
 
-<!-- nexora-design-record: 20261029 -->
+<!-- nexora-design-record: 20261107 -->
 
-## Overview
+## Current direction
 
-**Creative North Star: "The Comparison Workspace"**
+The user approved the [Dodo Payments](https://dodopayments.com/) typography,
+layout, framing, dotted hero, grid-backed demo, and compact controls, then
+explicitly requested Nexora’s previous color scheme. The current implementation
+retains Apfel Grotezk headings, Inter body text, and the approved layouts while
+restoring the original blue accents, cool silver surfaces, graphite text, and
+complete dark theme. Dodo’s green/lime palette is superseded.
 
-Nexora is a calm, precise comparison workspace. The user-pinned references are Apple, [Vidyst](https://www.vidyst.com), and [Backdoor](https://backdoorai.app): cool silver surfaces, graphite text, blue controls, rounded forms, and restrained depth. The interface gives the prompt, independent answers, and their measured numbers room to read.
+`apps/web/src/styles.css` owns shared tokens and working-screen styling.
+`apps/web/src/public.css` owns the public layout and marketing page. The
+frontmatter records the current tokens; `.impeccable/design.json` remains a
+historical snapshot from the previous design. The approved layout review lives
+in `.impeccable/review/dodo-20261107/`; the color-restoration review lives in
+`.impeccable/review/palette-20261107/`.
 
-This record describes the shipped redesign identified by `nexora-ui-20261029`, preserved in the leading `/*!` comment of `apps/web/src/styles.css`. That stylesheet owns visual tokens; shared components own reusable behavior. Both themes are complete. The default appearance choice is **System**, which follows the OS; explicit Light or Dark choices persist. Dark tokens on `:root` are the fallback, not a newly imposed theme preference.
+## Color and controls
 
-**Key Characteristics:**
+Both themes use the exact color tokens from the previous Nexora implementation.
+Light mode uses cool silver ground, white cards, graphite text, and blue
+(`#005dcc`) links, filled actions, and focus. Dark mode uses near-black graphite
+ground, neutral reading surfaces, pale text, and light blue (`#8bb8ff`) accents.
+Filled buttons and their hover states follow the matching primary tokens. Winner
+and error states retain the original green/red semantic tokens, icons, and labels.
 
-- Prompt-first comparison with an understated branching mark.
-- Cool tonal surfaces, blue operation, and readable graphite typography.
-- Pill controls, 16px content cards, and soft floating depth.
-- Shared components, full keyboard states, and reduced-motion alternatives.
+The public hero washes, dots, and demo grids use subtle mixtures of these same
+tokens. The alternating pricing band uses the original dark-theme graphite
+surfaces in either theme. Hairline framing and stronger input edges keep their
+original neutral tokens.
 
-The frontmatter preserves the source OKLCH values for both themes. Its component tokens
-describe the dark fallback; live components bind to semantic CSS variables and therefore
-resolve either theme. The schema-v2 sidecar at `.impeccable/design.json` adds shadows,
-motion, breakpoints, and self-contained component previews. Its tonal ramps are derived
-preview metadata, not additional application tokens.
+The comparison showcase has the user-requested decorative exceptions: green,
+blue, and pink tab icon tiles with white glyphs, and macOS red/yellow/green
+window dots. Their colors remain consistent in both themes. Window dots use
+the original 11px desktop size and 9px size below 640px.
 
-Evidence boundary: the review screenshot batch covers arena, picker, models, leaderboard,
-plans, sign-in, and signed-out billing on desktop/mobile, with selected dark states.
-Authenticated chat, shared threads, and billing-ready states were source-reviewed rather
-than visually captured. The current source includes the final navigation, radius, and
-heading-semantic corrections and governs this record. Paid purchase and portal flows were not verified
-by this visual documentation pass. Earlier feature evidence remains preserved below.
-
-## Colors
-
-The palette is cool and low-chroma around a single blue accent. Readable text and neutral
-surfaces carry the screen; saturated colors identify operation or a semantic state.
-
-### Primary
-
-- **Control Blue** (`primary`, `primary-hover`, `primary-foreground`): primary actions,
-  links, selection, caret, focus, activity indicators, and the branching comparison mark.
-- **Soft Blue** (`primary-soft`, `surface-tint`): selected navigation, featured plans,
-  prompt bubbles, and the subtle catalog spotlight. These are supporting tints rather
-  than a second accent.
-
-### Neutral
-
-- **Cool Ground** (`background`, `sidebar`): silver page and rail in light mode;
-  near-black graphite and a slightly raised rail in dark mode.
-- **Reading Surface** (`card`, `popover`): content and floating layers. Popovers receive
-  a distinct dark elevation tone; both are white in light mode.
-- **Graphite / Pale Ink** (`foreground`): primary copy and measured values.
-- **Quiet Ink** (`muted-foreground`): descriptions, labels, placeholders, and secondary
-  icons. It remains readable; smaller metadata does not receive an extra opacity cut.
-- **Tonal Steps** (`muted`, `secondary`, `accent`): chips, secondary controls, segmented
-  tracks, and hover. These are separate values, not interchangeable aliases.
-- **Seam / Control Edge** (`border`, `input`): seams divide already visible surfaces;
-  the stronger input tone identifies text fields and supports control-edge emphasis.
-  Outline buttons use a seam plus their card fill and pill silhouette.
-
-Winner Green and Error Red are semantic exceptions, with their own foreground pairs.
-Green marks chosen answers; blue marks copy confirmation. Red marks errors and destructive
-actions. Neither green nor red is a provider identity or a price-tier scale. Provider avatars may carry
-their small source-defined marks; price tiers use labels and neutral tonal differences.
-
-**The Blue Operation Rule.** Use blue for controls, selection, links, focus, and the comparison signature. Keep large reading surfaces neutral; green and red retain their semantic roles.
+Shared buttons use Apfel Grotezk, a medium weight, an 8px corner radius, and
+150ms state changes. Content cards, pricing shells, the composer, and answer
+cards use 12px corners. Existing model chips and compact metadata keep their
+functional shapes. Keyboard outlines remain visible; reduced-motion preferences
+remove decorative transitions. Both themes remain complete. The existing
+System/Light/Dark choice persists and is shared across the app.
 
 ## Typography
 
-**Display Font:** Geist Variable, with the system sans-serif fallback in the frontmatter.
-**Body Font:** the same Geist family. There is no second heading family. Code blocks use
-the existing monospace treatment; comparison metrics remain in Geist with tabular figures.
+Apfel Grotezk by Luigi Gorlero / Collletttivo supplies Regular and Mittel
+heading and control faces. Inter by Rasmus Andersson supplies variable body
+text. The three WOFF2 files and their SIL Open Font License files are served
+from `public/fonts/`; no page fetches fonts from the reference site at runtime.
+The root head preloads Mittel and Inter.
 
-The hierarchy is compact in working UI and spacious in introductory headings. Headings
-balance wrapping; descriptive copy uses comfortable line heights and restrained measure.
+The canonical Nexora mark retains its three planes. Its original blue SVG,
+blue/white favicons, Apple touch icon, and 512px brand icon are restored exactly.
+Their geometry and dimensions match the approved redesign assets.
 
-### Hierarchy
+The desktop public hero uses 60px medium headings with a 1.18 line height and
+-0.04em tracking. Section headings use 40px at the wide breakpoint. Mobile
+headings scale to 34–48px, while body copy remains 15–16px. Working screens
+retain their compact information hierarchy in the new heading family. Numeric
+metrics remain tabular; measured costs retain four decimal places.
 
-- **Public display:** the homepage's two-line prompt/perspectives thesis uses the
-  `public-display` role, with solid primary emphasis on the second line. Below
-  `640px`, it contracts to `clamp(2rem, 8.7vw, 2.75rem)` so both lines fit. Legal
-  document titles use `clamp(2.5rem, 5vw, 4rem)`. These extend the same Geist family.
-- **Display:** the arena's personalized welcome uses Geist at weight `500`,
-  `clamp(2rem, 3.6vw, 3rem)`, with balanced wrapping and space for long names.
-  Plans retains its larger display range and wider viewport scaling (`5vw`).
-- **Headline:** Models, Leaderboard, and Billing page titles, paired with descriptive copy.
-- **Title:** section and plan titles. Catalog model names use a smaller compact title
-  (`0.9375rem`, weight `600`, line height `1.5`) and wrap rather than clipping.
-- **Body:** answer copy uses the frontmatter body role; page descriptions sit one step
-  above (`0.9375rem`) and the composer stays at (`1rem`) including mobile.
-- **Label:** metadata remains sentence case. Buttons and measured footer values use
-  (`0.8125rem`–`0.875rem`); compact hints use the retained `2xs` step (`0.6875rem`).
+## Public layout
 
-**The Numbers Stay Still Rule.** Apply tabular figures to measured values, counters, prices, and table arithmetic. Preserve missing values as an em dash and measured cost to four decimal places.
+The home, Plans, and Billing pages share `PublicLayout`, including the centered
+1300px frame, thin vertical edges, header, full footer, legal links, theme menu,
+and back-to-top. The public width/gutter tokens belong to this shared wrapper.
+Their main landmarks retain individual skip-link targets.
 
-## Layout
+The desktop site sits in a 1300px frame with thin vertical edges. An 80px
+sticky header contains the wordmark, four navigation links, and the account
+action. Below 768px the 68px header exposes a Radix navigation dialog with
+managed focus, Escape dismissal, and dismissal after navigation.
 
-The desktop shell has a left rail (`256px`) and top bar (`64px`). It can collapse to a
-functional icon rail (`64px`) retaining primary routes, search, account, and appearance.
-The top-bar toggle owns collapse. Below (`1024px`) navigation becomes a Radix drawer
-(`272px`, at most `85vw`) with overlay, focus management, Escape, and dismissal on navigation.
-The primary route remains selected when its search parameters change.
+The hero uses Nexora's blue/silver wash, fine 22px dots,
+small bordered eyebrow, centered two-line heading, supporting copy, and paired
+44px actions. On mobile, its content aligns left.
 
-The arena centers a prompt-first workbench within (`58rem`): branching mark, personalized
-welcome, explanatory line, composer, visible selected-model pills, and prompt starters.
-The welcome chooses a time-of-day or conversational greeting once per arrival using
-the visitor's local clock. It uses the account's first display name, omits the name
-for guests or blank names, and stays stable while composing. Late-night arrivals
-use a natural invitation instead of a farewell. The public homepage owns the
-“Your prompt. Three perspectives.” tagline.
-Ordinary pages use a centered (`75rem`) content container. Thread and shared content use
-(`76rem`), Plans (`78rem`), and Billing (`64rem`). The body stays viewport-bound;
-each screen owns its scroll region. Answer columns share the transcript scroll rather
-than creating separate wheel traps; long code lines may scroll inside their block.
+Code/Writing/Decisions tabs sit immediately above a 14px square-grid surface.
+Each tab changes the example and grid color, resets the illustrative vote, and
+supports Left/Right/Home/End keys with one tab stop. Every tab controls the
+same labelled panel. The demo presents three independent answers, per-call
+metrics, and a clearly labelled illustrative vote. It never claims those
+examples are live results or saved user votes.
 
-Spacing follows a (`4px`) rhythm, with (`16px`) card/grid gaps, (`24px`) card padding,
-and (`32px`–`48px`) section breathing room. The catalog steps from three columns to two
-at (`1200px`) and one below (`640px`). Answer comparisons become simultaneous columns
-at (`1024px`) and stack below it. Plans uses four columns, two below (`1024px`), and one
-below (`640px`); one rounded shell encloses the plans, thin seams separate columns
-and responsive rows, and shared bands use subgrid on wide screens. Monthly/Annual
-price changes use Torph's digit morph with reduced-motion support. Billing allowances and dates
-stack below (`640px`). The leaderboard preserves its real table in a horizontal scroller.
+A three-step workflow and provider row lead into a split editorial section,
+a centered section introduction, four bordered product illustrations, a
+deep graphite pricing band, expandable FAQ, closing action, and compact footer. The
+footer retains legal and support links, appearance selection, and back-to-top.
+The previous drifting backdrop and oversized decorative footer wordmark are
+superseded by this reference.
 
-Below (`640px`) headers become (`56px`), page padding contracts to (`16px`), heading/toolbars
-stack, and the arena lineup wraps from the left. Composer hint and visible send text drop
-away while the accessible send label remains. Touch controls receive minimum (`44px`)
-targets where specified, including model removal and plan actions. Bottom composer padding
-respects the safe-area inset.
+## OAuth sign-in
 
-The public homepage and legal pages share a `1160px` container with responsive
-`20px`–`48px` gutters and a full-height page-owned scroll region. Their public header
-is sticky and uses a two-row mobile layout, preserving product links without a drawer.
-The comparison illustration uses three answer columns, with stacked answers below
-`640px`; measurements use two columns at intermediate widths and four on mobile.
-Supporting bento scenes use a `3/2` then `2/3` five-column grid, two equal columns below
-`1024px`, and one below `640px`. Legal reading pairs a sticky contents rail with a
-bounded text column; mobile replaces the rail with a native disclosure. Anchors clear
-the sticky header. The shared public footer closes each reading/landing surface
-with the page background and a soft primary-blue glow around the wordmark,
-without divider lines. Its bounded inner grid pairs a short product
-statement with Explore and Support links; catalog and pricing remain in the
-header. A decorative Geist wordmark scales at `20cqw` within the inner container,
-20% smaller than the solid-background revision, and fades at the bottom.
-The footer owns the public theme menu and a back-to-top
-button, both with `44px` targets. Back to top restores focus to the header's home
-link and scrolls immediately when reduced motion is enabled. Below `640px`, the
-description stacks above two compact link groups. All readable copy and controls
-retain the existing foreground, muted-foreground, and focus tokens; the
-decorative wordmark uses reduced contrast.
+The sign-in page follows the measured Dodo login layout: a centered 384px panel,
+40px circular Nexora mark, 20px Inter heading, paired Google/GitHub buttons, legal
+copy, and support link. It uses Nexora’s blue/silver/graphite theme tokens.
+Buttons stack below 380px and keep 44px mobile touch targets. Google uses its
+multicolor mark; GitHub follows the theme foreground. Theme selection sits in
+the lower-left corner.
 
-## Elevation & Depth
+The supported methods are Google and GitHub only. No email, password, OTP,
+separator, or separate signup page is presented. Pending requests disable both
+provider buttons and expose a status message. Errors retain the plain retry
+notice. An already signed-in user sees their account and a Continue action.
+The validated `next` path is passed through the existing OAuth handler.
 
-The system combines tonal layers and subtle seams with restrained soft shadows. Ordinary
-catalog, answer, plan, and allowance containers stay flat at rest. The composer and auth
-panel get a reading-surface lift; dialogs/popovers carry the strongest elevation over a
-dimmed, blurred overlay. Theme and tab selection use only the smallest lift.
+## Working screens
 
-### Shadow Vocabulary
+The arena, model picker, catalog, leaderboard, pricing, authentication, billing,
+answer cards, and shared-thread surfaces inherit the same blue/silver/graphite palette,
+font families, fine edges, and smaller control corners. Product-specific
+layouts retain their real data hierarchy: the rail, composer, model lineup,
+comparison columns, allowance details, and sortable/filterable catalog remain
+functional. Model provider marks keep their local source assets.
 
-- **Small lift** (`--shadow-sm`): selected appearance and view controls.
-- **Card lift** (`--shadow-card`): authentication panel.
-- **Composer lift** (`--shadow-composer`): prompt entry.
-- **Floating lift** (`--shadow-floating`): portalled menus, popovers, and dialogs.
+Authentication, streaming, votes, sharing, and billing logic are unchanged by
+this visual implementation. No live purchase or authenticated model call is
+part of the design verification.
 
-Exact shadow values and both theme variants are preserved in the sidecar. Primary buttons
-add a small inset highlight and base shadow; winner cards use their green edge and label,
-without adding a heavy shadow.
+## Verification
 
-**The Depth Has a Job Rule.** Use tonal separation and seams for ordinary content. Reserve stronger shadows for the composer, authentication panel, and floating overlays.
-
-## Shapes
-
-The Nexora logo is a solid N assembled from three separated perspective planes
-on a `32`-unit grid. It uses the semantic primary color and sits directly on the
-page surface, with a `30px` footprint in the shared Geist lockup. The same
-geometry drives standalone SVGs, a white-on-blue favicon, and raster app icons.
-Its open seams and asymmetric cuts remain intact at small sizes. See
-`docs/BRAND.md` for asset locations and regeneration.
-
-Content cards, answer cards, tables, empty states, auth, plans, and billing panels use the
-shared gentle corner (`16px`). The base token is (`14px`), with derived (`10px`, `12px`,
-`18px`) steps for marks, rows, inputs, and floating content. The composer intentionally has
-a more generous (`24px`) shell. Buttons, model lineup, prompt starters, and status chips
-use full pill rounding. Borders are thin (`1px`); avatars are compact rounded provider
-marks, while lineup avatars are circular. Composer selector stacks use (`24px`) circular
-avatars and (`1px`) separator rings, leaving space inside the selector pill
-(`32px` desktop, `44px` touch target).
-Logos resolve from the model publisher namespace,
-including aliases, rather than guessing from model-family names. Official SVGs are local
-monochrome marks; published author avatars cover community publishers. Raster marks retain
-a white backing (dark for Recursive’s white mark) so they remain readable in either theme.
-Preserve these role differences when adding a
-surface rather than applying one radius everywhere.
-
-## Components
-
-### Buttons
-
-Compact, confident pills. The shared `Button` provides primary, secondary, outline, ghost,
-and destructive variants; router links reuse `buttonClasses`. Default height is (`40px`),
-with (`32px`) small, (`48px`) large, and corresponding icon sizes. Hover uses the variant's
-tonal change; active scales to (`0.98`). Disabled opacity is (`45%`), and loading overlays
-a spinner on an invisible label to preserve width while exposing `aria-busy`.
-
-Buttons and links use a visible blue keyboard outline (`2px`, offset `2px`);
-pill buttons preserve their shape on focus. At the user's November 2 request,
-text inputs and composers keep their neutral resting seams and surfaces in hover
-and focus states. The blue caret remains, with no added outline or inset line.
-The `/app` composer alone opts into the animated border sweep. A focused button
-inside a composite retains its own keyboard outline.
-
-### Chips
-
-Selected-model pills name the lineup and provide labelled removal controls.
-On mobile, the lineup stays centered on one row with smaller padding, 16px provider marks, and
-24px removal targets. Names truncate within the available space; their full titles and
-removal labels remain available.
-Prompt starters populate and focus the actual composer. Tier chips are neutral and text-labelled, including
-“Not in arena”; they do not borrow winner or error colors. Segmented tabs use a muted track
-and raised card selection; the shared view control supports tabs and radio modes.
-
-### Cards / Containers
-
-Catalog cards group a provider mark/name/tier header and label-value details, with (`24px`)
-padding and a thin seam. The adapted Aceternity **CardSpotlight** applies a soft pointer
-highlight using Motion values rather than React renders. It skips touch pointer tracking
-and hides the highlight for reduced motion. Empty states retain an honest title,
-description, and relevant action instead of fabricated data.
-
-### Inputs / Fields
-
-Search and form fields use a stronger input edge, reading-surface fill, (`12px`) radius,
-and at least (`44px`) height. The **PromptComposer** auto-grows to (`180px`), then scrolls;
-Enter sends, Shift+Enter adds a line, and IME composition does not trigger submission.
-It persists a session draft, focuses starter text, and enables sending only for a nonempty
-prompt with an eligible selection and no pending send. A stop control replaces send while
-answers are active.
-
-The homepage composer keeps its generous two-row prompt area. Thread follow-ups start
-with one text row above the controls, 12px vertical padding, and an 8px toolbar gap.
-They grow with the draft up to the same 180px text limit, then scroll.
-
-**ComposerFrame** provides the shared neutral composer seam and elevation. The
-`/app` composer explicitly enables its finite hover/focus border sweep (`1.6s`);
-thread follow-ups retain a static frame. Input backgrounds remain unchanged in
-hover and focus states. Reduced motion hides the decorative sweep.
-The branching mark enters once (`1.6s`). Shared state feedback uses (`180ms`) and
-panel travel (`320ms`) on the established exponential ease. Reduced motion suppresses
-these embellishments and collapses normal transitions; loading spinners retain a slower
-functional cycle (`1.6s`). Thread-title reveal remains an overflow-only functional state.
-
-### Navigation
-
-The expanded rail carries brand, primary routes, thread search/history, account,
-and appearance. The shell’s “Explore plans” action lives in the top bar. Rows use quiet ink at rest, a tonal hover, and soft blue plus heavier text
-when selected. The compact rail retains labelled icon controls. Thread actions reveal on
-hover/focus/open and remain available on touch. Portalled menus and dialogs prevent
-clipping; keyboard navigation and focus restoration come from the shared Radix wrappers.
-The sidebar footer puts the account control and an icon-only theme menu on one row.
-The menu shows System, Dark, and Light as radio items with a checked selection; choices
-persist and synchronize across mounted controls. A full-width seam follows Search
-threads, with a 10px gap above Recent threads. History is one continuous list in
-recency order, with 36px rows and no date headings or added row gaps. The section
-label aligns with row icons, with 8px padding below the label.
-
-### Comparison, Standalone, and Account Surfaces
-
-Answer cards keep a model/state header, readable body, vote strip, and always-visible
-measured footer. State carries a word and dot; a winner carries a green edge, trophy,
-and label. Missing measurements read `—`. Shared threads reuse the comparison in a
-standalone frame with a thread-title `h1`, an explicit read-only badge, and no vote or send controls.
-
-Plans, Billing, and shared threads use a full-width standalone header with consistent
-edge padding, a vertically centered linked wordmark and page title, and the sidebar's
-icon-only System/Dark/Light menu opening below the header.
-The wordmark provides the route to the arena; there is no separate back button. Plans keeps interval selection and real price/allowance arithmetic within aligned
-columns within one rounded shell; plan names are `h2` beneath the page `h1`, and a
-featured column uses soft blue and its action. Billing groups current plan/actions,
-UTC dates, exact remaining/used allowances, and the separate daily free allowance. Signed-out,
-unavailable, attention, and portal-failure states use plain copy and relevant actions.
-Sign-in occupies a dedicated full-page frame without a header or sidebar. A centered,
-unboxed column carries the linked wordmark, welcome copy, 48px Google/GitHub buttons,
-and inline failure copy. Existing themes, OAuth callbacks, loading states, and the
-signed-in Continue action remain supported. Short screens scroll rather than clip.
-
-### Public Landing and Legal Reading
-
-`PublicLayout` owns the linked wordmark, public navigation, shared appearance menu,
-sign-in/open-app action, skip link, content region, and footer. Primary comparison
-actions explicitly use the blue primary button variant. The public header spans the
-viewport independently of the content container, with responsive edge padding.
-`LegalLinks` supplies the
-same Terms/Privacy pair to the public footer, Plans, Billing, and signed-in auth;
-signed-out auth includes contextual agreement and acknowledgment links.
-
-The landing's memorable device is one prompt branching into three independently
-readable answers. Example selection is a labeled group of native pressed buttons;
-each answer exposes a pressed vote button, with green plus a check and “Your pick”
-for the chosen response. The status states that example votes are not saved. Authored
-answers and measurements carry explicit example labels. The real workspace remains
-an honest prompt-first empty state at `/app`.
-
-Distinct bento scenes explain per-answer measurements, independent follow-ups,
-revocable read-only links, and leaderboard fields without inventing standings. They
-use semantic figures/labels and crisp geometry rather than decorative icon tiles.
-The FAQ uses native disclosure controls. Motion is limited to existing control
-transitions and a faded horizontal hero backdrop, with reduced-motion support.
-
-`HeroShowcase` places decorative fragments of code, model comparisons, answers, and
-follow-ups behind the comparison window. Upright tiles of varying sizes move
-continuously from left to right, matching the user's Devin recording. A masked
-scene fades at the edges; smaller, blurred fragments establish distance. Three
-identical scene copies provide a full buffer on each side. The linear CSS loop
-moves exactly one scene width, from minus two scene widths to minus one, so a
-successor is already attached when the cycle wraps. Regular quarter-scene spacing
-continues through the join, with a `max(1280px, 100vw)` desktop scene and a `960px`
-mobile scene. There are no per-frame React updates. The foreground window stays
-still. The backdrop cannot intercept controls
-and is hidden from assistive technology. Intersection and document visibility
-pause it offscreen or in a hidden tab. Reduced motion shows a static scene. Mobile
-uses a smaller scene with the same direction and softer opacity.
-
-The animated stage contains only the comparison window. The hero heading, actions,
-free-model note, and explanatory steps sit outside it in normal document flow;
-the backdrop starts at the window rather than a fixed offset from the heading.
-Its own clip and masks keep decorative tiles out of the intro and steps while
-leaving the foreground's existing floating shadow unobstructed. Near tiles use
-32% opacity and a 1px blur (23% mobile). The four smaller lower tiles use 34% opacity and a
-1.5px blur (25% on mobile), spaced at quarter-scene intervals so they can appear in the side gutters instead
-of all being hidden behind the window. The window remains opaque. The user
-requested removal of the play/pause button and its reserved space. The bottom
-mask fades over 24px to preserve the lower tiles' visibility.
-The loop takes 60 seconds on desktop and 36 seconds on mobile, approximately
-20% faster than the previous pass; opacity rose only three to four percentage points.
-
-The model picker uses its enclosing `main` as the collision boundary, with 12px
-padding. It stays below the shell header and inside the workspace in both initial
-and thread composers. The results list shrinks and scrolls when vertical space is
-limited; the picker heading and search field remain visible.
-
-The comparison illustration has a macOS-style title bar: decorative traffic lights,
-the Nexora/New comparison title, and quiet window-view icons. These are inert window
-chrome rather than product actions, and no device bezel is added. The existing
-prompt selection, measurements, and votes remain inside the framed illustration.
-
-`LegalScreen` pairs a descriptive document title and effective/operator metadata
-with three concise summaries, a contents list, and numbered sections. Reading copy
-has a generous line height and restrained measure. Policy tables use captions and
-row/column headers; all policy and support links remain discoverable on mobile.
-
-## Do's and Don'ts
-
-### Do:
-
-- **Do** extend the semantic tokens and existing shared components before introducing a new visual recipe.
-- **Do** keep prompt entry, selected models, independent answer states, and measured figures easy to find.
-- **Do** use 16px content cards, pill controls, and the established 4px spacing rhythm.
-- **Do** preserve text or icons alongside winner, error, selected, and unavailable states.
-- **Do** review desktop and mobile in both themes, keyboard focus, long names, empty data, and reduced motion after visual changes.
-- **Do** run the contrast gate after changing colors and regenerate this record and its sidecar when shared tokens or component rules change.
-
-### Don't:
-
-- **Don't** restore the superseded warm-paper, rust-accent, blue-ban, or Montserrat/Noto Sans guidance from the historical record.
-- **Don't** replace independently readable answers with decorative previews or hide their measured metrics.
-- **Don't** add perpetual decorative motion, provider-color ranking scales, or a new display font.
-- **Don't** treat a screenshot, a live catalog count, or a source review as proof of a paid purchase or an authenticated flow.
+The original layout and interaction review passed 151 production assertions
+and 19 development assertions, recorded in `.impeccable/review/dodo-20261107/`.
+The palette refinement passes all 90 token contrast pairs and 92 focused browser
+assertions. All 72 original color tokens match exactly, and every non-color public
+CSS declaration is retained. Typecheck, ESLint, formatting, and the Vercel build
+pass. All 16 public files are copied byte-for-byte to the static output. The
+latest captures and checks are in `.impeccable/review/palette-20261107/`;
+`docs/scope.md` records both verification scopes.
 
 <details>
 <summary>Historical design record — features 4–12, superseded visually on 2026-10-29</summary>

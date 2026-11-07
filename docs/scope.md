@@ -2,6 +2,112 @@
 
 <!-- Current UI direction supersedes historical styling decisions below. -->
 
+## Shared public frame and OAuth sign-in — 2026-11-07
+
+Use the exact home-page layout on Plans and Billing: its centered 1300px frame,
+header, vertical divider lines, full footer, legal links, theme selection, and
+back-to-top. The width token belongs to this shared wrapper, so standalone pages
+must use it rather than rendering the header outside that scope. Preserve their
+content and billing behavior. Adapt the measured Dodo
+login’s compact centered layout, circular brand mark, 20px heading, paired OAuth
+buttons, legal copy, and support link for Nexora’s Google/GitHub-only sign-in.
+Keep the approved blue palette, safe callback handling, pending/error states,
+and signed-in continuation. No email, password, OTP, or separate signup flow.
+
+- [x] Inspect the live Dodo login layout and current page/auth implementation.
+- [x] Share the complete home-page frame, header, and footer on Plans and every Billing state.
+- [x] Implement the reference-inspired OAuth screen and responsive styling.
+- [x] Verify layout, navigation, OAuth states, keyboard access, and required checks.
+
+Verification: all 234 production-browser checks pass, covering the shared header,
+centered frame, footer, divider lines, mobile menu focus, back-to-top, and OAuth
+layout in both themes. Sign-in checks cover keyboard focus, disabled pending
+controls, plain retry messages, provider selection, and safe return paths. OAuth
+requests were intercepted and fulfilled locally; no real login or payment was
+performed. Typecheck, source ESLint, changed-file formatting, all 90 contrast
+pairs, and the Vercel production build pass. Evidence is in
+`.impeccable/review/public-auth-20261107/`.
+
+## Original window-dot sizing — 2026-11-07
+
+Restore the showcase window dots to their pre-redesign dimensions: 11px on
+desktop and 9px below 640px. Preserve the restored macOS colors.
+
+- [x] Restore the original desktop/mobile sizes and prevent flex shrinking.
+- [x] Verify rendered sizes in both themes and run the required code/build checks.
+
+Verification: 49 browser checks pass at 1440px/390px in both themes. The
+rendered dots measure 11px/9px respectively and retain their macOS colors.
+Typecheck, lint, formatting, and the Vercel build pass. Evidence is in
+`.impeccable/review/window-size-20261107/`.
+
+## Showcase icon and window colors — 2026-11-07
+
+Keep the restored Nexora palette and approved layout. Give the comparison tabs
+distinct green, blue, and pink icon tiles in both themes, and use the macOS
+red/yellow/green window dots. These decorative accents are local to the showcase.
+
+- [x] Apply distinct tab icon colors and macOS window-dot colors.
+- [x] Verify desktop/mobile rendering, tab interactions, lint, typecheck, and build.
+
+Verification: all 49 browser checks pass at 1440px/390px in both themes,
+including the six requested colors, white glyphs, retained 8px dots, tab
+switching, and no overflow. Typecheck, ESLint, Prettier, and the Vercel
+production build pass. Screenshots and checks are in
+`.impeccable/review/showcase-colors-20261107/`.
+
+## Original palette restored — 2026-11-07
+
+The user approved the Dodo-inspired implementation and requested only the former
+Nexora color scheme. Restore the exact previous blue/silver/graphite tokens in
+both themes, including semantic states and blue favicon/brand assets. Retain the
+approved typography, layout, spacing, corner shapes, patterns, and interactions.
+New marketing backgrounds and the dark pricing band use those original tokens.
+This color-only refinement supersedes the Dodo green/lime direction below.
+
+- [x] Restore the original theme tokens and blue brand assets.
+- [x] Apply that palette to the new public patterns and section backgrounds.
+- [x] Verify theme colors, retained layout, contrast, lint, typecheck, and build.
+
+Verification: all 72 original color tokens match the previous source exactly;
+every non-color public CSS declaration is retained. All 90 contrast pairs and
+92 browser assertions pass across desktop/mobile home pages and mobile arena,
+plans, and catalog in both themes. Typecheck, ESLint, Prettier, and the Vercel
+production build pass. All 16 public files match the static output byte-for-byte.
+Evidence: `.impeccable/review/palette-20261107/`.
+
+## Dodo Payments reference redesign — 2026-11-07
+
+The user explicitly requested implementation using https://dodopayments.com/ as the
+sole design reference. Its current rendered site uses Apfel Grotezk headings, Inter
+body text, white and deep-green surfaces, lime actions, 8px controls, fine container
+borders, a pastel dotted hero, a tabbed product demonstration on a square grid,
+and alternating light and dark product sections. This direction supersedes the
+earlier blue/Geist/Apple reference decisions. Product behavior, authentic metrics,
+account state, keyboard access, and persistent appearance choices remain functional.
+
+- [x] Inspect the live reference and measure its typography, palette, and layout.
+- [x] Implement the shared typography, colors, controls, and working-screen surfaces.
+- [x] Rebuild the public hero, demonstration, feature rhythm, navigation, and footer.
+- [x] Verify responsive screens, interactions, both themes, typecheck, lint, and build.
+- [x] Record the delivered system and verification evidence.
+
+Verification: all 151 production-browser assertions pass. Captures cover the home page
+at 1440px and 390px in both themes, plus 320px light mode; arena, catalog,
+leaderboard, plans, sign-in, signed-out billing, terms, and privacy at desktop
+and mobile sizes. Example tabs/votes, keyboard navigation, FAQ, mobile menu
+Escape/focus, prompt starters, search, annual pricing, and footer scrolling pass.
+There are no runtime exceptions or failed production bundle requests. All 19
+additional development-browser checks pass, including prompt starters and mobile
+links that navigate, close the menu, and leave catalog search functional. Typecheck,
+source ESLint, changed-file Prettier, Node and Vercel production builds, and all
+90 contrast pairs pass. Every one of the 16 public files is present byte-for-byte
+in Vercel’s static output, with filesystem routing before the SSR fallback.
+Production HTML includes four icon links, two font preloads, and a hashed module
+entry without development CSS or client entries. The evidence and finish verdict
+are in `.impeccable/review/dodo-20261107/`. Live authenticated chat, shared
+threads, and purchases were not exercised; no deployment was performed.
+
 ## UI redesign — Apple, Vidyst, and Backdoor
 
 Authorized in the exported session and continued on 2026-10-29. Preserve product behavior and real measurements; replace the old warm/rust visual system with cool silver surfaces, graphite text, Geist typography, blue controls, restrained elevation, and a fully supported dark theme. The historical color and typography requirements below are superseded by this request.

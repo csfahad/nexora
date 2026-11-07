@@ -2,6 +2,13 @@
 
 <!-- impeccable:product-schema 1 -->
 
+The current UI follows the user's November 7, 2026 reference,
+[Dodo Payments](https://dodopayments.com/): Apfel Grotezk and Inter typography,
+framed product sections and a tabbed comparison demo. `docs/DESIGN.md` records this system. The product's
+independent model calls, measurement, voting, account, and billing behavior
+remain the same. The user subsequently retained the former Nexora blue/silver/
+graphite palette while approving the new typography and layouts.
+
 ## Platform
 
 web
