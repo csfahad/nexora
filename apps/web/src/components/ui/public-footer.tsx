@@ -25,9 +25,9 @@ export const PublicFooter = () => (
                         <Wordmark />
                     </Link>
                     <h2>
-                        AI answers,
+                        Your next great answer
                         <br />
-                        in perspective.
+                        is a comparison away.
                     </h2>
                     <p>Compare models on your own prompt, with speed and cost in view.</p>
                 </div>
@@ -42,6 +42,12 @@ export const PublicFooter = () => (
                             </li>
                             <li>
                                 <Link to="/leaderboard">Leaderboard</Link>
+                            </li>
+                            <li>
+                                <Link to="/models">Model catalog</Link>
+                            </li>
+                            <li>
+                                <Link to="/plans">Pricing</Link>
                             </li>
                         </ul>
                     </div>
@@ -75,9 +81,6 @@ export const PublicFooter = () => (
                         <IconArrowUp aria-hidden size={18} />
                     </Button>
                 </div>
-            </div>
-            <div className="public-footer-wordmark" aria-hidden="true" translate="no">
-                Nexora
             </div>
         </div>
     </footer>
