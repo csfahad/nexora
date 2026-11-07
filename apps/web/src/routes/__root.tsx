@@ -33,6 +33,20 @@ export const Route = createRootRoute({
         ],
         links: [
             { rel: "stylesheet", href: appCss },
+            {
+                rel: "preload",
+                href: "/fonts/ApfelGrotezk-Mittel.woff2",
+                as: "font",
+                type: "font/woff2",
+                crossOrigin: "anonymous",
+            },
+            {
+                rel: "preload",
+                href: "/fonts/Inter-Variable.woff2",
+                as: "font",
+                type: "font/woff2",
+                crossOrigin: "anonymous",
+            },
             { rel: "icon", href: "/favicon.ico", sizes: "16x16 32x32 48x48" },
             {
                 rel: "icon",
