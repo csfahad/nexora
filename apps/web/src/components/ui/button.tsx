@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 export const buttonClasses = cva(
     cn(
         "ui-button transition-state relative inline-flex shrink-0 items-center justify-center gap-2",
-        "rounded-full font-medium whitespace-nowrap select-none",
+        "rounded-lg font-medium whitespace-nowrap select-none",
         "not-disabled:active:scale-[0.98]",
         "disabled:cursor-not-allowed disabled:opacity-45",
         "aria-busy:cursor-progress",
