@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { LoaderErrorNotice } from "@/components/ui/retry-notice";
 import { ArenaScreen } from "@/features/arena/arena-screen";
+import { clearSubmittedDraft } from "@/infrastructure/composer-draft";
 import { useStartTurn } from "@/features/chat/use-start-turn";
 import {
     CATALOG_STALE_TIME_MS,
@@ -29,6 +30,7 @@ function ArenaRoute() {
 
         if (threadId === null) return false;
 
+        clearSubmittedDraft("arena", prompt);
         await navigate({ to: "/thread/$threadId", params: { threadId } });
         await router.invalidate();
 
