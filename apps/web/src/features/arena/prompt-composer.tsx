@@ -3,9 +3,13 @@ import type { KeyboardEvent, ReactNode } from "react";
 import { IconArrowUp, IconPlayerStopFilled } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { ComposerFrame } from "@/components/ui/composer-frame";
+import {
+    clearSubmittedDraft,
+    draftStorageKey,
+    subscribeToDraftReset,
+} from "@/infrastructure/composer-draft";
 
 const MAX_HEIGHT_PX = 180;
-const draftStorageKey = (key: string): string => `nexora:draft:${key}`;
 
 export const PromptComposer = ({
     onSubmit,
@@ -33,6 +37,7 @@ export const PromptComposer = ({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const submitting = useRef(false);
     const storageKey = draftStorageKey(draftKey);
+    useEffect(() => subscribeToDraftReset(draftKey, () => setDraft("")), [draftKey]);
     useEffect(() => {
         try {
             setDraft(window.sessionStorage.getItem(storageKey) ?? "");
@@ -66,6 +71,7 @@ export const PromptComposer = ({
         submitting.current = true;
         try {
             if (await onSubmit(trimmed)) {
+                clearSubmittedDraft(draftKey, trimmed);
                 setDraft((current) => (current.trim() === trimmed ? "" : current));
             }
         } finally {
