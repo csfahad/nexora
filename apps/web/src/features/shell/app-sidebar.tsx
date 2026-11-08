@@ -1,8 +1,10 @@
 import { useState } from "react";
+import type { MouseEvent } from "react";
 import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import { IconMessage, IconSearch } from "@tabler/icons-react";
 import { Wordmark } from "@/components/ui/wordmark";
 import { ThemeMenu } from "@/components/theme/theme-menu";
+import { resetComposerDraft } from "@/infrastructure/composer-draft";
 import { AccountRow } from "./account-row";
 import { DeleteThreadDialog } from "./delete-thread-dialog";
 import { NAV_ITEMS } from "./nav-items";
@@ -18,6 +20,24 @@ type AppSidebarProps = Readonly<{
     onNavigate?: () => void;
     collapsed?: boolean;
 }>;
+
+const navigatePrimary = (
+    event: MouseEvent<HTMLAnchorElement>,
+    to: string,
+    onNavigate?: () => void,
+) => {
+    if (
+        to === "/app" &&
+        event.button === 0 &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.shiftKey &&
+        !event.altKey
+    ) {
+        resetComposerDraft("arena");
+    }
+    onNavigate?.();
+};
 
 const CompactSidebar = ({
     onOpenSearch,
@@ -39,7 +59,7 @@ const CompactSidebar = ({
                     key={to}
                     to={to}
                     activeOptions={{ exact: true, includeSearch: false }}
-                    onClick={onNavigate}
+                    onClick={(event) => navigatePrimary(event, to, onNavigate)}
                     aria-label={label}
                     title={label}
                     className="side-row size-9 justify-center p-0"
@@ -142,7 +162,7 @@ export const AppSidebar = ({
                         key={to}
                         to={to}
                         activeOptions={{ exact: true, includeSearch: false }}
-                        onClick={onNavigate}
+                        onClick={(event) => navigatePrimary(event, to, onNavigate)}
                         className="side-row"
                     >
                         <Icon aria-hidden className="size-4.5" stroke={1.75} />
