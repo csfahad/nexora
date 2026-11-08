@@ -17,6 +17,7 @@
     --hero-dot: color-mix(in srgb, var(--input) 20%, transparent);
 }
 .public-page .public-main {
+    display: flow-root;
     width: min(var(--public-width), 100%);
     margin-inline: auto;
     min-height: 55vh;
