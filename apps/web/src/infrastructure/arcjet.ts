@@ -1,4 +1,5 @@
 import arcjet, {
+    cloudflare,
     detectBot,
     detectPromptInjection,
     shield,
@@ -13,6 +14,7 @@ import { PLANS } from "@/infrastructure/plans";
 const buildBase = () =>
     arcjet({
         key: serverEnv().ARCJET_KEY,
+        proxies: [cloudflare()],
         rules: [shield({ mode: "LIVE" }), detectBot({ mode: "LIVE", allow: [] })],
     });
 
@@ -73,10 +75,9 @@ const toNodeRequest = (request: Request): ArcjetNodeRequest => ({
     headers: Object.fromEntries(request.headers),
     method: request.method,
     url: request.url,
+    socket: { remoteAddress: getRequestIP() },
     body: "",
 });
-
-const trustedIp = (): string | undefined => getRequestIP();
 
 export type RequestVerdict =
     | Readonly<{ status: "allowed" }>
@@ -163,7 +164,6 @@ const rescreenInjection = async (
 
     const decision = await injectionClient.protect(toNodeRequest(request), {
         detectPromptInjectionMessage: prompt,
-        ipSrc: trustedIp(),
     });
 
     return verdictFor(decision, "startTurn recheck");
@@ -177,7 +177,6 @@ export const screenPrompt = async (
         userId: input.userId,
         requested: input.models,
         detectPromptInjectionMessage: input.prompt,
-        ipSrc: trustedIp(),
     });
 
     const verdict = verdictFor(decision, "startTurn");
@@ -196,16 +195,13 @@ export const screenRetry = async (
     const decision = await spendClientFor(input.plan).protect(toNodeRequest(request), {
         userId: input.userId,
         requested: 1,
-        ipSrc: trustedIp(),
     });
 
     return verdictFor(decision, "retryResponse");
 };
 
 export const screenStream = async (request: Request): Promise<RequestVerdict> => {
-    const decision = await arcjetClient().protect(toNodeRequest(request), {
-        ipSrc: trustedIp(),
-    });
+    const decision = await arcjetClient().protect(toNodeRequest(request));
 
     return verdictFor(decision, "/api/chat");
 };
