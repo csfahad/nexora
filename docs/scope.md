@@ -1772,9 +1772,16 @@ and script injection. An arena is legitimately sent SQL, script tags and shell a
 answers about, so a WAF reading that body is a false-positive machine. Shield judges the envelope; the
 prompt is judged by the injection detector, which is the rule that knows what a prompt is.
 
-**The IP comes from the socket, not a header.** `getRequestIP()` from `@tanstack/react-start/server`
-resolves to the srvx peer address, and it is passed as `ipSrc`, which takes precedence over Arcjet's own
-detection. A caller cannot move their own rate-limit identity by setting `X-Forwarded-For`.
+**The IP is resolved through trusted proxies.** `getRequestIP()` from
+`@tanstack/react-start/server` supplies the transport address in the Node request's
+`socket.remoteAddress`. The base client uses Arcjet's built-in `cloudflare()` proxy
+descriptor, which reads `CF-Connecting-IP` / `CF-Connecting-IPv6` only when the transport
+address belongs to Cloudflare's published ranges. On Vercel, Nitro supplies the
+address from Vercel's `X-Forwarded-For`; with Cloudflare in front, that is the edge
+address, not the visitor. Passing it as `ipSrc` bypassed proxy resolution and caused
+production `UNKNOWN_BOT` denials; corrected November 10, 2026. Direct visitors keep
+their transport IP even if they forge a Cloudflare header. The hourly budget remains
+keyed by the authenticated user id.
 
 **Read the per-rule results, not the decision's conclusion.** This is why `verdictFor` looks the way it
 does, and it was found by measurement. One `protect()` carrying the bucket and the injection rule
@@ -3263,6 +3270,49 @@ labels and visible keyboard focus, and fits the collapsed workspace rail.
 The mark and actual favicon exports were visually reviewed at small sizes.
 Evidence: `.impeccable/review/logo-*.json`, corresponding captures,
 `nexora-brand-board.png`, and `logo-verdict.md`.
+
+### Production chat blocked as `UNKNOWN_BOT` — November 10, 2026
+
+The deployed request travels Chrome → Cloudflare → Vercel → Nitro → TanStack
+Start. The reported Arcjet denial recorded `104.23.216.112` (Cloudflare,
+AS13335) as the client, while `CF-Connecting-IP` contained the actual visitor
+address. Vercel correctly recorded Cloudflare as its upstream peer in
+`X-Forwarded-For`, `X-Real-IP`, and `X-Vercel-Forwarded-For`. Nitro exposes that
+address as `request.ip`; `getRequestIP()` returns it. The app then passed it as
+`ipSrc`, which short-circuits Arcjet's automatic IP and trusted-proxy handling.
+Localhost has no Cloudflare hop, so that verification missed this deployment
+condition.
+
+The base client now configures `proxies: [cloudflare()]`, already available in
+`@arcjet/node@1.11.0`, and the shared request adapter supplies the transport
+address through `socket.remoteAddress` instead of `ipSrc`. Arcjet checks the
+Cloudflare address ranges before accepting its visitor-IP headers. This applies
+to prompt submission, injection rechecks, response retries, and streaming. Bot
+protection and Shield remain LIVE; authenticated-user rate limits, prompt
+screening, and the deliberately empty WAF body keep their existing behavior.
+No bot is allowlisted and no environment variable or dependency is added.
+
+- [x] Confirm the Cloudflare → Vercel chain against the public response headers
+      and the reported Arcjet request headers.
+- [x] Correct shared proxy resolution and the earlier IP-handling explanation.
+- [x] Verify visitor-IP resolution, direct-client spoof resistance, all chat
+      screening paths, and continued bot/rate-limit/injection denials.
+- [x] Finish typecheck, lint, formatting, and production runtime verification.
+- [ ] Redeploy and verify a signed-in new thread through the production domain.
+
+Verification: 17 temporary Node probe scenarios load the actual application
+module, Arcjet SDK, TanStack `getRequestIP()`, and plan definitions with a
+captured remote transport. They verify all four plan budgets, prompt/retry/stream
+paths, injection rechecks without double charging, IPv4/IPv6 Cloudflare hops,
+direct-client forged-header resistance, and preserved denial handling. Separate
+live Arcjet checks return ALLOW with the corrected mapping. The production
+preview serves `/app`; `/api/chat` with the reported Cloudflare headers reaches
+the sign-in check for a Chrome request (401) and still blocks curl as BOT (403).
+The Node and Vercel builds both pass, including Vercel's Node 24 web entry; the
+actual Vercel entry also reaches the sign-in check and blocks curl. Some first
+live checks hit Arcjet's existing upstream deadline, so those are not evidence
+of a clean Arcjet decision. No signed-in production thread has been created
+during verification; that check remains pending after deployment.
 
 ## Consider to build onwards
 
