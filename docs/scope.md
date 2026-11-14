@@ -3314,6 +3314,38 @@ live checks hit Arcjet's existing upstream deadline, so those are not evidence
 of a clean Arcjet decision. No signed-in production thread has been created
 during verification; that check remains pending after deployment.
 
+### Billing navigation briefly shows a model-list error — November 14, 2026
+
+The root layout selected its frame from `state.location.pathname`, which changes
+when navigation begins. On a first visit to Billing, its loader is still pending
+and `Outlet` continues rendering the arena. Removing `AppShell` and
+`ArenaStreamProvider` at that point makes `useArenaStream()` throw; the arena's
+error boundary labels that render failure as an unavailable model catalog.
+
+Select the pathname from the active route matches that `Outlet` renders instead.
+Keep the current frame and providers until the destination route is committed,
+then switch them together. This also covers navigation to Plans and the other
+standalone pages, and navigation back into the workspace.
+
+- [x] Trace the URL, active route, and provider lifetime during navigation.
+- [x] Align the root layout with the active route matches.
+- [x] Verify delayed first visits, cached navigation, and return navigation.
+- [x] Complete typecheck, lint, formatting, and production runtime checks.
+
+Verification: a temporary Node probe loads the actual root layout, arena route,
+model route, billing route, streaming provider, and installed TanStack Router.
+It reproduces the missing-provider exception with the previous selector and
+passes 44 rendered route snapshots with the fix. Checks cover delayed Billing
+navigation from arena/models/thread, repeated visits, returning to arena,
+direct and trailing-slash Billing entry, the other standalone pages, and a real
+catalog-loader failure followed by retry. Network functions and screen bodies
+are stubbed in that probe; it performs no login, payment, or chat submission.
+Typecheck, lint, changed-file formatting, and the production build pass. The
+running production build serves `/app`, `/settings/billing`, and
+`/settings/billing/` with HTTP 200, the correct frame, and no catalog/provider
+error. Signed-in browser verification on the deployed site remains unperformed;
+the fix has not been deployed.
+
 ## Consider to build onwards
 
 Kept here so the plan stays honest about what's deliberately left out.

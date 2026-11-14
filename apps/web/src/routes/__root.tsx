@@ -75,7 +75,9 @@ export const Route = createRootRoute({
 function RootLayout() {
     usePostHogViewer();
     const { threadGroups } = Route.useLoaderData();
-    const pathname = useRouterState({ select: (state) => state.location.pathname });
+    const pathname = useRouterState({
+        select: (state) => state.matches.at(-1)?.pathname ?? state.location.pathname,
+    });
 
     if (
         pathname === "/" ||
