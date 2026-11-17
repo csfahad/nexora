@@ -3,6 +3,7 @@ import { z } from "zod";
 import { LoaderErrorNotice } from "@/components/ui/retry-notice";
 import { LeaderboardScreen } from "@/features/leaderboard/leaderboard-screen";
 import { getStandings } from "@/features/leaderboard/standings";
+import { RoutePending } from "@/features/shell/route-pending";
 
 const searchSchema = z.object({
     scope: z.enum(["global", "personal"]).default("global"),
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/leaderboard")({
     head: () => ({ meta: [{ title: "Leaderboard · Nexora" }] }),
     validateSearch: searchSchema,
     loader: async () => getStandings(),
+    pendingComponent: RoutePending,
     component: LeaderboardRoute,
 });
 

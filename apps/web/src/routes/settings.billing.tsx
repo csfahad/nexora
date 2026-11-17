@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BillingScreen } from "@/features/billing/billing-screen";
 import { getBilling } from "@/features/billing/get-billing";
+import { RoutePending } from "@/features/shell/route-pending";
 
 export const Route = createFileRoute("/settings/billing")({
     head: () => ({
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/settings/billing")({
     }),
     loader: () => getBilling(),
     staleTime: 0,
+    pendingComponent: RoutePending,
     component: BillingRoute,
 });
 

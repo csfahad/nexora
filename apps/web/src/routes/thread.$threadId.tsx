@@ -17,9 +17,14 @@ import { ShareThreadDialog } from "@/features/shell/share-dialog";
 import { useTopBarCrumbs, useTopBarTrailing } from "@/features/shell/shell-chrome";
 import { VoteControl } from "@/features/voting/vote-control";
 import type { ThreadView } from "@/features/chat/get-thread";
+import { useChatState } from "@/features/chat/optimistic-turns";
+import { useShellState } from "@/features/shell/optimistic-history";
+import { RoutePending } from "@/features/shell/route-pending";
 
 export const Route = createFileRoute("/thread/$threadId")({
-    loader: async ({ params }) => {
+    loader: async ({ params, context }) => {
+        const seed = context.chat.takeSeed(params.threadId);
+        if (seed) return { status: "found" as const, thread: seed };
         const result = await getThread({ data: { threadId: params.threadId } });
 
         if (result.status === "signed-out") {
@@ -29,8 +34,10 @@ export const Route = createFileRoute("/thread/$threadId")({
             });
         }
 
+        if (result.status === "found") context.chat.reconcile(result.thread);
         return result;
     },
+    pendingComponent: RoutePending,
     component: ThreadRoute,
     errorComponent: () => <LoaderErrorNotice message={THREAD_READ_FAILED} />,
 });
@@ -63,10 +70,16 @@ function ThreadRoute() {
     return <LoadedThread thread={result.thread} />;
 }
 
-function LoadedThread({ thread }: { readonly thread: ThreadView }) {
+function LoadedThread({ thread: savedThread }: { readonly thread: ThreadView }) {
     const { threadId } = Route.useParams();
     const { streaming, answering, stop } = useArenaStream();
     const { send, notice } = useStartTurn();
+    const { chat, pending, saved } = useChatState();
+    const { changes } = useShellState();
+    const thread = useMemo(() => {
+        const preview = chat.preview(savedThread);
+        return { ...preview, title: changes.get(preview.id)?.title ?? preview.title };
+    }, [chat, savedThread, pending, saved, changes]);
     const [sending, setSending] = useState(false);
     const [sharing, setSharing] = useState(false);
 
@@ -100,8 +113,10 @@ function LoadedThread({ thread }: { readonly thread: ThreadView }) {
 
         try {
             return (
-                (await send({ prompt, modelIds: [...thread.modelIds], threadId })) !==
-                null
+                (await send(
+                    { prompt, modelIds: [...thread.modelIds], threadId },
+                    thread,
+                )) !== null
             );
         } finally {
             setSending(false);
@@ -125,7 +140,7 @@ function LoadedThread({ thread }: { readonly thread: ThreadView }) {
 
                         <PromptComposer
                             onSubmit={submit}
-                            busy={sending || streaming}
+                            busy={sending || pending !== null || streaming}
                             draftKey={threadId}
                             onStop={streaming ? stop : undefined}
                             controls={

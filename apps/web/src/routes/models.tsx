@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LoaderErrorNotice } from "@/components/ui/retry-notice";
 import { ModelsScreen } from "@/features/models/models-screen";
+import { RoutePending } from "@/features/shell/route-pending";
 import {
     CATALOG_STALE_TIME_MS,
     CATALOG_UNAVAILABLE,
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/models")({
     head: () => ({ meta: [{ title: "Models · Nexora" }] }),
     loader: () => getModelCatalog(),
     staleTime: CATALOG_STALE_TIME_MS,
+    pendingComponent: RoutePending,
     component: ModelsRoute,
     errorComponent: () => <LoaderErrorNotice message={CATALOG_UNAVAILABLE} />,
 });
