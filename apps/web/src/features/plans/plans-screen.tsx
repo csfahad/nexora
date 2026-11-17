@@ -5,6 +5,8 @@ import { IconArrowRight, IconCheck, IconX } from "@tabler/icons-react";
 import { Plan } from "@/generated/prisma/enums";
 import type { BillingInterval } from "@/generated/prisma/enums";
 import { PublicLayout } from "@/components/ui/public-layout";
+import { buttonClasses } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { TierChip } from "@/components/ui/tier-chip";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { TIER_WORD, useAllowance } from "@/infrastructure/entitlement";
@@ -111,7 +113,10 @@ const PlanColumn = ({
         <div className="plan-band--cta">
             <button
                 type="button"
-                className="plan-cta"
+                className={cn(
+                    buttonClasses({ variant: featured ? "primary" : "secondary" }),
+                    "plan-cta",
+                )}
                 data-featured={featured || undefined}
                 disabled={disabled || busy}
                 aria-busy={busy || undefined}
