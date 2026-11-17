@@ -38,7 +38,7 @@ export const ResponseColumn = ({
 }) => {
     const streaming = response.state === "streaming";
     const empty = response.text.length === 0;
-    const verb = useThinkingVerb(response.id, streaming && empty);
+    const verb = useThinkingVerb(response.id, streaming && empty && !response.queued);
     const Vote = useVoteSlot();
 
     return (
@@ -63,7 +63,9 @@ export const ResponseColumn = ({
 
                 <span className="answer-state" data-state={response.state}>
                     <span aria-hidden className="answer-dot" />
-                    <span className="label-meta">{STATE_LABEL[response.state]}</span>
+                    <span className="label-meta">
+                        {response.queued ? "Sending" : STATE_LABEL[response.state]}
+                    </span>
                 </span>
             </header>
 
@@ -74,7 +76,9 @@ export const ResponseColumn = ({
             )}
 
             <div className="answer-body">
-                {streaming && empty && <Thinking verb={verb} />}
+                {streaming && empty && (
+                    <Thinking verb={response.queued ? "Sending" : verb} />
+                )}
 
                 {!empty && <AnswerMarkdown text={response.text} streaming={streaming} />}
 

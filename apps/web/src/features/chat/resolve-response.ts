@@ -11,6 +11,7 @@ export type ResolvedResponse = Readonly<{
     text: string;
     metrics: ModelResponseMetrics | null;
     message: string | null;
+    queued?: boolean;
 }>;
 
 const fromLive = (row: ThreadResponse, entry: LiveResponse): ResolvedResponse => ({
@@ -43,5 +44,18 @@ export const resolveResponse = (
     live: ReadonlyMap<string, LiveResponse>,
 ): ResolvedResponse => {
     const entry = live.get(row.id);
-    return entry === undefined ? fromRow(row) : fromLive(row, entry);
+    return entry === undefined
+        ? row.pending && row.status === "STREAMING"
+            ? {
+                  id: row.id,
+                  modelId: row.modelId,
+                  modelName: row.modelName,
+                  state: "streaming",
+                  queued: true,
+                  text: "",
+                  metrics: null,
+                  message: null,
+              }
+            : fromRow(row)
+        : fromLive(row, entry);
 };
