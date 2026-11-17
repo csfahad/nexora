@@ -112,13 +112,13 @@
     gap: 8px;
     margin-top: 20px;
 }
-.public-menu-panel nav > a {
+.public-menu-panel nav > a:not(.ui-button) {
     padding: 14px 12px;
     color: var(--foreground);
     font-size: 1rem;
     border-radius: 8px;
 }
-.public-menu-panel nav > a:hover {
+.public-menu-panel nav > a:not(.ui-button):hover {
     background: var(--accent);
 }
 .public-menu-panel nav > .ui-button-primary {
@@ -881,6 +881,12 @@
     --action-hover: var(--primary-hover);
     --primary-foreground: oklch(0.2454775 0.0561043 260.2616);
     --action-hover-foreground: var(--primary-foreground);
+    --button-neutral-top: oklch(0.36002337 0 0);
+    --button-neutral-bottom: oklch(0.28094023 0 0);
+    --button-neutral-border: #2b2b2b;
+    --button-neutral-base: #1b1b1b;
+    --button-highlight: rgb(255 255 255 / 0.22);
+    --button-ambient: rgb(0 0 0 / 0.28);
     display: grid;
     grid-template-columns: 1.1fr 1fr;
     align-items: center;
@@ -938,12 +944,6 @@
     grid-column: 1 / -1;
     margin: 0 28px 28px;
     color: var(--foreground);
-    background: var(--card);
-    border-color: var(--border);
-}
-.landing-plan-choice > a:hover {
-    color: var(--foreground);
-    background: var(--accent);
 }
 .landing-faq {
     display: grid;
