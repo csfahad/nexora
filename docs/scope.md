@@ -2,6 +2,38 @@
 
 <!-- Current UI direction supersedes historical styling decisions below. -->
 
+## Remember composer models — 2026-11-17
+
+Save the new-thread composer's lineup immediately on picker changes and chip
+removals. Restore the same IDs and order on later visits and reloads, with
+separate browser-local preferences for each account and guests. Use the existing
+default trio only before any valid preference exists. Preserve an intentionally
+empty selection, omit models removed from the catalog without filling the lineup
+with arbitrary replacements, and retain preferences when an allowance runs out.
+Failed-send model IDs take precedence for recovery; opening an existing thread
+does not change the saved preference. Storage failures must leave the composer
+usable, and server rendering must hydrate without mismatched markup.
+
+- [x] Add selection restoration and immediate persistence to both selection paths.
+- [x] Reverify the restored integration and required checks after accidental removal.
+
+Previous verification: 105 isolated browser checks exercise the actual ArenaScreen,
+ModelPicker, PromptComposer, and selection hook. They cover immediate picker/chip
+writes, one/two/three-model restoration and order, new-thread remounts, route
+revisits, reloads, another tab, submitted IDs, the three-model cap, exhausted
+allowances, account/guest isolation, unavailable sessions, failed-send overrides
+and draft recovery, catalog removals/recovery, duplicates, empty and corrupt
+preferences, denied storage, and hydration without recoverable errors. Desktop
+and mobile composer screenshots were inspected. Typecheck, lint, changed-file
+formatting, production build, and diff checks passed. Generated route-tree output
+was preserved exactly. Sessions and services were isolated fixtures; no live
+chat requests, account actions, or deployment were performed.
+
+Restoration verification: reconnected the surviving hook in ArenaScreen and
+restored this entry after accidental Git removal. All 105 composer checks pass
+again against the restored source. Typecheck, lint, formatting, production build,
+and diff checks pass; the surviving hook and starting route tree were preserved.
+
 ## Button palette and landing pricing correction — 2026-11-17
 
 This supersedes the saturated primary palette in the raised-button entry below.
