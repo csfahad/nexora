@@ -29,6 +29,78 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.page-loading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--background);
+}
+.page-loading--full {
+    position: fixed;
+    z-index: 120;
+}
+.public-page:has(> .public-main > .page-loading) {
+    display: flex;
+    flex-direction: column;
+}
+.public-page .public-main:has(> .page-loading) {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}
+.public-page:has(> .public-main > .page-loading) > .public-footer {
+    display: none;
+}
+.page-loading .page-loading-mark {
+    width: 3rem;
+    height: 3rem;
+    color: var(--primary);
+}
+.page-loading-mark path {
+    animation: nexora-loading 1.8s ease-in-out infinite;
+}
+.page-loading-mark path:nth-child(2) {
+    animation-delay: -1.2s;
+}
+.page-loading-mark path:nth-child(3) {
+    animation-delay: -0.6s;
+}
+@keyframes nexora-loading {
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .page-loading-mark path {
+        animation: none !important;
+        opacity: 1;
+    }
+}
+.action-notice {
+    position: fixed;
+    inset-inline: 1rem;
+    bottom: 1rem;
+    z-index: 110;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: min(calc(100% - 2rem), 32rem);
+    margin-inline: auto;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--popover);
+    color: var(--popover-foreground);
+    box-shadow: var(--shadow-floating);
+    font-size: 0.875rem;
+}
+
 :root {
     color-scheme: dark;
     --background: oklch(0.1864945 0.0043594 264.46262);

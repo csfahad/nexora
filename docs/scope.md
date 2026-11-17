@@ -2,6 +2,113 @@
 
 <!-- Current UI direction supersedes historical styling decisions below. -->
 
+## Branded page loading — 2026-11-16
+
+This supersedes the spinner and thread exclusion below. Center Nexora's existing
+three-stroke monogram in the available page area, using the established primary
+color and a quiet sequential opacity animation. Keep status text for assistive
+technology only and make the mark static with reduced motion. Use this loader on
+uncached Leaderboard, Models, Billing, and thread visits. Sign-out uses the same
+mark as a full-page state, without a popup; restore the page on sign-out failure.
+App, Plans, and other routes retain their loader-free navigation.
+
+- [x] Replace the generic spinner with the centered branded loader.
+- [x] Restore uncached thread loading and replace the sign-out popup.
+- [x] Verify appearance, route scope, failure recovery, and required checks.
+
+Verification: 62 controlled route/state checks cover all four uncached loaders,
+cached revisits, App/Plans without loaders, optimistic prompts, and sign-out
+success/failure. The sign-out view contains only the branded status and restores
+the page after failure. Twelve isolated browser previews use the actual loader
+and production CSS across 1440px/390px, both themes, and workspace/Billing/sign-out
+layouts. They confirm centering in the available viewport, a hidden accessible
+status, no popup or visible text, and static strokes with reduced motion.
+Screenshots were inspected. Billing keeps its header/frame while loading and
+shows its footer once content is ready. Typecheck, lint, changed-file formatting,
+production build, and all 90 contrast pairs pass. No deployment or authenticated
+live-app browser operations were performed for this adjustment.
+
+## Route loader scope — 2026-11-16
+
+This supersedes the global route loading views below. Show a simple spinner and
+status only on an uncached visit to Leaderboard, Models, or Billing. Remove the
+global and root loading screens so App, Plans, threads, and other routes do not
+show route loaders. Preserve intent preloading, background refreshes, the
+Billing frame, optimistic prompts/thread actions, and sign-out progress.
+
+- [x] Scope pending views to the three requested routes and omit skeletons.
+- [x] Verify first visits, cached revisits, other routes, and required checks.
+
+Verification: 57 controlled checks load the actual route/state modules with
+stubbed services. Slow first visits to the three requested routes show a spinner
+without skeletons; cached revisits retain content during background refreshes.
+First App navigation from Home, Plans, and Models retains the previous page
+until the composer is ready. Slow Plans/thread navigation also shows no route
+loader. Optimistic prompts, rollback, and sign-out checks still pass. Typecheck,
+lint, changed-file formatting, and the production build pass. No deployment or
+authenticated browser verification was performed for this adjustment.
+
+## Immediate action feedback — 2026-11-16
+
+Show a submitted prompt and selected model cards immediately while the server
+validates and saves the turn. Reconcile temporary turns with authoritative IDs,
+preserve drafts on failure, and refresh saved data in the background. Show the
+destination's loading view immediately on uncached navigation, retain short
+intent-preload caching, and avoid mandatory delays after fast responses. Apply
+rename/delete changes across both sidebars and search immediately, with rollback
+and a plain error if the server rejects them. Sign-out shows a blocking progress
+state immediately and clears local private state only after session revocation.
+Use existing surfaces, typography, semantic colors, and reduced-motion behavior.
+
+- [x] Add route loading views and remove redundant navigation waits.
+- [x] Render and reconcile optimistic first prompts and follow-up turns.
+- [x] Add shared optimistic thread actions and visible sign-out progress.
+- [x] Verify slow responses, rollback, duplicate prevention, and session isolation.
+- [x] Finish typecheck, lint, formatting, production build, and runtime checks.
+
+Implementation: route loading views appear with `pendingMs: 0` and have no
+mandatory minimum duration. Intent preloads remain fresh for 30 seconds. Client
+state is created separately for each router, and streaming survives page
+navigation until the viewer changes. Prompts and named model cards render with
+a Sending state before the save resolves; the saved thread seeds its first
+navigation without another blocking read. Follow-ups use the same optimistic
+turn path. Authoritative turn/response IDs replace temporary IDs, loader results
+deduplicate turns, and response content/metrics come from the real stream or
+saved data. Rejected prompts restore the composer draft and selected models. New thread history,
+rename, and delete updates are shared across the rail, drawer, and search;
+confirmed mutations retain their overrides until synchronous invalidation
+finishes. Failures roll back and show a plain alert. Sign-out uses a focus-trapped
+progress dialog and clears cached/private state and composer drafts only after revocation succeeds;
+late submissions and root-loader results cannot repopulate that state.
+
+The allowance rejection path previously created a thread/turn before checking
+whether any model could reserve an answer. Those writes now follow successful
+reservation checks in the same transaction, preventing phantom rejected turns.
+Authentication, prompt screening, allowance reservations, and server-assigned
+IDs remain authoritative.
+
+Verification: 45 temporary Node checks load the actual state, draft, response,
+send-hook, route, root-layout, submission-server, and sign-out modules with
+controlled delayed/rejected RPCs. They cover immediate canvas/model-card
+rendering, pending navigation and frame selection, seeded thread navigation,
+duplicate prevention, reconciliation, rollback, rejected-turn persistence,
+independent sessions, successful/failed sign-out, and a root refresh that began
+before revocation. UI helpers and external services are stubbed in these probes;
+no live login, prompt, payment, or deployment was initiated by the assistant.
+Typecheck, lint,
+changed-file formatting, production build, and all 90 contrast pairs pass.
+Production `/app`, `/models`, `/leaderboard`, and signed-out `/settings/billing`
+return HTTP 200 with complete HTML, the correct frame, and no provider/catalog
+error or lingering loading skeleton. The broad source formatting check also
+reports pre-existing formatting in two untouched chat files and generated code;
+those files are excluded from the change. Signed-in browser verification on the
+deployed site remains pending after redeployment.
+
+Local server output also included OpenRouter HTTP 402 rejections reporting
+insufficient credits for the requested token budget. The response-stream
+configuration is unchanged by this work; live answer generation remains
+unverified.
+
 ## Shared public frame and OAuth sign-in — 2026-11-07
 
 Use the exact home-page layout on Plans and Billing: its centered 1300px frame,
