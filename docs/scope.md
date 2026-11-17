@@ -2,6 +2,52 @@
 
 <!-- Current UI direction supersedes historical styling decisions below. -->
 
+## Button palette and landing pricing correction — 2026-11-17
+
+This supersedes the saturated primary palette in the raised-button entry below.
+Restore the original action tokens for primary faces, labels, and hover in each
+theme while keeping the approved bevel, lower edge, shadows, and press feedback.
+The landing pricing band stays dark in both themes; scope its neutral button
+palette to dark values and remove legacy CTA background overrides so Compare
+plans retains its complete raised graphite treatment.
+
+- [x] Restore original primary colors and fix pricing-band button inheritance.
+- [x] Verify both themes at desktop/mobile widths and run required checks.
+
+Verification: 265 isolated browser assertions use actual Button, LandingScreen,
+and PlansScreen markup with production CSS at 1440px and 390px in both themes.
+Primary rest/hover faces and labels match the original action tokens, including
+mobile navigation and Plans CTAs; disabled/loading semantics remain intact.
+Compare plans retains its dark gradient, border, lower edge, ambient shadow,
+readable label, keyboard focus, stable dimensions on press, and card spacing.
+Primary and pricing screenshots were inspected. Typecheck, lint, changed-file
+formatting, and production build pass; all 98 contrast pairs pass in both themes.
+The build's generated route-tree formatting was restored to the exact starting
+snapshot. External services were stubbed; no deployment or live account actions
+were performed.
+
+## Raised reference buttons — 2026-11-17
+
+Apply the supplied button treatment across shared controls and Plans CTAs:
+saturated blue with white labels, theme-specific graphite/silver secondary
+faces, beveled highlights, rounded edges, and a solid shadow below the face.
+Scale the depth for existing sizes, compress it on press, and preserve disabled,
+loading, keyboard focus, and reduced-motion behavior. Keep semantic destructive
+colors and flat ghost controls.
+
+- [x] Implement shared raised variants and remove conflicting local styling.
+- [x] Verify reference appearance, interaction states, and required checks.
+
+Verification: 488 isolated browser assertions cover all five variants/sizes in
+both themes at 1440px and 390px, with actual Button/Plans components and production
+CSS. They check raised faces, stable dimensions on press/loading, disabled
+states, keyboard focus, reduced motion, link CTAs, mobile navigation, sign-in
+button styling, and Plans CTAs. Reference-pair, controls, and Plans screenshots
+were inspected. External services are stubbed; no login, checkout, or deployment
+was performed. Typecheck, lint, changed-file formatting, and production build
+pass. The contrast checker now also verifies gradient endpoints; all 104 pairs
+pass in both themes.
+
 ## Branded page loading — 2026-11-16
 
 This supersedes the spinner and thread exclusion below. Center Nexora's existing

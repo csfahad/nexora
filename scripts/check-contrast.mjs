@@ -81,6 +81,15 @@ const parseTokens = (body, label) => {
  * nobody renders reports a bar the design does not actually have to clear.
  */
 const PAIRS = [
+    ["secondary-foreground", "button-neutral-top", 4.5, "secondary button gradient top"],
+    [
+        "secondary-foreground",
+        "button-neutral-bottom",
+        4.5,
+        "secondary button gradient bottom",
+    ],
+    ["foreground", "button-neutral-top", 4.5, "outline button gradient top"],
+    ["foreground", "button-neutral-bottom", 4.5, "outline button gradient bottom"],
     ["foreground", "background", 4.5, "body text on the page"],
     ["foreground", "surface-tint", 4.5, "text in the prompt bubble"],
     ["primary", "primary-soft", 4.5, "selected navigation and billing status"],

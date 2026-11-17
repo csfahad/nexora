@@ -2,8 +2,14 @@
 name: Nexora
 description: A precise workspace for independently measured model comparisons.
 colors:
+    button-neutral-top-dark: "#3d3d3d"
+    button-neutral-bottom-dark: "#292929"
+    button-neutral-top-light: "#e7e7e7"
+    button-neutral-bottom-light: "#d5d5d5"
     action: "{colors.primary-dark}"
     action-foreground: "{colors.primary-foreground-dark}"
+    action-hover: "{colors.primary-hover-dark}"
+    action-hover-foreground: "{colors.primary-foreground-dark}"
     background-dark: "oklch(0.1864945 0.0043594 264.46262)"
     foreground-dark: "oklch(0.9707138 0.0026505 286.35036)"
     card-dark: "oklch(0.2309377 0.005954 271.15289)"
@@ -99,33 +105,36 @@ components:
     button-primary:
         backgroundColor: "{colors.action}"
         textColor: "{colors.action-foreground}"
-        rounded: "{rounded.md}"
+        rounded: "{rounded.lg}"
         padding: "0 16px"
         height: "40px"
     button-primary-hover:
-        backgroundColor: "{colors.primary-hover-dark}"
+        backgroundColor: "{colors.action-hover}"
+        textColor: "{colors.action-hover-foreground}"
     button-secondary:
-        backgroundColor: "{colors.secondary-dark}"
+        backgroundColor: "{colors.button-neutral-bottom-dark}"
+        backgroundImage: "linear-gradient(180deg, {colors.button-neutral-top-dark}, {colors.button-neutral-bottom-dark})"
         textColor: "{colors.foreground-dark}"
-        rounded: "{rounded.md}"
+        rounded: "{rounded.lg}"
         padding: "0 16px"
         height: "40px"
     button-outline:
-        backgroundColor: "{colors.card-dark}"
+        backgroundColor: "{colors.button-neutral-bottom-dark}"
+        backgroundImage: "linear-gradient(180deg, {colors.button-neutral-top-dark}, {colors.button-neutral-bottom-dark})"
         textColor: "{colors.foreground-dark}"
-        rounded: "{rounded.md}"
+        rounded: "{rounded.lg}"
         padding: "0 16px"
         height: "40px"
     button-ghost:
         backgroundColor: "transparent"
         textColor: "{colors.muted-foreground-dark}"
-        rounded: "{rounded.md}"
+        rounded: "{rounded.lg}"
         height: "40px"
         width: "40px"
     button-destructive:
         backgroundColor: "{colors.destructive-dark}"
         textColor: "{colors.destructive-foreground-dark}"
-        rounded: "{rounded.md}"
+        rounded: "{rounded.lg}"
         padding: "0 16px"
         height: "40px"
     field-input:
@@ -181,21 +190,30 @@ Both themes use the exact color tokens from the previous Nexora implementation.
 Light mode uses cool silver ground, white cards, graphite text, and blue
 (`#005dcc`) links, filled actions, and focus. Dark mode uses near-black graphite
 ground, neutral reading surfaces, pale text, and light blue (`#8bb8ff`) accents.
-Filled buttons and their hover states follow the matching primary tokens. Winner
-and error states retain the original green/red semantic tokens, icons, and labels.
+The 2026-11-17 button reference adds a raised finish while preserving the original
+primary face and label colors: light blue with dark labels in dark mode, and blue
+with white labels in light mode. Hover uses the original primary hover tokens.
+Secondary and outline controls use graphite in dark mode and silver in light
+mode. A thin highlight, solid lower edge, and short ambient shadow create the
+raised treatment; neutral controls also have a graduated face. Pressing compresses
+that lower edge without changing layout; small and large controls scale the
+corner radius and depth. Ghost controls stay
+flat. Winner and error states retain their original semantic colors and labels.
 
 The public hero washes, dots, and demo grids use subtle mixtures of these same
 tokens. The alternating pricing band uses the original dark-theme graphite
 surfaces in either theme. Hairline framing and stronger input edges keep their
-original neutral tokens.
+original neutral tokens. Its Compare plans button uses the complete dark neutral
+button palette in both themes, including its gradient, lower edge, and shadow.
 
 The comparison showcase has the user-requested decorative exceptions: green,
 blue, and pink tab icon tiles with white glyphs, and macOS red/yellow/green
 window dots. Their colors remain consistent in both themes. Window dots use
 the original 11px desktop size and 9px size below 640px.
 
-Shared buttons use Apfel Grotezk, a medium weight, an 8px corner radius, and
-150ms state changes. Content cards, pricing shells, the composer, and answer
+Shared buttons use Apfel Grotezk, a medium weight, 8px/10px/12px corner radii
+for small/default/large sizes, and 150ms state changes. Content cards, pricing
+shells, the composer, and answer
 cards use 12px corners. Existing model chips and compact metadata keep their
 functional shapes. Keyboard outlines remain visible; reduced-motion preferences
 remove decorative transitions. Both themes remain complete. The existing
