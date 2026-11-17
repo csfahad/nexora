@@ -13,6 +13,7 @@ import { ShareThreadDialog } from "./share-dialog";
 import { deleteThread, renameThread, threadMutationNotice } from "./thread-actions";
 import { ThreadRow } from "./thread-row";
 import type { ThreadHistoryGroup, ThreadHistoryItem } from "./thread-history";
+import { useShellState } from "./optimistic-history";
 
 type AppSidebarProps = Readonly<{
     threadGroups: readonly ThreadHistoryGroup[];
@@ -93,6 +94,7 @@ export const AppSidebar = ({
     collapsed = false,
 }: AppSidebarProps) => {
     const router = useRouter();
+    const { shell, changes } = useShellState();
     const { pathname } = useLocation();
     const shortcut = useSearchShortcutLabel();
     const threads = threadGroups.flatMap((group) => group.threads);
@@ -100,7 +102,6 @@ export const AppSidebar = ({
     const [editingId, setEditingId] = useState<string | null>(null);
     const [pendingDelete, setPendingDelete] = useState<ThreadHistoryItem | null>(null);
     const [sharing, setSharing] = useState<ThreadHistoryItem | null>(null);
-    const [busyId, setBusyId] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
 
     if (collapsed) {
@@ -108,38 +109,68 @@ export const AppSidebar = ({
     }
 
     const rename = async (threadId: string, title: string) => {
-        setBusyId(threadId);
+        const ticket = shell.begin(threadId, title);
+        if (ticket === null) return;
+        setEditingId(null);
         setNotice(null);
 
         const problem = threadMutationNotice(
             await renameThread({ data: { threadId, title } }).catch(() => null),
         );
 
-        setBusyId(null);
-        setNotice(problem);
-        if (problem !== null) return;
-
-        setEditingId(null);
-        await router.invalidate();
+        if (problem !== null) {
+            shell.rollback(threadId, ticket);
+            shell.notify(problem);
+            setEditingId(threadId);
+            return;
+        }
+        const refreshed = await router
+            .invalidate({ sync: true })
+            .then(() => true)
+            .catch((error: unknown) => {
+                console.error("[shell] rename refresh failed", error);
+                return false;
+            });
+        shell.finish(threadId, ticket, refreshed);
     };
 
     const confirmDelete = async (thread: ThreadHistoryItem) => {
-        setBusyId(thread.id);
+        const ticket = shell.begin(thread.id, null);
+        if (ticket === null) return;
+        setPendingDelete(null);
         setNotice(null);
+        if (pathname === `/thread/${thread.id}`) {
+            void router
+                .navigate({ to: "/app" })
+                .catch((error: unknown) =>
+                    console.error("[shell] navigation failed", error),
+                );
+        }
 
         const problem = threadMutationNotice(
             await deleteThread({ data: { threadId: thread.id } }).catch(() => null),
         );
 
-        setBusyId(null);
-        setPendingDelete(null);
-        setNotice(problem);
-        if (problem !== null) return;
-
-        await router.invalidate();
-
-        // The open thread just stopped existing, so nothing is left to read.
-        if (pathname === `/thread/${thread.id}`) await router.navigate({ to: "/app" });
+        if (problem !== null) {
+            shell.rollback(thread.id, ticket);
+            shell.notify(problem);
+            return;
+        }
+        router.options.context.chat.forget(thread.id);
+        shell.removeAdded(thread.id);
+        router.clearCache({
+            filter: (match) =>
+                match.routeId === "/thread/$threadId" &&
+                match.params.threadId === thread.id,
+        });
+        const refreshed = await router
+            .invalidate({ sync: true })
+            .then(() => true)
+            .catch((error: unknown) => {
+                console.error("[shell] delete refresh failed", error);
+                return false;
+            });
+        shell.finish(thread.id, ticket, refreshed);
     };
 
     return (
@@ -194,7 +225,7 @@ export const AppSidebar = ({
                                 key={thread.id}
                                 thread={thread}
                                 renaming={editingId === thread.id}
-                                busy={busyId === thread.id}
+                                busy={changes.get(thread.id)?.busy ?? false}
                                 onNavigate={onNavigate}
                                 onStartRename={() => {
                                     setNotice(null);
@@ -241,7 +272,10 @@ export const AppSidebar = ({
             <DeleteThreadDialog
                 open={pendingDelete !== null}
                 title={pendingDelete?.title ?? null}
-                busy={pendingDelete !== null && busyId === pendingDelete.id}
+                busy={
+                    pendingDelete !== null &&
+                    (changes.get(pendingDelete.id)?.busy ?? false)
+                }
                 onOpenChange={(open) => {
                     if (!open) setPendingDelete(null);
                 }}

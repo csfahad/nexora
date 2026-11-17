@@ -112,6 +112,7 @@ export const ThreadRow = ({
             </Link>
 
             <ThreadMenu
+                busy={busy}
                 title={thread.title}
                 onRename={onStartRename}
                 onShare={onShare}

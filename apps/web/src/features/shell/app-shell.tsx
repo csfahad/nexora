@@ -8,16 +8,19 @@ import { isSearchShortcut } from "./search-shortcut";
 import { ThreadSearchDialog } from "./thread-search-dialog";
 import { TopBar } from "./top-bar";
 import type { ThreadHistoryGroup } from "./thread-history";
+import { applyHistoryChanges, useShellState } from "./optimistic-history";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
 export const AppShell = ({
     children,
-    threadGroups,
+    threadGroups: savedGroups,
 }: {
     readonly children: ReactNode;
     readonly threadGroups: readonly ThreadHistoryGroup[];
 }) => {
+    const { changes, revoked, added } = useShellState();
+    const threadGroups = revoked ? [] : applyHistoryChanges(savedGroups, changes, added);
     const isDesktop = useMediaQuery(DESKTOP_QUERY, true);
     const [collapsed, setCollapsed] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);

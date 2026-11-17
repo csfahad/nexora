@@ -13,11 +13,13 @@ export const ThreadMenu = ({
     onRename,
     onShare,
     onDelete,
+    busy = false,
 }: Readonly<{
     title: string;
     onRename: () => void;
     onShare: () => void;
     onDelete: () => void;
+    busy?: boolean;
 }>) => {
     const selected = useRef(false);
 
@@ -33,6 +35,7 @@ export const ThreadMenu = ({
                     size="icon-sm"
                     aria-label={`Actions for ${title}`}
                     className="thread-actions bg-sidebar size-7"
+                    disabled={busy}
                 >
                     <IconDotsVertical aria-hidden stroke={1.75} />
                 </Button>

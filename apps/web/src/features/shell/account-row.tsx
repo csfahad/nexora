@@ -17,9 +17,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/infrastructure/auth-client";
+import { resetAllComposerDrafts } from "@/infrastructure/composer-draft";
 import { SESSION_UNAVAILABLE, useSessionState } from "@/infrastructure/session";
 import type { SessionUser } from "@/infrastructure/session";
 import { cn } from "@/lib/utils";
+import { useShellState } from "./optimistic-history";
 
 const SIGN_OUT_FAILED = "Signing out didn't go through. Try that again.";
 
@@ -66,7 +68,7 @@ export const AccountRow = ({
 }) => {
     const session = useSessionState();
     const router = useRouter();
-    const [signingOut, setSigningOut] = useState(false);
+    const { shell, signingOut } = useShellState();
     const [failed, setFailed] = useState(false);
     const [open, setOpen] = useState(false);
 
@@ -130,7 +132,9 @@ export const AccountRow = ({
     const { user } = session;
 
     const signOut = async () => {
-        setSigningOut(true);
+        if (shell.getSnapshot().signingOut) return;
+        shell.setSigningOut(true);
+        setOpen(false);
         setFailed(false);
 
         try {
@@ -139,20 +143,36 @@ export const AccountRow = ({
             if (error) {
                 console.error("[auth] sign-out rejected:", error);
                 setFailed(true);
-                setSigningOut(false);
+                shell.setSigningOut(false);
+                shell.notify(SIGN_OUT_FAILED);
 
                 return;
             }
         } catch (error) {
             console.error("[auth] sign-out failed:", error);
             setFailed(true);
-            setSigningOut(false);
+            shell.setSigningOut(false);
+            shell.notify(SIGN_OUT_FAILED);
 
             return;
         }
 
-        await router.navigate({ to: "/app" });
-        await router.invalidate();
+        router.options.context.chat.reset();
+        resetAllComposerDrafts();
+        shell.revoke();
+        router.clearCache();
+        try {
+            await router.navigate({ to: "/app" });
+            void router
+                .invalidate()
+                .catch((error: unknown) =>
+                    console.error("[auth] sign-out refresh failed", error),
+                );
+        } catch (error) {
+            console.error("[auth] signed-out navigation failed", error);
+        } finally {
+            shell.setSigningOut(false);
+        }
     };
 
     return (
