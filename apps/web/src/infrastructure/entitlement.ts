@@ -1,4 +1,5 @@
-import { getRouteApi } from "@tanstack/react-router";
+import { getRouteApi, useRouter } from "@tanstack/react-router";
+import { useSyncExternalStore } from "react";
 import { createServerFn } from "@tanstack/react-start";
 import { Plan } from "@/generated/prisma/enums";
 import type { ModelTier } from "@/generated/prisma/enums";
@@ -29,7 +30,16 @@ export const UNMETERED: AllowanceView = {
 
 const rootRoute = getRouteApi("__root__");
 
-export const useAllowance = (): AllowanceView => rootRoute.useLoaderData().allowance;
+export const useAllowance = (): AllowanceView => {
+    const allowance = rootRoute.useLoaderData().allowance;
+    const { shell } = useRouter().options.context;
+    const { revoked } = useSyncExternalStore(
+        shell.subscribe,
+        shell.getSnapshot,
+        shell.getSnapshot,
+    );
+    return revoked ? UNMETERED : allowance;
+};
 
 export const remainingFor = (view: AllowanceView, tier: ModelTier): number =>
     isPaidTier(tier) ? view.remaining[tier] : view.freeAnswersRemaining;
