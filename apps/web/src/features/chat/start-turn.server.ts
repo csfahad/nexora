@@ -123,22 +123,6 @@ export const runStartTurn = async (
                     return { status: "error", message: TURN_MODELS_GONE };
                 }
 
-                const saved = thread
-                    ? await tx.thread.update({
-                          where: { id: thread.id },
-                          data: { updatedAt: new Date() },
-                          select: { id: true },
-                      })
-                    : await tx.thread.create({
-                          data: { userId, title: threadTitleFrom(input.prompt) },
-                          select: { id: true },
-                      });
-
-                const turn = await tx.turn.create({
-                    data: { threadId: saved.id, prompt: input.prompt },
-                    select: { id: true },
-                });
-
                 const reserved = await Promise.all(
                     planned.map(async (model): Promise<PlannedModel> => {
                         if (!model.available) return model;
@@ -192,6 +176,22 @@ export const runStartTurn = async (
                             : TURN_MODELS_GONE,
                     };
                 }
+
+                const saved = thread
+                    ? await tx.thread.update({
+                          where: { id: thread.id },
+                          data: { updatedAt: new Date() },
+                          select: { id: true },
+                      })
+                    : await tx.thread.create({
+                          data: { userId, title: threadTitleFrom(input.prompt) },
+                          select: { id: true },
+                      });
+
+                const turn = await tx.turn.create({
+                    data: { threadId: saved.id, prompt: input.prompt },
+                    select: { id: true },
+                });
 
                 const rows = await tx.modelResponse.createManyAndReturn({
                     data: reserved.map((model) => ({
