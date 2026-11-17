@@ -1,4 +1,5 @@
-import { getRouteApi } from "@tanstack/react-router";
+import { getRouteApi, useRouter } from "@tanstack/react-router";
+import { useSyncExternalStore } from "react";
 import { createServerFn } from "@tanstack/react-start";
 import { readSessionState } from "@/infrastructure/session.server";
 
@@ -19,7 +20,16 @@ export const SESSION_UNAVAILABLE =
 
 const rootRoute = getRouteApi("__root__");
 
-export const useSessionState = (): SessionState => rootRoute.useLoaderData().session;
+export const useSessionState = (): SessionState => {
+    const session = rootRoute.useLoaderData().session;
+    const { shell } = useRouter().options.context;
+    const { revoked } = useSyncExternalStore(
+        shell.subscribe,
+        shell.getSnapshot,
+        shell.getSnapshot,
+    );
+    return revoked ? { status: "signed-out" } : session;
+};
 
 export const getSessionState = createServerFn({ method: "GET" }).handler(
     async (): Promise<SessionState> => {
