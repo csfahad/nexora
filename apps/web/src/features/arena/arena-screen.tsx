@@ -41,6 +41,7 @@ export const ArenaScreen = ({
     models,
     onSubmit,
     notice = null,
+    initialSelectedIds,
 }: {
     readonly models: readonly CatalogModel[];
     readonly onSubmit: (
@@ -48,14 +49,17 @@ export const ArenaScreen = ({
         modelIds: readonly string[],
     ) => Promise<boolean> | boolean;
     readonly notice?: string | null;
+    readonly initialSelectedIds?: readonly string[];
 }) => {
     const session = useSessionState();
     const allowance = useAllowance();
     const navigate = useNavigate();
-    const [selectedIds, setSelectedIds] = useState<readonly string[]>(() =>
-        defaultTrio(models, undefined, (model) => canSend(allowance, model)).map(
-            (model) => model.id,
-        ),
+    const [selectedIds, setSelectedIds] = useState<readonly string[]>(
+        () =>
+            initialSelectedIds ??
+            defaultTrio(models, undefined, (model) => canSend(allowance, model)).map(
+                (model) => model.id,
+            ),
     );
     const [sending, setSending] = useState(false);
     const [suggestion, setSuggestion] =

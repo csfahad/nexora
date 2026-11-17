@@ -7,6 +7,7 @@ import {
     clearSubmittedDraft,
     draftStorageKey,
     subscribeToDraftReset,
+    restoreSubmittedDraft,
 } from "@/infrastructure/composer-draft";
 
 const MAX_HEIGHT_PX = 180;
@@ -34,6 +35,7 @@ export const PromptComposer = ({
 }) => {
     const [draft, setDraft] = useState("");
     const [restoredKey, setRestoredKey] = useState<string | null>(null);
+    const [submissionPending, setSubmissionPending] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const submitting = useRef(false);
     const storageKey = draftStorageKey(draftKey);
@@ -69,13 +71,20 @@ export const PromptComposer = ({
     const submit = async () => {
         if (!canSubmit || submitting.current) return;
         submitting.current = true;
+        setSubmissionPending(true);
+        clearSubmittedDraft(draftKey, trimmed);
+        setDraft("");
         try {
-            if (await onSubmit(trimmed)) {
-                clearSubmittedDraft(draftKey, trimmed);
-                setDraft((current) => (current.trim() === trimmed ? "" : current));
+            if (!(await onSubmit(trimmed))) {
+                restoreSubmittedDraft(draftKey, trimmed);
+                setDraft((current) => (current.length === 0 ? trimmed : current));
             }
+        } catch (error) {
+            restoreSubmittedDraft(draftKey, trimmed);
+            setDraft((current) => (current.length === 0 ? trimmed : current));
         } finally {
             submitting.current = false;
+            setSubmissionPending(false);
         }
     };
     const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -102,6 +111,7 @@ export const PromptComposer = ({
                     autoComplete="off"
                     ref={textareaRef}
                     value={draft}
+                    readOnly={submissionPending}
                     onChange={(event) => setDraft(event.target.value)}
                     onKeyDown={handleKeyDown}
                     rows={showSendLabel ? 2 : 1}
