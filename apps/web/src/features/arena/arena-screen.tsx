@@ -13,10 +13,9 @@ import { ModelAvatar } from "@/components/ui/model-avatar";
 import type { CatalogModel } from "@/infrastructure/model-catalog";
 import { SESSION_UNAVAILABLE, useSessionState } from "@/infrastructure/session";
 import { useAllowance } from "@/infrastructure/entitlement";
-import { defaultTrio } from "./default-trio";
 import { ModelPicker } from "./model-picker";
 import { PromptComposer } from "./prompt-composer";
-import { canSend } from "./send-cost";
+import { useModelSelection } from "./use-model-selection";
 import { ArenaGreeting } from "./arena-greeting";
 
 const STARTERS = [
@@ -54,12 +53,15 @@ export const ArenaScreen = ({
     const session = useSessionState();
     const allowance = useAllowance();
     const navigate = useNavigate();
-    const [selectedIds, setSelectedIds] = useState<readonly string[]>(
-        () =>
-            initialSelectedIds ??
-            defaultTrio(models, undefined, (model) => canSend(allowance, model)).map(
-                (model) => model.id,
-            ),
+    const [selectedIds, setSelectedIds] = useModelSelection(
+        models,
+        allowance,
+        session.status === "signed-in"
+            ? `user:${session.user.id}`
+            : session.status === "signed-out"
+              ? "guest"
+              : null,
+        initialSelectedIds,
     );
     const [sending, setSending] = useState(false);
     const [suggestion, setSuggestion] =
@@ -122,8 +124,10 @@ export const ArenaScreen = ({
                                         type="button"
                                         aria-label={`Remove ${model.name}`}
                                         onClick={() =>
-                                            setSelectedIds((ids) =>
-                                                ids.filter((id) => id !== model.id),
+                                            setSelectedIds(
+                                                selectedIds.filter(
+                                                    (id) => id !== model.id,
+                                                ),
                                             )
                                         }
                                     >
