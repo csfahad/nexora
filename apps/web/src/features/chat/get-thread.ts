@@ -17,6 +17,7 @@ export type ThreadResponse = Readonly<{
     content: string;
     failure: string | null;
     metrics: ModelResponseMetrics | null;
+    pending?: boolean;
 }>;
 
 export type ThreadTurn = Readonly<{
