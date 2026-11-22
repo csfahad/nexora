@@ -7,9 +7,7 @@ const overflowWidth = (track: HTMLElement, text: HTMLElement): number => {
     const range = document.createRange();
     range.selectNodeContents(text);
 
-    const textWidth = range.getBoundingClientRect().width;
-
-    return textWidth - track.getBoundingClientRect().width;
+    return range.getBoundingClientRect().width - track.getBoundingClientRect().width;
 };
 
 export const ThreadTitle = ({ title }: Readonly<{ title: string }>) => {
@@ -25,12 +23,14 @@ export const ThreadTitle = ({ title }: Readonly<{ title: string }>) => {
         const overflow = overflowWidth(track, text);
 
         if (overflow <= 0) {
-            track.style.removeProperty("--slide-shift");
+            track.style.setProperty("--slide-shift", "0px");
             track.style.removeProperty("--slide-dur");
             return;
         }
 
-        const distance = Math.ceil(overflow);
+        // Keep the final characters clear of the existing right-edge fade.
+        const endPadding = Number.parseFloat(getComputedStyle(text).paddingInlineEnd);
+        const distance = Math.ceil(overflow + endPadding);
         const duration = Math.max(
             MIN_SLIDE_MS,
             Math.round((distance / SLIDE_PX_PER_SECOND) * 1000),
@@ -44,6 +44,7 @@ export const ThreadTitle = ({ title }: Readonly<{ title: string }>) => {
         <span
             ref={trackRef}
             className="thread-title"
+            title={title}
             onPointerEnter={measure}
             onFocus={measure}
         >

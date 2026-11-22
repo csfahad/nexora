@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { IconDotsVertical, IconPencil, IconShare, IconTrash } from "@tabler/icons-react";
+import { IconDots, IconPencil, IconShare, IconTrash } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -34,10 +34,10 @@ export const ThreadMenu = ({
                     variant="ghost"
                     size="icon-sm"
                     aria-label={`Actions for ${title}`}
-                    className="thread-actions bg-sidebar size-7"
+                    className="thread-actions size-7"
                     disabled={busy}
                 >
-                    <IconDotsVertical aria-hidden stroke={1.75} />
+                    <IconDots aria-hidden stroke={1.75} />
                 </Button>
             </DropdownMenuTrigger>
 

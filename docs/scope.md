@@ -2,6 +2,54 @@
 
 <!-- Current UI direction supersedes historical styling decisions below. -->
 
+## Restore thread-title hover slide — 2026-11-22
+
+This supersedes the static-title decision in the sidebar entry below.
+The user clarified that the existing hover slide is essential. Restore the
+distance-based 55px/second reveal for overflowing titles while retaining the
+tighter gutters, right-edge fade, and horizontal action menu. Leave room for
+the fade at the end so the final characters remain readable. Short titles stay
+still; pointer exit resets the title. Keyboard focus can reveal long titles,
+and reduced-motion or non-hover input keeps them static.
+
+- [x] Restore hover sliding without reverting the sidebar refinements.
+- [x] Verify overflow/short titles, reset, menu spacing, reduced motion, and required checks.
+
+Verification: 63 isolated Chrome checks cover actual sidebar components in both
+themes at narrow and desktop widths. Overflowing titles slide at the original
+55px/second rate, reveal their endings before the fade, and reset on pointer
+exit; short titles remain still. Keyboard reveal, static reduced-motion/touch
+behavior, 44px touch controls, menu opening, and 4px gutters pass. The endpoint
+captures were inspected. Typecheck, lint, formatting, and production build pass.
+Evidence is in `.impeccable/review/sidebar-hover-slide-20261122/`.
+
+## Sidebar thread-list spacing and fade — 2026-11-22
+
+Match the supplied Claude thread-list reference with a 4px history gutter and
+8px row inset. Let titles use the available width and fade at the right edge,
+replacing ellipsis and hover scrolling. Reveal a horizontal three-dot action
+on row hover, keyboard focus, and while its menu is open. Reserve action space
+only in those states on pointer devices; keep actions visible with square 44px
+targets and adequate row height on touch devices. Preserve active-thread
+styling, full accessible titles, navigation, and Rename/Share/Delete behavior.
+
+- [x] Tighten thread-list spacing, add static title fading, and refine menu visibility.
+- [x] Verify both themes, desktop/mobile input, title extremes, menus, rename, and required checks.
+
+Verification: 253 isolated Chrome checks use the actual AppSidebar, ThreadRow,
+ThreadTitle, ThreadMenu, AccountRow, and compiled source CSS with 50 populated
+threads. Sidebar widths of 220, 256, and 280px are exercised across 320, 390,
+768, and 1440px viewports in both themes. Checks cover narrow gutters, full
+accessible titles, static fading without ellipsis or marquee, active-thread
+colors, hover-only pointer actions, keyboard opening, menu persistence outside
+the row, square touch targets without title overlap, inline rename/save/cancel,
+share callbacks, delete confirmation/cancellation, independent history scrolling,
+and empty/collapsed states. Screenshots were inspected; evidence lives in
+`.impeccable/review/sidebar-threads-20261122/`. Typecheck, lint, changed-file
+formatting, production build, and all 98 contrast pairs pass. The design scan
+only flags the existing, user-approved Inter family. Viewports/input are emulated
+and services are isolated stubs; no live thread mutations were made.
+
 ## Mobile leaderboard and quick actions — 2026-11-22
 
 Keep the leaderboard's model identity at its natural width, with long names
