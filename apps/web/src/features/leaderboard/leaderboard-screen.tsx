@@ -212,7 +212,7 @@ const StandingsTable = ({
                             {row.rank ?? <Absent label="Unranked" />}
                         </td>
                         <td className="px-3 py-3.5">
-                            <div className="flex items-center gap-2.5">
+                            <div className="standings-model">
                                 <ModelAvatar
                                     modelId={row.modelId}
                                     name={row.modelName}

@@ -2,6 +2,33 @@
 
 <!-- Current UI direction supersedes historical styling decisions below. -->
 
+## Mobile leaderboard and quick actions — 2026-11-22
+
+Keep the leaderboard's model identity at its natural width, with long names
+wrapping within the existing limit and all metrics accessible through the table's
+horizontal scroll. Give shared icon buttons matching minimum width and height
+on touch devices so theme and back-to-top controls stay square, including the
+footer's compact overrides. Preserve the approved colors, typography, raised
+button treatment, and desktop sizes.
+
+- [x] Fix model-cell sizing and shared icon-button touch dimensions.
+- [x] Verify populated Free/Paid tables and quick actions in both themes at mobile and desktop widths; run required checks.
+
+Verification: 573 isolated Chrome checks use the actual LeaderboardScreen,
+Button, ThemeMenu, AccountRow, PublicFooter, provider assets, and compiled source
+CSS at 320, 360, 390, 430, 768, and 1440px in both themes. Populated Global and
+Personal Free/Paid views retain all five columns, readable short/long/unbroken
+names, tier chips contained in their cells, compact ordinary rows, and horizontal
+access to every metric without page overflow. Touch icon controls are 44px square
+across variants and disabled/loading states; desktop sizes are preserved. Theme
+selection and back-to-top scrolling/focus work. Screenshots were inspected;
+evidence is in `.impeccable/review/mobile-responsive-20261122/`. Typecheck, lint,
+changed-file formatting, production build, and all 98 contrast pairs pass.
+The mechanical design scan only flags the existing, user-approved Inter family.
+The generated route-tree snapshot was restored after verifying equivalent emitted
+JavaScript tokens. Verification uses emulated viewports and isolated data/service stubs;
+physical-device and live authenticated checks were not performed.
+
 ## Remember composer models — 2026-11-17
 
 Save the new-thread composer's lineup immediately on picker changes and chip

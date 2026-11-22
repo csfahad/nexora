@@ -2586,6 +2586,10 @@
     .view-toggle-option {
         min-height: 2.75rem;
     }
+    .ui-button.ui-button-icon {
+        min-width: 2.75rem;
+        min-height: 2.75rem;
+    }
     .theme-toggle button {
         width: 2.25rem;
         height: 2.75rem;
@@ -2716,6 +2720,12 @@
     overflow: hidden;
     border-radius: 999px;
     background: var(--muted);
+}
+.standings-model {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: max-content;
 }
 .standings-model-name {
     display: inline-block;
