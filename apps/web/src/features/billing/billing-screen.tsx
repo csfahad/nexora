@@ -25,33 +25,73 @@ const date = (value: Date): string =>
         timeZone: "UTC",
     }).format(value) + " UTC";
 
+const calendarDate = (value: Date): string =>
+    new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+    }).format(value);
+
+const renewalCancelled = (subscription: NonNullable<BillingView["subscription"]>) =>
+    subscription.cancelAtPeriodEnd || subscription.status === "CANCELLED";
+
+const FREE_ACCESS_DESCRIPTION =
+    "Free models remain available within your daily allowance.";
+
 const statusLabel = ({ subscription: sub, entitlement }: BillingView): string => {
     if (!sub) return "Free";
     if (sub.status === "PAST_DUE") return "Payment overdue";
     if (sub.status === "ON_HOLD") return "On hold";
     if (sub.status === "FAILED") return "Payment failed";
     if (sub.status === "EXPIRED" || entitlement.plan === Plan.FREE) return "Ended";
-    if (sub.cancelAtPeriodEnd || sub.status === "CANCELLED") return "Cancelled";
+    if (renewalCancelled(sub)) return "Renewal cancelled";
     return "Active";
 };
 
+type StatusTone = "current" | "warning" | "danger";
+
+const subscriptionTone = (
+    subscription: NonNullable<BillingView["subscription"]>,
+): StatusTone => {
+    if (subscription.status === "FAILED") return "danger";
+    if (
+        ["PAST_DUE", "ON_HOLD", "EXPIRED"].includes(subscription.status) ||
+        renewalCancelled(subscription)
+    )
+        return "warning";
+    return "current";
+};
+
+const BillingStatus = ({
+    label,
+    tone,
+}: Readonly<{ label: string; tone: StatusTone }>) => (
+    <span className="billing-status" data-tone={tone}>
+        {tone === "danger" ? (
+            <IconAlertTriangle aria-hidden className="size-3" stroke={1.75} />
+        ) : (
+            <span aria-hidden className="billing-status-dot" />
+        )}
+        {label}
+    </span>
+);
+
 const statusSentence = ({ subscription: sub, entitlement }: BillingView): string => {
-    if (!sub) return "Free models are available. Choose a plan to compare paid models.";
+    if (!sub) return FREE_ACCESS_DESCRIPTION;
     if (sub.status === "PAST_DUE")
         return sub.pastDueEndsAt && entitlement.plan !== Plan.FREE
             ? `Your payment is overdue. Paid access stays available until ${date(sub.pastDueEndsAt)}. Update your payment method in the portal.`
             : "Your payment is overdue and paid access has stopped. Update your payment method in the portal.";
     if (sub.status === "ON_HOLD")
         return "Paid access is on hold. Open the portal to check your payment method.";
-    if (
-        sub.status === "EXPIRED" ||
-        sub.status === "FAILED" ||
-        entitlement.plan === Plan.FREE
-    )
-        return "Your paid access has ended. Free models are still available.";
-    if (sub.cancelAtPeriodEnd || sub.status === "CANCELLED")
-        return `Your subscription is cancelled. Paid access lasts until ${date(sub.currentPeriodEnd)}.`;
-    return "Your subscription is active. Manage payment details or change your plan in the portal.";
+    if (sub.status === "FAILED")
+        return "Your payment failed and paid access has stopped. Update your payment method in the portal.";
+    if (sub.status === "EXPIRED" || entitlement.plan === Plan.FREE)
+        return FREE_ACCESS_DESCRIPTION;
+    if (renewalCancelled(sub))
+        return `Renewal cancelled · Paid access ends on ${calendarDate(sub.currentPeriodEnd)}.`;
+    return `Renews on ${calendarDate(sub.currentPeriodEnd)}.`;
 };
 
 export const BillingScreen = ({
@@ -109,6 +149,7 @@ export const BillingScreen = ({
     const attention =
         subscription !== null &&
         ["PAST_DUE", "ON_HOLD", "FAILED"].includes(subscription.status);
+    const previousSubscription = subscription !== null && !paid && !attention;
     return (
         <BillingFrame>
             <div className="billing-content">
@@ -133,51 +174,101 @@ export const BillingScreen = ({
                     </div>
                 )}
                 <section className="billing-plan" aria-labelledby="current-plan-heading">
-                    <div className="billing-plan-head">
-                        <div>
+                    <div className="billing-plan-summary">
+                        <div className="billing-plan-head">
                             <h2 id="current-plan-heading" className="billing-plan-name">
                                 {PLANS[access.plan].name} plan
                             </h2>
-                            <p className="billing-description">
-                                {paid
-                                    ? `Billed ${access.interval === "ANNUAL" ? "annually" : "monthly"}`
-                                    : "No subscription required"}
-                            </p>
+                            <BillingStatus
+                                label={paid ? statusLabel(billing) : "Current"}
+                                tone={
+                                    paid && subscription
+                                        ? subscriptionTone(subscription)
+                                        : "current"
+                                }
+                            />
                         </div>
-                        <span className="billing-status" data-attention={attention}>
-                            {attention && (
-                                <IconAlertTriangle
-                                    aria-hidden
-                                    className="size-3.5"
-                                    stroke={1.75}
-                                />
-                            )}
-                            {statusLabel(billing)}
-                        </span>
-                    </div>
-                    <p className="billing-description">{statusSentence(billing)}</p>
-                    {subscription && !paid && (
-                        <p className="text-muted-foreground text-sm">
-                            Subscription: {PLANS[subscription.plan].name} ·{" "}
-                            {subscription.interval === "ANNUAL" ? "Annual" : "Monthly"}
+                        {paid && (
+                            <p className="billing-description">
+                                Billed{" "}
+                                {access.interval === "ANNUAL" ? "annually" : "monthly"}
+                            </p>
+                        )}
+                        <p className="billing-description">
+                            {!paid && attention
+                                ? FREE_ACCESS_DESCRIPTION
+                                : statusSentence(billing)}
                         </p>
+                    </div>
+                    {subscription && !paid && (
+                        <section
+                            className="billing-subscription"
+                            aria-labelledby="subscription-record-heading"
+                        >
+                            <div className="billing-subscription-head">
+                                <h3
+                                    id="subscription-record-heading"
+                                    className="billing-subscription-name"
+                                >
+                                    {PLANS[subscription.plan].name} ·{" "}
+                                    {subscription.interval === "ANNUAL"
+                                        ? "Annual"
+                                        : "Monthly"}
+                                </h3>
+                                <BillingStatus
+                                    label={
+                                        previousSubscription
+                                            ? "Ended"
+                                            : statusLabel(billing)
+                                    }
+                                    tone={
+                                        previousSubscription
+                                            ? "warning"
+                                            : subscriptionTone(subscription)
+                                    }
+                                />
+                            </div>
+                            {previousSubscription ? (
+                                <>
+                                    <p className="billing-description">
+                                        Paid access ended on{" "}
+                                        <time
+                                            dateTime={subscription.currentPeriodEnd.toISOString()}
+                                            title={date(subscription.currentPeriodEnd)}
+                                        >
+                                            {calendarDate(subscription.currentPeriodEnd)}
+                                        </time>
+                                        .
+                                    </p>
+                                    {renewalCancelled(subscription) && (
+                                        <p className="billing-description">
+                                            Renewal cancelled.
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <p className="billing-description" role="alert">
+                                    {statusSentence(billing)}
+                                </p>
+                            )}
+                        </section>
                     )}
                     <div className="billing-actions">
                         <Link
                             to="/plans"
                             className={buttonClasses({
-                                variant: subscription ? "outline" : "primary",
+                                variant: paid || attention ? "outline" : "primary",
                             })}
                         >
-                            Compare plans
+                            View plans
                         </Link>
                         {subscription && (
                             <Button
-                                variant="primary"
+                                variant={paid || attention ? "primary" : "outline"}
                                 loading={portal.opening}
                                 onClick={() => void portal.openPortal()}
                             >
-                                Open billing portal
+                                Billing portal
                                 <IconExternalLink aria-hidden />
                             </Button>
                         )}
@@ -191,7 +282,7 @@ export const BillingScreen = ({
                         <dl className="billing-dates">
                             <div>
                                 <dt>
-                                    {access.cancelAtPeriodEnd &&
+                                    {renewalCancelled(subscription) &&
                                     access.window.end.getTime() >=
                                         subscription.currentPeriodEnd.getTime()
                                         ? "Allowance ends"
@@ -205,7 +296,7 @@ export const BillingScreen = ({
                             </div>
                             <div>
                                 <dt>
-                                    {access.cancelAtPeriodEnd
+                                    {renewalCancelled(subscription)
                                         ? "Paid access ends"
                                         : subscription.status === "PAST_DUE"
                                           ? "Last renewal due"

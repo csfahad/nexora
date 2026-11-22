@@ -118,6 +118,10 @@
     --primary-hover: oklch(0.8329731 0.0833801 259.14578);
     --win: oklch(0.8110519 0.0954115 163.3289);
     --win-foreground: oklch(0.2597881 0.0408001 159.86781);
+    --billing-current-background: oklch(0.30799063 0.03157905 165.67292);
+    --billing-warning-foreground: oklch(0.83977266 0.1158816 78.01137);
+    --billing-warning-background: oklch(0.2873391 0.03193861 80.20948);
+    --billing-error-background: oklch(0.29213517 0.02833388 0.72935);
     --destructive: oklch(0.7732194 0.1340323 17.80403);
     --destructive-foreground: oklch(0.23822 0.0624185 20.1337);
     --code-keyword: oklch(0.8261093 0.0862588 264.23974);
@@ -177,6 +181,10 @@
     --primary-hover: oklch(0.4480996 0.1660032 258.01567);
     --win: oklch(0.5047107 0.1031119 158.56544);
     --win-foreground: oklch(1 0 89.87556);
+    --billing-current-background: oklch(0.96424007 0.01730315 159.12127);
+    --billing-warning-foreground: oklch(0.47966013 0.1085778 57.30062);
+    --billing-warning-background: oklch(0.97022555 0.03000672 83.63454);
+    --billing-error-background: oklch(0.96560998 0.01409493 12.01615);
     --destructive: oklch(0.5230109 0.1821467 22.03945);
     --destructive-foreground: oklch(1 0 89.87556);
     --code-keyword: oklch(0.4649816 0.1368808 264.19639);
@@ -503,31 +511,85 @@
 
 .billing-plan-head {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.75rem;
 }
 
 .billing-plan-name {
-    margin-bottom: 0.25rem;
+    margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
+    line-height: 1.4;
 }
 
-.billing-status {
-    display: inline-flex;
+.billing-plan-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.billing-subscription {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+
+.billing-subscription-head {
+    display: flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.25rem 0.625rem;
-    border-radius: var(--radius-sm);
-    background-color: var(--muted);
-    font-size: 0.75rem;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+}
+
+.billing-subscription-name {
+    color: var(--foreground);
+    font-size: 1rem;
     font-weight: 500;
 }
 
-.billing-status[data-attention="true"] > svg {
-    color: var(--destructive);
+.billing-status {
+    --billing-status-color: var(--win);
+    --billing-status-background: var(--billing-current-background);
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.375rem;
+    padding: 0.1875rem 0.625rem;
+    border: 1px solid
+        color-mix(
+            in srgb,
+            var(--billing-status-color) 22%,
+            var(--billing-status-background)
+        );
+    border-radius: 999px;
+    background-color: var(--billing-status-background);
+    color: var(--billing-status-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    white-space: nowrap;
+}
+
+.billing-status[data-tone="warning"] {
+    --billing-status-color: var(--billing-warning-foreground);
+    --billing-status-background: var(--billing-warning-background);
+}
+
+.billing-status[data-tone="danger"] {
+    --billing-status-color: var(--destructive);
+    --billing-status-background: var(--billing-error-background);
+}
+
+.billing-status-dot {
+    width: 0.3125rem;
+    height: 0.3125rem;
+    border-radius: 999px;
+    background: currentColor;
 }
 
 .billing-heading {
@@ -2371,15 +2433,6 @@
 .billing-plan {
     border-radius: 0.75rem;
     padding: 2rem;
-}
-.billing-status {
-    border-radius: 999px;
-    background: var(--primary-soft);
-    color: var(--primary);
-}
-.billing-status[data-attention="true"] {
-    color: var(--destructive);
-    background: var(--muted);
 }
 .billing-section {
     border: 1px solid var(--border);
