@@ -28,6 +28,10 @@ colors:
     surface-tint-dark: "oklch(0.2457143 0.0258012 258.33104)"
     win-dark: "oklch(0.8110519 0.0954115 163.3289)"
     win-foreground-dark: "oklch(0.2597881 0.0408001 159.86781)"
+    billing-current-background-dark: "oklch(0.30799063 0.03157905 165.67292)"
+    billing-warning-foreground-dark: "oklch(0.83977266 0.1158816 78.01137)"
+    billing-warning-background-dark: "oklch(0.2873391 0.03193861 80.20948)"
+    billing-error-background-dark: "oklch(0.29213517 0.02833388 0.72935)"
     destructive-dark: "oklch(0.7732194 0.1340323 17.80403)"
     destructive-foreground-dark: "oklch(0.23822 0.0624185 20.1337)"
     background-light: "oklch(0.9876094 0.0017048 247.83885)"
@@ -48,6 +52,10 @@ colors:
     surface-tint-light: "oklch(0.972124 0.0102815 261.78914)"
     win-light: "oklch(0.5047107 0.1031119 158.56544)"
     win-foreground-light: "oklch(1 0 89.87556)"
+    billing-current-background-light: "oklch(0.96424007 0.01730315 159.12127)"
+    billing-warning-foreground-light: "oklch(0.47966013 0.1085778 57.30062)"
+    billing-warning-background-light: "oklch(0.97022555 0.03000672 83.63454)"
+    billing-error-background-light: "oklch(0.96560998 0.01409493 12.01615)"
     destructive-light: "oklch(0.5230109 0.1821467 22.03945)"
     destructive-foreground-light: "oklch(1 0 89.87556)"
 typography:
@@ -199,6 +207,15 @@ raised treatment; neutral controls also have a graduated face. Pressing compress
 that lower edge without changing layout; small and large controls scale the
 corner radius and depth. Ghost controls stay
 flat. Winner and error states retain their original semantic colors and labels.
+
+Billing uses the user-requested status palette: green Current/Active pills,
+amber Ended/cancelled/overdue/held pills, and red payment-failure pills. Each
+uses an opaque theme surface, a thin tinted edge, a readable label, and a quiet
+status dot or failure icon. These are informational 28px pills. The plan name
+and supporting copy form one group with an 8px gap; former subscription details
+stay divided below. Green's use for current billing access is an explicit
+extension of the existing winner color. All three pill text pairs are covered
+by the contrast checker in both themes.
 
 The public hero washes, dots, and demo grids use subtle mixtures of these same
 tokens. The alternating pricing band uses the original dark-theme graphite

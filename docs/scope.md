@@ -2,6 +2,83 @@
 
 <!-- Current UI direction supersedes historical styling decisions below. -->
 
+## Billing summary spacing and status pills — 2026-11-22
+
+Group the plan heading and description with an 8px gap, removing the inherited
+20px card gap between them. Use one shared pill for current and historical
+statuses: green Current/Active, amber Ended/cancelled/overdue/held, and red payment
+failure. This is the user's explicit extension of green into billing access.
+Keep readable labels, a quiet status dot (or failure icon), soft opaque theme
+surfaces, thin edges, and consistent pill dimensions. Preserve accurate billing
+states, recorded dates, allowances, and actions.
+
+- [x] Tighten summary grouping and implement shared semantic status pills.
+- [x] Verify spacing, pill contrast, billing states, responsive layouts, and required checks.
+
+Verification: 2,163 isolated Chrome checks pass at 320, 390, 768, and 1440px in
+both themes. They measure the 8px summary gap, zero heading margin, centered
+28px pills, correct state colors, and actual rendered text contrast alongside
+the existing billing-state, date, allowance, portal, and checkout checks. Ended,
+active, and failed-payment captures were reviewed. The shared contrast checker
+now covers the three new pill surfaces; all 104 text/control pairs pass in both
+themes. Typecheck, lint, formatting, and production build pass. Evidence lives
+in `.impeccable/review/billing-status-20261122/`. The only mechanical-scan
+finding is the approved Inter font. Account/provider responses are fixtures;
+no live billing actions occurred.
+
+## Billing plan-led hierarchy — 2026-11-22
+
+This supersedes the stacked Current plan / Previous subscription labels below.
+Apply all six repo UI skills, with Impeccable distill and frontend-design guiding
+the refinement. Let the effective plan name lead the card and explain free
+access once. Give the former plan and billing interval a single heading row
+with its Ended/payment status aligned opposite; retain the divider, real dates,
+confirmed cancellation, action hierarchy, allowances, and portal behavior.
+Use existing typography, neutral metadata, and a wrapping row on narrow screens.
+
+- [x] Remove redundant labels and repeat copy; simplify the plan/status hierarchy.
+- [x] Verify all billing states, mobile/desktop themes, screenshots, and required checks.
+
+Verification: all 1,483 isolated billing browser checks pass at 320, 390, 768,
+and 1440px in both themes. The actual plan name is the card's first heading;
+the former plan/interval and status share a row without overlap or duplicated
+labels. Dates, cancellation truth, active/ended/payment states, allowances,
+portal loading/error/retry, checkout refresh, and sign-in/error views remain
+verified. Desktop/mobile captures were inspected, including ended, active,
+and held subscriptions. Typecheck, lint, formatting, production build, and all
+98 contrast pairs pass. Evidence is in
+`.impeccable/review/billing-hierarchy-20261122/`. The only mechanical-scan finding
+is the existing approved Inter family. Account/provider responses are fixtures;
+no live billing actions were performed.
+
+## Billing current plan and previous subscription — 2026-11-22
+
+Implement the user-approved billing hierarchy: Current plan, effective plan name,
+and clear current-access copy; after paid access ends, a divided Previous
+subscription section names the former plan/interval as Ended and shows its real
+access end date. Show Renewal cancelled only when the stored cancellation flag
+or status confirms it. Distinguish never-subscribed, active, cancelled-but-valid,
+and ended access, retaining accurate payment-problem messages and portal recovery.
+Use View plans as primary for Free/ended access and Billing portal as secondary;
+paid and payment-problem states retain the primary management action. Preserve
+allowances, exact UTC deadlines, checkout return handling, and portal errors.
+
+- [x] Implement the approved structure and state-specific copy/actions.
+- [x] Verify subscription states, dates, actions, mobile/desktop themes, and required checks.
+
+Verification: 1,435 isolated Chrome checks use the actual BillingScreen,
+PublicLayout, allowance components, portal hook, and compiled source CSS across
+320, 390, 768, and 1440px in both themes. They cover never-subscribed, active,
+cancelled-but-valid, scheduled cancellation, expired/cancelled access, annual
+plans, elapsed terms with stale provider status, grace/overdue/held/failed
+payments, exact recorded dates, confirmed cancellation, action hierarchy,
+allowances, portal loading/failure/retry, checkout refresh, and signed-out/error
+states. Captures were inspected; evidence lives in
+`.impeccable/review/billing-structure-20261122/`. Typecheck, lint, changed-file
+formatting, production build, and all 98 contrast pairs pass. The mechanical
+scan only flags the existing approved Inter family. Viewports are emulated and
+account/provider responses are isolated fixtures; no live billing actions occurred.
+
 ## Restore thread-title hover slide — 2026-11-22
 
 This supersedes the static-title decision in the sidebar entry below.
