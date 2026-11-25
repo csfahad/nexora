@@ -18,8 +18,8 @@ const formatMissing = (error: z.ZodError): string => {
         "Invalid or missing public environment variables:",
         ...lines,
         "",
-        "Copy apps/web/.env.example to apps/web/.env and fill these in.",
-        "A `VITE_` variable is read at build time, so restart the dev server after editing it.",
+        "Set POSTHOG_KEY and POSTHOG_HOST (or their VITE_ equivalents) in the build environment.",
+        "Rebuild and redeploy after changing them; restart the dev server for local changes.",
     ].join("\n");
 };
 

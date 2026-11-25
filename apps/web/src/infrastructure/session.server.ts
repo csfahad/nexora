@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { auth } from "@/infrastructure/auth";
 import type { SessionState } from "@/infrastructure/session";
 
@@ -19,7 +20,7 @@ export const readSessionState = async (headers: Headers): Promise<SessionState> 
             },
         };
     } catch (error) {
-        console.error("[auth] session read failed:", error);
+        reportServerError("[auth] session read failed:", error);
 
         return { status: "unavailable" };
     }

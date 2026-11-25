@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { auth } from "@/infrastructure/auth";
 import { dodoClient } from "@/infrastructure/dodo.server";
 import { applyDodoWebhook, dodoDelivery } from "@/infrastructure/dodo-webhook.server";
@@ -33,7 +34,7 @@ export const handleAuthRequest = async (request: Request): Promise<Response> => 
             await applyDodoWebhook(delivery);
             return Response.json({ received: true });
         } catch (error) {
-            console.error("[billing] past-due webhook rejected:", error);
+            reportServerError("[billing] past-due webhook rejected:", error);
             return Response.json(
                 {
                     message:

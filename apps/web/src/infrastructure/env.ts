@@ -10,7 +10,7 @@ const serverEnvSchema = z.object({
     GITHUB_CLIENT_SECRET: z.string().min(1),
     OPENROUTER_API_KEY: z.string().min(1),
     ARCJET_KEY: z.string().min(1),
-    POSTHOG_KEY: z.string().min(1),
+    POSTHOG_KEY: z.string().startsWith("phc_").min(5),
     POSTHOG_HOST: z.url(),
     DODO_PAYMENTS_API_KEY: z.string().min(1),
     DODO_PAYMENTS_WEBHOOK_KEY: z.string().min(1),

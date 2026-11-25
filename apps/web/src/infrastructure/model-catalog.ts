@@ -222,7 +222,8 @@ export const modelCatalog = async (): Promise<readonly CatalogModel[]> => {
         snapshot = { at: now, models };
         return models;
     } catch (error) {
-        console.error("[model-catalog] refresh failed:", error);
+        const { reportServerError } = await import("@/infrastructure/posthog");
+        reportServerError("[model-catalog] refresh failed:", error);
 
         if (snapshot) return snapshot.models;
 

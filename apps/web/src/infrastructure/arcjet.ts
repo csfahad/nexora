@@ -1,3 +1,4 @@
+import { reportServerError, reportServerWarning } from "@/infrastructure/posthog";
 import arcjet, {
     cloudflare,
     detectBot,
@@ -123,7 +124,7 @@ const failures = (decision: ArcjetDecision): readonly string[] => {
 
 const verdictFor = (decision: ArcjetDecision, path: string): RequestVerdict => {
     failures(decision).forEach((message) => {
-        console.error(`[arcjet] ${path} was not fully checked:`, message);
+        reportServerError(`[arcjet] ${path} was not fully checked:`, message);
     });
 
     const reasons = blockingReasons(decision);
@@ -132,7 +133,7 @@ const verdictFor = (decision: ArcjetDecision, path: string): RequestVerdict => {
 
     const types = reasons.map((reason) => reason.type ?? "unknown").join(", ");
 
-    console.warn(`[arcjet] blocked ${path}: ${types}`);
+    reportServerWarning(`[arcjet] blocked ${path}: ${types}`);
 
     const resets = reasons.flatMap((reason) =>
         reason.isRateLimit() ? [reason.reset] : [],

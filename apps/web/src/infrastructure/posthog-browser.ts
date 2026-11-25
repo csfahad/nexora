@@ -17,8 +17,19 @@ const browserPostHog = (): typeof posthog | null => {
             api_host: env.VITE_POSTHOG_HOST,
             defaults: "2026-08-30",
             person_profiles: "identified_only",
+            autocapture: true,
+            capture_pageview: "history_change",
+            capture_pageleave: true,
+            capture_exceptions: {
+                capture_unhandled_errors: true,
+                capture_unhandled_rejections: true,
+                capture_console_errors: true,
+            },
             disable_session_recording: false,
+            enable_recording_console_log: true,
             capture_heatmaps: true,
+            logs: { serviceName: "nexora-browser", captureConsoleLogs: true },
+            loaded: (analytics) => analytics.startSessionRecording(true),
         });
 
         client = posthog;
