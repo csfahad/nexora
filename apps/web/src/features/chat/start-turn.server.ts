@@ -1,7 +1,7 @@
 import { ResponseStatus, ModelTier, UsageScope } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
 import { screenPrompt } from "@/infrastructure/arcjet";
-import { capturePromptSent } from "@/infrastructure/posthog";
+import { reportServerError, capturePromptSent } from "@/infrastructure/posthog";
 import { CATALOG_UNAVAILABLE, arenaCatalog } from "@/infrastructure/model-catalog";
 import { readSessionState } from "@/infrastructure/session.server";
 import { readEntitlement } from "@/infrastructure/entitlement.server";
@@ -74,7 +74,7 @@ export const runStartTurn = async (
     }
 
     const catalog = await arenaCatalog().catch((error: unknown) => {
-        console.error("[chat] catalog unavailable while starting a turn:", error);
+        reportServerError("[chat] catalog unavailable while starting a turn:", error);
 
         return null;
     });
@@ -228,7 +228,7 @@ export const runStartTurn = async (
         );
 
         if (result.status === "started") {
-            capturePromptSent({
+            await capturePromptSent({
                 userId,
                 threadId: result.threadId,
                 turnId: result.turnId,
@@ -241,7 +241,7 @@ export const runStartTurn = async (
 
         return result;
     } catch (error) {
-        console.error("[chat] could not write a turn:", error);
+        reportServerError("[chat] could not write a turn:", error);
         return { status: "error", message: TURN_SAVE_FAILED };
     }
 };

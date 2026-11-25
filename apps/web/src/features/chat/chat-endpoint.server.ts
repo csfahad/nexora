@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { ResponseStatus } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
 import { screenStream } from "@/infrastructure/arcjet";
@@ -44,7 +45,7 @@ const recordUnavailable = async (
             });
         });
     } catch (error) {
-        console.error(`[api/chat] could not mark ${responseId} unavailable:`, error);
+        reportServerError(`[api/chat] could not mark ${responseId} unavailable:`, error);
     }
 };
 
@@ -88,7 +89,7 @@ export const respondToChatRequest = async (request: Request): Promise<Response> 
 
         const [catalog, charge] = await Promise.all([
             arenaCatalog().catch((error: unknown) => {
-                console.error("[api/chat] catalog unavailable:", error);
+                reportServerError("[api/chat] catalog unavailable:", error);
                 return null;
             }),
             chargeForReservation({
@@ -137,7 +138,6 @@ export const respondToChatRequest = async (request: Request): Promise<Response> 
             userId,
             threadId: row.turn.threadId,
             turnId: row.turnId,
-            prompt: turns[position]?.prompt ?? "",
             prices: {
                 prompt: listed.promptPriceUsd,
                 completion: listed.completionPriceUsd,
@@ -145,7 +145,7 @@ export const respondToChatRequest = async (request: Request): Promise<Response> 
             charge,
         });
     } catch (error) {
-        console.error("[api/chat] could not read the row to stream:", error);
+        reportServerError("[api/chat] could not read the row to stream:", error);
         return problem(LOOKUP_FAILED, 503);
     }
 };

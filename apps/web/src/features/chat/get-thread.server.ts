@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { database } from "@/infrastructure/database";
 import { readSessionState } from "@/infrastructure/session.server";
 import { THREAD_TURNS_SELECT, toThreadTurns } from "./thread-turns.server";
@@ -39,7 +40,7 @@ export const runGetThread = async (
             },
         };
     } catch (error) {
-        console.error("[chat] could not read a thread:", error);
+        reportServerError("[chat] could not read a thread:", error);
         return { status: "error", message: THREAD_READ_FAILED };
     }
 };

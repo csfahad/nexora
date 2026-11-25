@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { database } from "@/infrastructure/database";
 import { THREAD_TURNS_SELECT, toThreadTurns } from "./thread-turns.server";
 import { SHARED_THREAD_READ_FAILED } from "./get-shared-thread";
@@ -22,7 +23,7 @@ export const runGetSharedThread = async (
             thread: { title: thread.title, turns: toThreadTurns(thread.turns) },
         };
     } catch (error) {
-        console.error("[sharing] could not read a shared thread:", error);
+        reportServerError("[sharing] could not read a shared thread:", error);
         return { status: "error", message: SHARED_THREAD_READ_FAILED };
     }
 };

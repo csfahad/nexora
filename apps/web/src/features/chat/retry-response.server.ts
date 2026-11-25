@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { ResponseStatus, ModelTier, UsageScope } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
 import { screenRetry } from "@/infrastructure/arcjet";
@@ -39,7 +40,7 @@ export const runRetryResponse = async (
     }
 
     const catalog = await arenaCatalog().catch((error: unknown) => {
-        console.error("[chat] catalog unavailable while retrying:", error);
+        reportServerError("[chat] catalog unavailable while retrying:", error);
 
         return null;
     });
@@ -124,7 +125,7 @@ export const runRetryResponse = async (
             };
         });
     } catch (error) {
-        console.error("[chat] could not retry a response:", error);
+        reportServerError("[chat] could not retry a response:", error);
         return { status: "error", message: RETRY_FAILED };
     }
 };

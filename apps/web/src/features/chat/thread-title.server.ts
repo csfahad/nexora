@@ -1,8 +1,10 @@
 import { generateText } from "ai";
+import { randomUUID } from "node:crypto";
 import { ResponseStatus } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
 import { freeCatalog } from "@/infrastructure/model-catalog";
 import { openRouterClient } from "@/infrastructure/openrouter";
+import { reportServerError, captureGeneration } from "@/infrastructure/posthog";
 import { readSessionState } from "@/infrastructure/session.server";
 import {
     TITLE_MAX_OUTPUT_TOKENS,
@@ -82,15 +84,32 @@ const uniqueTitle = async (
     return `${candidate} (${suffix})`;
 };
 
-const generateTitle = async (brief: string): Promise<string | null> => {
+const generateTitle = async (
+    brief: string,
+    viewer: Readonly<{ userId: string; threadId: string }>,
+): Promise<string | null> => {
     const catalog = await freeCatalog().catch((error: unknown) => {
-        console.error("[chat] catalog unavailable while titling a thread:", error);
+        reportServerError("[chat] catalog unavailable while titling a thread:", error);
         return null;
     });
 
     if (catalog === null) return null;
 
+    const traceId = randomUUID();
     for (const model of rankTitleModels(catalog).slice(0, TITLE_MODEL_ATTEMPTS)) {
+        const startedAt = Date.now();
+        const generation = {
+            userId: viewer.userId,
+            traceId,
+            modelId: model.id,
+            input: [
+                { role: "system", content: SYSTEM },
+                { role: "user", content: brief },
+            ],
+            ttftMs: null,
+            costUsd: 0,
+            properties: { thread_id: viewer.threadId, operation: "thread_title" },
+        };
         try {
             const result = await generateText({
                 model: openRouterClient()(model.id),
@@ -103,10 +122,25 @@ const generateTitle = async (brief: string): Promise<string | null> => {
                 providerOptions: { openrouter: { reasoning: NO_REASONING } },
             });
 
+            await captureGeneration({
+                ...generation,
+                answer: result.text,
+                latencyMs: Date.now() - startedAt,
+                promptTokens: result.usage.inputTokens ?? null,
+                completionTokens: result.usage.outputTokens ?? null,
+            });
             const title = cleanGeneratedTitle(result.text);
             if (title !== null) return title;
         } catch (error) {
-            console.error(`[chat] ${model.id} could not title a thread:`, error);
+            reportServerError(`[chat] ${model.id} could not title a thread:`, error);
+            await captureGeneration({
+                ...generation,
+                answer: "",
+                latencyMs: Date.now() - startedAt,
+                promptTokens: null,
+                completionTokens: null,
+                error,
+            });
         }
     }
 
@@ -151,7 +185,10 @@ export const runEnsureThreadTitle = async (
         if (thread._count.turns > TITLE_WATCH_TURNS) return { status: "unchanged" };
         if (thread.turns.length === 0) return { status: "unchanged" };
 
-        const generated = await generateTitle(titlingBrief(thread.turns));
+        const generated = await generateTitle(titlingBrief(thread.turns), {
+            userId,
+            threadId: thread.id,
+        });
 
         const candidate = generated ?? threadTitleFrom(thread.turns[0].prompt);
         const title = await uniqueTitle(userId, thread.id, candidate);
@@ -163,7 +200,7 @@ export const runEnsureThreadTitle = async (
 
         return { status: "titled", title };
     } catch (error) {
-        console.error("[chat] could not title a thread:", error);
+        reportServerError("[chat] could not title a thread:", error);
         return { status: "unchanged" };
     }
 };

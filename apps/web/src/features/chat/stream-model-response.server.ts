@@ -3,7 +3,12 @@ import type { ModelMessage } from "ai";
 import { ResponseStatus } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
 import { openRouterClient } from "@/infrastructure/openrouter";
-import { captureAnswerFinished, captureGeneration } from "@/infrastructure/posthog";
+import {
+    reportServerError,
+    captureAnswerFinished,
+    captureGeneration,
+    flushPostHog,
+} from "@/infrastructure/posthog";
 import { encodeStreamEvent } from "./chat-stream-protocol";
 import type { ChatStreamEvent } from "./chat-stream-protocol";
 import { computeMetrics } from "./model-response-metrics";
@@ -40,20 +45,6 @@ export const failureStream = (message: string): Response =>
         status: 200,
         headers: NDJSON_HEADERS,
     });
-
-const describeForLog = (error: unknown): string => {
-    if (error instanceof Error) return `${error.name}: ${error.message}`;
-
-    if (typeof error === "object" && error !== null) {
-        try {
-            return JSON.stringify(error);
-        } catch {
-            return String(error);
-        }
-    }
-
-    return String(error);
-};
 
 type Outcome = Readonly<{
     status: ResponseStatus;
@@ -97,7 +88,7 @@ const recordOutcome = async (
             });
         });
     } catch (error) {
-        console.error(`[chat] could not record response ${input.responseId}:`, error);
+        reportServerError(`[chat] could not record response ${input.responseId}:`, error);
     }
 };
 
@@ -109,12 +100,11 @@ export type StreamModelResponseInput = Readonly<{
     userId: string;
     threadId: string;
     turnId: string;
-    prompt: string;
     prices: ModelPrices | null;
     charge: Charge | null;
 }>;
 
-const reportFinished = (
+const reportFinished = async (
     stream: StreamModelResponseInput,
     finished: Readonly<{
         outcome: "complete" | "failed" | "cancelled";
@@ -122,35 +112,41 @@ const reportFinished = (
         metrics: ModelResponseMetrics;
         error?: unknown;
     }>,
-): void => {
-    captureAnswerFinished({
-        userId: stream.userId,
-        threadId: stream.threadId,
-        turnId: stream.turnId,
-        responseId: stream.responseId,
-        modelId: stream.modelId,
-        outcome: finished.outcome,
-        ttftMs: finished.metrics.ttftMs,
-        durationMs: finished.metrics.durationMs,
-        totalTokens: finished.metrics.totalTokens,
-        tokensPerSecond: finished.metrics.tokensPerSecond,
-        costUsd: finished.metrics.costUsd,
-    });
-
-    captureGeneration({
-        userId: stream.userId,
-        turnId: stream.turnId,
-        responseId: stream.responseId,
-        modelId: stream.modelId,
-        prompt: stream.prompt,
-        answer: finished.text,
-        latencyMs: finished.metrics.durationMs,
-        ttftMs: finished.metrics.ttftMs,
-        promptTokens: finished.metrics.promptTokens,
-        completionTokens: finished.metrics.completionTokens,
-        costUsd: finished.metrics.costUsd,
-        ...(finished.error === undefined ? {} : { error: finished.error }),
-    });
+): Promise<void> => {
+    await Promise.all([
+        captureAnswerFinished({
+            userId: stream.userId,
+            threadId: stream.threadId,
+            turnId: stream.turnId,
+            responseId: stream.responseId,
+            modelId: stream.modelId,
+            outcome: finished.outcome,
+            ttftMs: finished.metrics.ttftMs,
+            durationMs: finished.metrics.durationMs,
+            totalTokens: finished.metrics.totalTokens,
+            tokensPerSecond: finished.metrics.tokensPerSecond,
+            costUsd: finished.metrics.costUsd,
+        }),
+        captureGeneration({
+            userId: stream.userId,
+            traceId: stream.turnId,
+            modelId: stream.modelId,
+            input: stream.messages,
+            answer: finished.text,
+            latencyMs: finished.metrics.durationMs,
+            ttftMs: finished.metrics.ttftMs,
+            promptTokens: finished.metrics.promptTokens,
+            completionTokens: finished.metrics.completionTokens,
+            costUsd: finished.metrics.costUsd,
+            properties: {
+                thread_id: stream.threadId,
+                turn_id: stream.turnId,
+                response_id: stream.responseId,
+                operation: "answer",
+            },
+            ...(finished.error === undefined ? {} : { error: finished.error }),
+        }),
+    ]);
 };
 
 export const streamModelResponse = (input: StreamModelResponseInput): Response => {
@@ -226,7 +222,7 @@ export const streamModelResponse = (input: StreamModelResponseInput): Response =
 
                 send({ type: "done", metrics });
 
-                reportFinished(input, {
+                await reportFinished(input, {
                     outcome: "complete",
                     text,
                     metrics,
@@ -238,9 +234,9 @@ export const streamModelResponse = (input: StreamModelResponseInput): Response =
                     : RESPONSE_FAILURE.PROVIDER;
 
                 if (!cancelled) {
-                    console.error(
+                    reportServerError(
                         `[chat] model ${input.modelId} failed after ${Date.now() - startedAt}ms:`,
-                        describeForLog(error),
+                        error,
                     );
                 }
 
@@ -254,13 +250,14 @@ export const streamModelResponse = (input: StreamModelResponseInput): Response =
                 if (!cancelled)
                     send({ type: "error", message: failureSentence(failure) });
 
-                reportFinished(input, {
+                await reportFinished(input, {
                     outcome: cancelled ? "cancelled" : "failed",
                     text,
                     metrics: measured(null, null),
                     ...(cancelled ? {} : { error }),
                 });
             } finally {
+                await flushPostHog();
                 open = false;
 
                 try {
