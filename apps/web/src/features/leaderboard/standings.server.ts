@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { database } from "@/infrastructure/database";
 import { notTheModelsFault } from "@/infrastructure/response-failure";
 import { latestAttempts } from "@/infrastructure/response-order";
@@ -192,7 +193,7 @@ export const runGetStandings = async (headers: Headers): Promise<GetStandingsRes
 
         return { status: "ready", standings: { global, personal } };
     } catch (error) {
-        console.error("[leaderboard] could not read standings:", error);
+        reportServerError("[leaderboard] could not read standings:", error);
 
         return { status: "error", message: STANDINGS_READ_FAILED };
     }

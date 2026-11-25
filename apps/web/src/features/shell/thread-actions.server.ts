@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { database } from "@/infrastructure/database";
 import { readOwnerId } from "@/infrastructure/session.server";
 import { THREAD_MUTATION_FAILED } from "./thread-actions";
@@ -16,7 +17,7 @@ export const runRenameThread = async (
 
         return changed === 1 ? { status: "ok" } : { status: "not-found" };
     } catch (error) {
-        console.error("[shell] could not rename thread:", error);
+        reportServerError("[shell] could not rename thread:", error);
         return { status: "error", message: THREAD_MUTATION_FAILED };
     }
 };
@@ -35,7 +36,7 @@ export const runDeleteThread = async (
 
         return result.count === 1 ? { status: "ok" } : { status: "not-found" };
     } catch (error) {
-        console.error("[shell] could not delete thread:", error);
+        reportServerError("[shell] could not delete thread:", error);
         return { status: "error", message: THREAD_MUTATION_FAILED };
     }
 };

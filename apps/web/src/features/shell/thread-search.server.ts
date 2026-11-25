@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { database } from "@/infrastructure/database";
 import { readSessionState } from "@/infrastructure/session.server";
 import { SEARCH_FAILED, SEARCH_LIMIT, snippetAround } from "./thread-search";
@@ -69,7 +70,7 @@ export const runSearchThreads = async (
             }),
         };
     } catch (error) {
-        console.error("[shell] could not search threads:", error);
+        reportServerError("[shell] could not search threads:", error);
         return { status: "error", message: SEARCH_FAILED };
     }
 };

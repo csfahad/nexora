@@ -1,6 +1,6 @@
 import { ResponseStatus } from "@/generated/prisma/enums";
 import { database } from "@/infrastructure/database";
-import { captureVoteCast } from "@/infrastructure/posthog";
+import { reportServerError, captureVoteCast } from "@/infrastructure/posthog";
 import { latestAttempts } from "@/infrastructure/response-order";
 import { readSessionState } from "@/infrastructure/session.server";
 import { MIN_VOTABLE_ANSWERS } from "@/infrastructure/turn-vote";
@@ -99,7 +99,7 @@ export const runCastVote = async (
         );
 
         if (outcome.counted !== undefined) {
-            captureVoteCast({
+            await captureVoteCast({
                 userId,
                 turnId: input.turnId,
                 winnerResponseId: input.winnerResponseId,
@@ -126,7 +126,7 @@ export const runCastVote = async (
             }
         }
 
-        console.error("[voting] could not record a vote:", error);
+        reportServerError("[voting] could not record a vote:", error);
         return { status: "error", message: VOTE_FAILED };
     }
 };

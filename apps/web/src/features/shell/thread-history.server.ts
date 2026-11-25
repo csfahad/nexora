@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { database } from "@/infrastructure/database";
 import { readSessionState } from "@/infrastructure/session.server";
 import { THREAD_HISTORY_LIMIT, groupThreadHistory } from "./thread-history";
@@ -20,7 +21,7 @@ export const runGetThreadHistory = async (
 
         return groupThreadHistory(threads);
     } catch (error) {
-        console.error("[shell] could not read thread history:", error);
+        reportServerError("[shell] could not read thread history:", error);
         return [];
     }
 };

@@ -1,3 +1,4 @@
+import { reportServerError } from "@/infrastructure/posthog";
 import { database } from "@/infrastructure/database";
 import { readOwnerId } from "@/infrastructure/session.server";
 import { generateShareSlug } from "./share-slug";
@@ -28,7 +29,7 @@ export const runReadShareLink = async (
 
         return slug === undefined ? { status: "not-found" } : { status: "ok", slug };
     } catch (error) {
-        console.error("[sharing] could not read a share link:", error);
+        reportServerError("[sharing] could not read a share link:", error);
         return { status: "error", message: SHARE_FAILED };
     }
 };
@@ -54,7 +55,7 @@ export const runShareThread = async (
 
         return changed === 1 ? { status: "ok", slug } : { status: "not-found" };
     } catch (error) {
-        console.error("[sharing] could not share a thread:", error);
+        reportServerError("[sharing] could not share a thread:", error);
         return { status: "error", message: SHARE_FAILED };
     }
 };
@@ -72,7 +73,7 @@ export const runRevokeShareLink = async (
 
         return changed === 1 ? { status: "ok", slug: null } : { status: "not-found" };
     } catch (error) {
-        console.error("[sharing] could not revoke a share link:", error);
+        reportServerError("[sharing] could not revoke a share link:", error);
         return { status: "error", message: SHARE_FAILED };
     }
 };
