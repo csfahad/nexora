@@ -46,7 +46,7 @@ importers:
         version: 3.0.0(ai@7.0.66(zod@4.4.3))(zod@4.4.3)
       '@posthog/ai':
         specifier: 8.9.0
-        version: 8.9.0(@ai-sdk/provider@4.0.7)(posthog-node@5.51.4)
+        version: 8.9.0(@ai-sdk/provider@4.0.7)(posthog-node@5.65.0)
       '@prisma/adapter-pg':
         specifier: ^7.9.1
         version: 7.9.1
@@ -108,8 +108,8 @@ importers:
         specifier: 1.422.5
         version: 1.422.5(@types/react@19.2.2)(react@19.2.0)
       posthog-node:
-        specifier: 5.51.4
-        version: 5.51.4
+        specifier: 5.65.0
+        version: 5.65.0
       radix-ui:
         specifier: ^1.6.7
         version: 1.6.7(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1089,8 +1089,14 @@ packages:
   '@posthog/core@1.49.2':
     resolution: {integrity: sha512-AXHDo/4nisUg7OPG1TQNgREK7n+chBQXLQyttp7bDTDsDg2k9lV06TmnpvuNbwJs53q9mP9hjezKEZu4fYadfg==}
 
+  '@posthog/core@1.69.2':
+    resolution: {integrity: sha512-toMfPKklwLW+a4ZY3/EzM3GNMVXmk2ylGb8NPJXRH4igXMoI8wgNL2jqXOiglWAXqFBLZGYFN1oQx6LVmUTxTg==}
+
   '@posthog/types@1.407.1':
     resolution: {integrity: sha512-WhbkXPC2rgylXqmxHqv70ffI3k+KxyR6s7DBIfr5NvIqHkxp6v0pk31D/jbz0DNVbzwkLjyll2pxr4FNbJiYzg==}
+
+  '@posthog/types@1.427.2':
+    resolution: {integrity: sha512-86GJtdFt7zkk6tDpCFKfxyTtuXyLpiWPmTn5nlLDGlxGeky4s4l2fiWSRvYi6Lfn5MRrjiHE24RgKR4A75K+xA==}
 
   '@prisma/adapter-pg@7.9.1':
     resolution: {integrity: sha512-Ho2RK1KanQxLNSC0sR5bpiiVep10sWPLXCcxK+KXfI/Q69TMRbiafSvLPv3V9snimX72rMCqGlyJ4sBO4lKTAw==}
@@ -4882,12 +4888,15 @@ packages:
       react:
         optional: true
 
-  posthog-node@5.51.4:
-    resolution: {integrity: sha512-gI6JMBnU3vjDNclUBWonw3y7k8Y0UPIAVO4AQ2zu9eyW+7sY8UQRofx4JIA7IGYLMEbs4gykfogOmXp16+oUdg==}
+  posthog-node@5.65.0:
+    resolution: {integrity: sha512-JzbVWfdB0lVY3pocgD1sxwIch1JB+R/XrF+ByaQ4THIJuleS2ya8FIlbWVdVJ2/N/0+JusxlEkQAWkm5VHUpdA==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
+      '@opentelemetry/api': ^1.2.0
       rxjs: ^7.0.0
     peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
       rxjs:
         optional: true
 
@@ -6715,10 +6724,10 @@ snapshots:
 
   '@oxc-project/types@0.143.0': {}
 
-  '@posthog/ai@8.9.0(@ai-sdk/provider@4.0.7)(posthog-node@5.51.4)':
+  '@posthog/ai@8.9.0(@ai-sdk/provider@4.0.7)(posthog-node@5.65.0)':
     dependencies:
       '@posthog/core': 1.49.2
-      posthog-node: 5.51.4
+      posthog-node: 5.65.0
       uuid: 11.1.1
       zod: 4.4.3
     optionalDependencies:
@@ -6733,7 +6742,13 @@ snapshots:
     dependencies:
       '@posthog/types': 1.407.1
 
+  '@posthog/core@1.69.2':
+    dependencies:
+      '@posthog/types': 1.427.2
+
   '@posthog/types@1.407.1': {}
+
+  '@posthog/types@1.427.2': {}
 
   '@prisma/adapter-pg@7.9.1':
     dependencies:
@@ -10735,9 +10750,9 @@ snapshots:
     transitivePeerDependencies:
       - preact-render-to-string
 
-  posthog-node@5.51.4:
+  posthog-node@5.65.0:
     dependencies:
-      '@posthog/core': 1.49.2
+      '@posthog/core': 1.69.2
 
   powershell-utils@0.1.0: {}
 
